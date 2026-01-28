@@ -32,7 +32,7 @@ app.get("/", (req, res) => {
 app.post("/search", async (req, res) => {
   const { query, limit = 5 } = req.body;
 
-  if (!query) {
+  if (!query || typeof query !== "string") {
     return res.json([]);
   }
 
@@ -47,49 +47,62 @@ app.post("/search", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0.3,
+          temperature: 0.2,
           messages: [
             {
               role: "system",
               content: `
-Tu es un moteur de cartographie conceptuelle.
+Tu es un moteur de cartographie historique et conceptuelle.
 
-RÈGLES ABSOLUES :
+RÈGLES ABSOLUES (NON NÉGOCIABLES) :
 - Tu réponds UNIQUEMENT avec du JSON valide
 - AUCUN texte hors du JSON
-- AUCUNE balise
-- AUCUNE explication
+- AUCUNE balise Markdown
+- AUCUNE justification hors champ
 
-Chaque point DOIT :
-- correspondre à un LIEU RÉEL
-- avoir des coordonnées GPS RÉALISTES
-- être historiquement ou culturellement cohérent
+RÈGLES DE VÉRACITÉ :
+- N'INVENTE JAMAIS de faits historiques
+- Si une information est incertaine, EXCLUS le point
+- PRÉFÈRE NE RIEN RENVOYER plutôt qu'une erreur
+- Chaque affirmation doit être historiquement ou culturellement admise
 
-Les coordonnées doivent être plausibles (Europe, monde réel).
+CONTRAINTES SUR LES LIEUX :
+- UNIQUEMENT des lieux réels (villes, sites, régions identifiables)
+- Coordonnées GPS plausibles et cohérentes
+- Cohérence stricte entre le lieu et le concept
+
+INTERDICTIONS EXPLICITES :
+- Pas d’anachronisme
+- Pas de confusion de titres (roi / empereur / lieu)
+- Pas de raccourci symbolique faux
+- Pas de généralisation abusive
+
+FORMAT STRICT À RESPECTER :
+[
+  {
+    "title": "Nom exact du lieu",
+    "latitude": 0.0,
+    "longitude": 0.0,
+    "description": "Fait court, neutre et vérifiable",
+    "reason": "Lien précis, factuel et historiquement admis"
+  }
+]
 `,
             },
             {
               role: "user",
               content: `
-Concept : "${query}"
-Nombre de points : ${limit}
+Concept étudié : "${query}"
+Nombre maximum de points : ${limit}
 
-Retourne STRICTEMENT un tableau JSON :
+INSTRUCTIONS :
+- Sélectionne uniquement des lieux FACTUELS
+- Chaque lien doit être défendable historiquement
+- Si le concept est abstrait, utilise uniquement des lieux reconnus pour ce rôle
+- N'ajoute PAS de lieu si tu doutes de sa pertinence
 
-[
-  {
-    "title": "Nom du lieu ou concept",
-    "latitude": 48.8566,
-    "longitude": 2.3522,
-    "description": "Description courte et claire",
-    "reason": "Pourquoi ce lieu est lié au concept"
-  }
-]
-
-IMPORTANT :
-- Utilise de vrais lieux (villes, sites, régions)
-- Répartis les points géographiquement si pertinent
-- N'invente pas de coordonnées absurdes
+RAPPEL :
+Mieux vaut 3 points exacts que 10 approximatifs.
 `,
             },
           ],
@@ -99,7 +112,7 @@ IMPORTANT :
 
     const data = await response.json();
 
-    // 🔎 Log complet pour debug
+    // 🔎 Log brut pour audit
     console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
 
     const text = data?.choices?.[0]?.message?.content;
@@ -109,20 +122,30 @@ IMPORTANT :
       return res.json([]);
     }
 
+    let parsed;
     try {
-      const parsed = JSON.parse(text);
-
-      // Sécurité minimale
-      if (!Array.isArray(parsed)) {
-        console.error("Response is not an array");
-        return res.json([]);
-      }
-
-      return res.json(parsed);
+      parsed = JSON.parse(text);
     } catch (err) {
       console.error("JSON parse error:", text);
       return res.json([]);
     }
+
+    // 🛡️ Validation minimale côté serveur
+    if (!Array.isArray(parsed)) {
+      console.error("Response is not an array");
+      return res.json([]);
+    }
+
+    const cleaned = parsed.filter(p =>
+      typeof p?.title === "string" &&
+      typeof p?.latitude === "number" &&
+      typeof p?.longitude === "number" &&
+      typeof p?.description === "string" &&
+      typeof p?.reason === "string"
+    );
+
+    return res.json(cleaned);
+
   } catch (err) {
     console.error("OpenAI request error:", err);
     res.json([]);
@@ -136,4 +159,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("IA backend running on port", PORT);
 });
+
 
