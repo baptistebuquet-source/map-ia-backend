@@ -158,7 +158,11 @@ Ce contenu est destiné à un client exigeant, pas à un débutant.
       p.source.startsWith("http") &&
       (
         !p.image ||
-        (typeof p.image === "string" && p.image.startsWith("http"))
+        (
+           typeof p.image === "string" &&
+           /^https?:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(p.image)
+         )
+
       )
     );
 
