@@ -2,13 +2,34 @@ import express from "express";
 import fetch from "node-fetch";
 
 const app = express();
-app.use(express.json());
 
-// route de test simple
-app.get("/", (req, res) => {
-  res.send("Map IA backend is running 🚀");
+/* =====================
+   CORS (OBLIGATOIRE)
+===================== */
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // autorise tous les sites
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
 });
 
+app.use(express.json());
+
+/* =====================
+   ROUTE TEST
+===================== */
+app.get("/", (req, res) => {
+  res.send("API map-ia-backend OK");
+});
+
+/* =====================
+   ROUTE SEARCH
+===================== */
 app.post("/search", async (req, res) => {
   const { query, limit = 5 } = req.body;
 
@@ -21,15 +42,15 @@ app.post("/search", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // ✅ BON MODÈLE
+        model: "gpt-4.1-mini",
         messages: [
           {
             role: "system",
             content:
-              "Tu es un moteur de cartographie conceptuelle. Tu réponds uniquement avec un JSON strict, sans texte autour.",
+              "Tu es un moteur de cartographie conceptuelle. Tu réponds uniquement en JSON.",
           },
           {
             role: "user",
@@ -37,7 +58,7 @@ app.post("/search", async (req, res) => {
 Concept : "${query}"
 Nombre de points : ${limit}
 
-Retourne STRICTEMENT ce format JSON :
+Retourne UNIQUEMENT un tableau JSON valide :
 [
   {
     "title": "Nom",
@@ -47,7 +68,7 @@ Retourne STRICTEMENT ce format JSON :
     "reason": "..."
   }
 ]
-            `,
+`,
           },
         ],
         temperature: 0.3,
@@ -55,25 +76,24 @@ Retourne STRICTEMENT ce format JSON :
     });
 
     const data = await response.json();
-
-    console.log("OPENAI RAW RESPONSE:", JSON.stringify(data, null, 2));
-
     const text = data?.choices?.[0]?.message?.content;
 
     if (!text) {
-      console.log("❌ No content from OpenAI");
+      console.log("No content from OpenAI");
       return res.json([]);
     }
 
-    const parsed = JSON.parse(text);
-    res.json(parsed);
+    res.json(JSON.parse(text));
   } catch (err) {
-    console.error("❌ ERROR:", err);
-    res.status(500).json([]);
+    console.error("OpenAI error:", err);
+    res.json([]);
   }
 });
 
-const PORT = process.env.PORT || 10000;
+/* =====================
+   START SERVER
+===================== */
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("IA backend running on port", PORT);
 });
