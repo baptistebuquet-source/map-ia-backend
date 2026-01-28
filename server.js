@@ -23,30 +23,40 @@ app.use(express.json());
    UTILS
 ===================== */
 
-// Géocodage réel via OpenStreetMap
-async function geocode(place, city, country = "France") {
-  const q = `${place}, ${city}, ${country}`;
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+// Géocodage STRICT à partir d’une ADRESSE
+async function geocodeAddress(address, city, country = "France") {
+  const q = `${address}, ${city}, ${country}`;
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&q=${encodeURIComponent(q)}`;
 
   const r = await fetch(url, {
-    headers: {
-      "User-Agent": "map-ia-backend/1.0"
-    }
+    headers: { "User-Agent": "map-ia-backend/1.0" }
   });
 
   const data = await r.json();
   if (!data || !data[0]) return null;
 
+  const d = data[0];
+
+  // Vérification stricte de la commune
+  const cityMatch =
+    d.address?.city ||
+    d.address?.town ||
+    d.address?.village ||
+    "";
+
+  if (!cityMatch.toLowerCase().includes(city.toLowerCase())) {
+    return null;
+  }
+
   return {
-    latitude: parseFloat(data[0].lat),
-    longitude: parseFloat(data[0].lon),
-    displayName: data[0].display_name
+    latitude: parseFloat(d.lat),
+    longitude: parseFloat(d.lon),
+    displayName: d.display_name
   };
 }
 
-// Extraction simple de la ville depuis la requête
+// Extraction naïve de la ville (à améliorer plus tard si besoin)
 function extractCity(query) {
-  // ex: "salle de sport à prix bas Evreux"
   const parts = query.split(" ");
   return parts[parts.length - 1];
 }
@@ -81,38 +91,45 @@ app.post("/search", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0.1,
+          temperature: 0,
           max_tokens: 900,
           messages: [
             {
               role: "system",
               content: `
-Tu es un moteur de cartographie EXPERTE.
+Tu es un moteur d’IDENTIFICATION DE LIEUX RÉELS.
 
-OBJECTIF :
-Identifier des lieux RÉELS, VÉRIFIABLES et PRÉCIS.
+RÈGLE ABSOLUE :
+Tu n’inventes JAMAIS de lieu, de nom, d’adresse ou de coordonnées.
 
-RÈGLES ABSOLUES :
-- JSON VALIDE UNIQUEMENT
-- AUCUN texte hors JSON
-- AUCUN lieu approximatif
-- AUCUN lieu hors de la ville demandée
+Si un lieu n’a PAS :
+- un NOM officiel
+- une ADRESSE POSTALE précise
+- une SOURCE PUBLIQUE vérifiable
+→ TU NE LE RETOURNES PAS.
 
-GÉOGRAPHIE (CRITIQUE) :
-- Chaque lieu DOIT se situer STRICTEMENT dans la commune demandée
-- Si le lieu est hors commune → NE PAS LE RETOURNER
-- Si tu n’es pas sûr → ABSTENTION
+GÉOGRAPHIE :
+- Tous les lieux doivent être STRICTEMENT dans la commune demandée
+- Aucun lieu hors ville
+- Aucune approximation
 
-FORMAT STRICT :
+INTERDICTIONS :
+- Lieux génériques
+- Synthèses abstraites
+- Regroupements imaginaires
+
+FORMAT STRICT (JSON UNIQUEMENT) :
+
 [
   {
-    "title": "Nom exact de l’établissement",
-    "place": "Nom du lieu ou adresse précise",
+    "title": "Nom officiel exact",
+    "address": "Adresse postale complète",
     "city": "Nom exact de la commune",
     "country": "France",
-    "description": "Description factuelle et utile",
-    "reason": "Lien argumenté avec le concept",
+    "description": "Description factuelle",
+    "reason": "Pourquoi ce lieu répond précisément à la demande",
     "source": "https://source-officielle.fr",
+    "phone": "+33123456789",
     "image": "https://site-officiel.fr/image.jpg"
   }
 ]
@@ -121,13 +138,12 @@ FORMAT STRICT :
             {
               role: "user",
               content: `
-Concept étudié : "${query}"
-Ville cible : "${city}"
-Nombre maximum de points : ${limit}
+REQUÊTE : "${query}"
+VILLE CIBLE : "${city}"
 
 CONTRAINTES :
 - Refuser tout lieu hors de "${city}"
-- Refuser toute approximation géographique
+- Refuser tout lieu sans adresse exacte
 - Qualité > quantité
 `
             }
@@ -154,7 +170,7 @@ CONTRAINTES :
     for (const p of parsed) {
       if (
         typeof p?.title !== "string" ||
-        typeof p?.place !== "string" ||
+        typeof p?.address !== "string" ||
         typeof p?.city !== "string" ||
         typeof p?.description !== "string" ||
         typeof p?.reason !== "string" ||
@@ -164,14 +180,14 @@ CONTRAINTES :
         continue;
       }
 
-      // Géocodage réel
-      const geo = await geocode(p.place, p.city, p.country || "France");
-      if (!geo) continue;
+      // Géocodage STRICT par adresse
+      const geo = await geocodeAddress(
+        p.address,
+        p.city,
+        p.country || "France"
+      );
 
-      // Sécurité : vérifier que la ville correspond bien
-      if (!geo.displayName.toLowerCase().includes(p.city.toLowerCase())) {
-        continue;
-      }
+      if (!geo) continue;
 
       results.push({
         title: p.title,
@@ -180,8 +196,12 @@ CONTRAINTES :
         description: p.description,
         reason: p.reason,
         source: p.source,
+        phone:
+          typeof p.phone === "string" && p.phone.length > 5
+            ? p.phone
+            : undefined,
         image:
-          p.image &&
+          typeof p.image === "string" &&
           /^https?:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(p.image)
             ? p.image
             : undefined
@@ -205,3 +225,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("IA backend running on port", PORT);
 });
+
