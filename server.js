@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
 });
 
 /* =====================
-   ROUTE SEARCH
+   ROUTE SEARCH (ROBUSTE)
 ===================== */
 app.post("/search", async (req, res) => {
   const { query, limit = 5 } = req.body;
@@ -36,23 +36,35 @@ app.post("/search", async (req, res) => {
     return res.json([]);
   }
 
+  const MAX_ATTEMPTS = 3;      // sécurité
+  const BATCH_SIZE = 5;        // taille d’un lot raisonnable
+
+  let results = [];
+  let attempts = 0;
+
   try {
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          temperature: 0.15,
-          max_tokens: 900,
-          messages: [
-            {
-              role: "system",
-              content: `
+    while (results.length < limit && attempts < MAX_ATTEMPTS) {
+      attempts++;
+
+      const remaining = limit - results.length;
+      const batchCount = Math.min(BATCH_SIZE, remaining);
+
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            temperature: 0.15,
+            max_tokens: 900,
+            messages: [
+              {
+                role: "system",
+                content: `
 Tu es un moteur de cartographie EXPERTE, destiné à un public exigeant.
 
 TA MISSION :
@@ -83,10 +95,8 @@ SOURCES :
   (site institutionnel, station officielle, fédération, publication reconnue)
 
 IMAGES (OPTIONNEL) :
-- Tu PEUX inclure un champ "image"
-- L’image DOIT provenir d’un site officiel ou institutionnel
-- URL directe vers un fichier image réel (jpg, png)
-- Si aucune image fiable n’existe, OMIT le champ
+- Champ "image" autorisé uniquement si URL directe réelle (jpg, png, webp)
+- Sinon, OMIT le champ
 
 FORMAT STRICT :
 [
@@ -101,72 +111,64 @@ FORMAT STRICT :
   }
 ]
 `,
-            },
-            {
-              role: "user",
-              content: `
+              },
+              {
+                role: "user",
+                content: `
 Concept étudié : "${query}"
-Nombre maximum de points : ${limit}
 
-INSTRUCTIONS CRITIQUES :
-- Refuse toute réponse évidente ou pauvre
-- Privilégie la qualité à la quantité
-- Si nécessaire, retourne MOINS de points
-- Chaque point doit justifier son existence
+Génère ${batchCount} NOUVEAUX points,
+différents de ceux déjà fournis.
 
-RAPPEL :
-Ce contenu est destiné à un client exigeant, pas à un débutant.
+IMPORTANT :
+- Pas de doublon
+- Refuse les points faibles
+- Privilégie la véracité à la quantité
 `,
-            },
-          ],
-        }),
+              },
+            ],
+          }),
+        }
+      );
+
+      const data = await response.json();
+      console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
+
+      const text = data?.choices?.[0]?.message?.content;
+      if (!text) break;
+
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        break;
       }
-    );
 
-    const data = await response.json();
+      if (!Array.isArray(parsed) || parsed.length === 0) break;
 
-    console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
+      // 🛡️ Validation stricte
+      const cleanedBatch = parsed.filter(p =>
+        typeof p?.title === "string" &&
+        typeof p?.latitude === "number" &&
+        typeof p?.longitude === "number" &&
+        typeof p?.description === "string" &&
+        typeof p?.reason === "string" &&
+        typeof p?.source === "string" &&
+        p.source.startsWith("http") &&
+        (
+          !p.image ||
+          (typeof p.image === "string" && p.image.startsWith("http"))
+        )
+      );
 
-    const text = data?.choices?.[0]?.message?.content;
-
-    if (!text) {
-      console.log("No content from OpenAI");
-      return res.json([]);
+      results.push(...cleanedBatch);
     }
 
-    let parsed;
-    try {
-      parsed = JSON.parse(text);
-    } catch (err) {
-      console.error("JSON parse error:", text);
-      return res.json([]);
-    }
-
-    if (!Array.isArray(parsed)) {
-      console.error("Response is not an array");
-      return res.json([]);
-    }
-
-    // 🛡️ Validation renforcée (image optionnelle)
-    const cleaned = parsed.filter(p =>
-      typeof p?.title === "string" &&
-      typeof p?.latitude === "number" &&
-      typeof p?.longitude === "number" &&
-      typeof p?.description === "string" &&
-      typeof p?.reason === "string" &&
-      typeof p?.source === "string" &&
-      p.source.startsWith("http") &&
-      (
-        !p.image ||
-        (typeof p.image === "string" && p.image.startsWith("http"))
-      )
-    );
-
-    return res.json(cleaned.slice(0, limit));
+    return res.json(results.slice(0, limit));
 
   } catch (err) {
     console.error("OpenAI request error:", err);
-    res.json([]);
+    return res.json([]);
   }
 });
 
@@ -177,5 +179,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("IA backend running on port", PORT);
 });
-
 
