@@ -2,112 +2,78 @@ import express from "express";
 import fetch from "node-fetch";
 
 const app = express();
-
-/* =========================
-   CORS (OBLIGATOIRE)
-========================= */
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
 app.use(express.json());
 
-/* =========================
-   ROUTE TEST (OPTIONNELLE)
-   https://map-ia-backend.onrender.com/
-========================= */
+// route de test simple
 app.get("/", (req, res) => {
   res.send("Map IA backend is running 🚀");
 });
 
-/* =========================
-   ROUTE IA
-========================= */
 app.post("/search", async (req, res) => {
-  const { query, limit } = req.body;
+  const { query, limit = 5 } = req.body;
 
   if (!query) {
     return res.json([]);
   }
 
   try {
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4.1-mini",
-          messages: [
-            {
-              role: "system",
-              content:
-                "Tu es un moteur de cartographie conceptuelle. Tu réponds uniquement en JSON strictement valide."
-            },
-            {
-              role: "user",
-              content: `
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini", // ✅ BON MODÈLE
+        messages: [
+          {
+            role: "system",
+            content:
+              "Tu es un moteur de cartographie conceptuelle. Tu réponds uniquement avec un JSON strict, sans texte autour.",
+          },
+          {
+            role: "user",
+            content: `
 Concept : "${query}"
 Nombre de points : ${limit}
 
-Retourne UNIQUEMENT un tableau JSON valide :
+Retourne STRICTEMENT ce format JSON :
 [
   {
     "title": "Nom",
     "latitude": 0,
     "longitude": 0,
-    "description": "Description courte",
-    "reason": "Pourquoi ce lieu est lié"
+    "description": "...",
+    "reason": "..."
   }
 ]
-`
-            }
-          ],
-          temperature: 0.3
-        })
-      }
-    );
+            `,
+          },
+        ],
+        temperature: 0.3,
+      }),
+    });
 
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content;
+
+    console.log("OPENAI RAW RESPONSE:", JSON.stringify(data, null, 2));
+
+    const text = data?.choices?.[0]?.message?.content;
 
     if (!text) {
-      console.error("No content from OpenAI");
+      console.log("❌ No content from OpenAI");
       return res.json([]);
     }
 
-    // 🔍 LOG DEBUG
-    console.log("RAW AI RESPONSE:\n", text);
-
-    // 🧼 Nettoyage du JSON
-    const cleaned = text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-
-    const parsed = JSON.parse(cleaned);
+    const parsed = JSON.parse(text);
     res.json(parsed);
-
   } catch (err) {
-    console.error("SERVER ERROR:", err);
-    res.json([]);
+    console.error("❌ ERROR:", err);
+    res.status(500).json([]);
   }
 });
 
-/* =========================
-   START SERVER
-========================= */
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("IA backend running on port", PORT);
 });
