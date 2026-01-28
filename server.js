@@ -2,55 +2,99 @@ import express from "express";
 import fetch from "node-fetch";
 
 const app = express();
+
+/* =====================
+   CORS
+===================== */
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.json());
 
 /* =====================
-   SEARCH
+   TEST ROUTE
+===================== */
+app.get("/", (req, res) => {
+  res.send("API map-ia-backend OK");
+});
+
+/* =====================
+   SEARCH ROUTE
 ===================== */
 app.post("/search", async (req, res) => {
-  const { query } = req.body;
+  const { query, limit = 5 } = req.body;
   if (!query) return res.json([]);
 
   try {
-    // Recherche principale
-    const searchRes = await fetch(
-      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&language=fr&key=${process.env.GOOGLE_MAPS_KEY}`
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4.1-mini",
+          temperature: 0.3,
+          messages: [
+            {
+              role: "system",
+              content:
+                "Tu es un moteur de cartographie conceptuelle. Tu réponds UNIQUEMENT en JSON valide.",
+            },
+            {
+              role: "user",
+              content: `
+Concept : "${query}"
+Nombre de points : ${limit}
+
+Retourne UNIQUEMENT un tableau JSON valide, sans texte autour :
+
+[
+  {
+    "title": "Titre court",
+    "place_name": "Nom du lieu réel",
+    "address": "Adresse lisible (rue, ville, pays)",
+    "description": "Description courte",
+    "reason": "Lien avec le concept"
+  }
+]
+`,
+            },
+          ],
+        }),
+      }
     );
-    const searchData = await searchRes.json();
 
-    const results = [];
+    const data = await response.json();
+    const text = data?.choices?.[0]?.message?.content;
 
-    for (const place of searchData.results.slice(0, 5)) {
-      // Détails précis
-      const detailsRes = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,formatted_address,geometry,formatted_phone_number,website&language=fr&key=${process.env.GOOGLE_MAPS_KEY}`
-      );
-
-      const details = await detailsRes.json();
-      if (!details.result?.geometry) continue;
-
-      results.push({
-        name: details.result.name,
-        address: details.result.formatted_address,
-        latitude: details.result.geometry.location.lat,
-        longitude: details.result.geometry.location.lng,
-        phone: details.result.formatted_phone_number,
-        website: details.result.website
-      });
+    if (!text) {
+      console.log("No content from OpenAI", data);
+      return res.json([]);
     }
 
-    res.json(results);
-
+    const parsed = JSON.parse(text);
+    res.json(parsed);
   } catch (err) {
-    console.error(err);
+    console.error("OpenAI error:", err);
     res.json([]);
   }
 });
 
 /* =====================
-   START
+   START SERVER
 ===================== */
-app.listen(3000, () => {
-  console.log("Backend running on http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("IA backend running on port", PORT);
 });
-
