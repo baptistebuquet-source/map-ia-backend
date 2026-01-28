@@ -20,27 +20,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 /* =====================
-   UTILS
-===================== */
-async function isValidUrl(url) {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
-
-    const res = await fetch(url, {
-      method: "HEAD",
-      redirect: "follow",
-      signal: controller.signal
-    });
-
-    clearTimeout(timeout);
-    return res.ok && res.status < 400;
-  } catch {
-    return false;
-  }
-}
-
-/* =====================
    ROUTE TEST
 ===================== */
 app.get("/", (req, res) => {
@@ -48,111 +27,145 @@ app.get("/", (req, res) => {
 });
 
 /* =====================
-   ROUTE SEARCH (ROBUSTE)
+   ROUTE SEARCH
 ===================== */
 app.post("/search", async (req, res) => {
   const { query, limit = 5 } = req.body;
-  if (!query || typeof query !== "string") return res.json([]);
 
-  const MAX_ATTEMPTS = 3;
-  const BATCH_SIZE = 5;
-
-  let results = [];
-  let attempts = 0;
+  if (!query || typeof query !== "string") {
+    return res.json([]);
+  }
 
   try {
-    while (results.length < limit && attempts < MAX_ATTEMPTS) {
-      attempts++;
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          temperature: 0.15,
+          max_tokens: 900,
+          messages: [
+            {
+              role: "system",
+              content: `
+Tu es un moteur de cartographie EXPERTE, destiné à un public exigeant.
 
-      const remaining = limit - results.length;
-      const batchCount = Math.min(BATCH_SIZE, remaining);
+TA MISSION :
+Fournir des lieux et pratiques RÉELLES, SPÉCIFIQUES et NON TRIVIALES.
 
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            temperature: 0.15,
-            max_tokens: 900,
-            messages: [
-              {
-                role: "system",
-                content: `
-Tu es un moteur de cartographie EXPERTE.
+RÈGLES ABSOLUES :
+- JSON VALIDE UNIQUEMENT
+- AUCUN texte hors JSON
+- AUCUNE généralité évidente
+- AUCUNE réponse que "tout le monde sait déjà"
 
-RÈGLES :
-- JSON UNIQUEMENT
-- LIEUX RÉELS
-- SOURCES VÉRIFIABLES
-- PAS DE GÉNÉRALITÉS
-                `,
-              },
-              {
-                role: "user",
-                content: `
-Concept : "${query}"
+INTERDICTIONS :
+- Activités génériques sans valeur ajoutée
+- Conseils médicaux vagues
+- Lieux inventés
+- Sources fictives
+- Images inventées
 
-Génère ${batchCount} nouveaux points FACTUELS
-(différents des précédents).
+EXIGENCES DE QUALITÉ :
+- Chaque point doit apporter une information NOUVELLE
+- Le lien avec le concept doit être TECHNIQUE ou CONTEXTUEL
+- Si le concept implique une contrainte physique ou médicale :
+  → mentionner les adaptations reconnues
+  → rester factuel et prudent
 
-FORMAT JSON STRICT :
+SOURCES :
+- Chaque point DOIT inclure une source publique fiable
+  (site institutionnel, station officielle, fédération, publication reconnue)
+
+IMAGES (OPTIONNEL) :
+- Tu PEUX inclure un champ "image"
+- L’image DOIT provenir d’un site officiel ou institutionnel
+- URL directe vers un fichier image réel (jpg, png)
+- Si aucune image fiable n’existe, OMIT le champ
+
+FORMAT STRICT :
 [
   {
-    "title": "",
+    "title": "Nom précis du lieu ou de la pratique",
     "latitude": 0.0,
     "longitude": 0.0,
-    "description": "",
-    "reason": "",
-    "source": "",
-    "image": ""
+    "description": "Description précise, contextualisée et utile",
+    "reason": "Lien argumenté et défendable avec le concept",
+    "source": "https://source-fiable.org",
+    "image": "https://site-officiel.org/image.jpg"
   }
 ]
-                `,
-              },
-            ],
-          }),
-        }
-      );
+`,
+            },
+            {
+              role: "user",
+              content: `
+Concept étudié : "${query}"
+Nombre maximum de points : ${limit}
 
-      const data = await response.json();
-      const text = data?.choices?.[0]?.message?.content;
-      if (!text) break;
+INSTRUCTIONS CRITIQUES :
+- Refuse toute réponse évidente ou pauvre
+- Privilégie la qualité à la quantité
+- Si nécessaire, retourne MOINS de points
+- Chaque point doit justifier son existence
 
-      let parsed;
-      try {
-        parsed = JSON.parse(text);
-      } catch {
-        break;
+RAPPEL :
+Ce contenu est destiné à un client exigeant, pas à un débutant.
+`,
+            },
+          ],
+        }),
       }
+    );
 
-      if (!Array.isArray(parsed)) break;
+    const data = await response.json();
 
-      for (const p of parsed) {
-        if (
-          typeof p?.title !== "string" ||
-          typeof p?.latitude !== "number" ||
-          typeof p?.longitude !== "number" ||
-          typeof p?.description !== "string" ||
-          typeof p?.reason !== "string" ||
-          typeof p?.source !== "string" ||
-          !p.source.startsWith("http")
-        ) continue;
+    console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
 
-        const ok = await isValidUrl(p.source);
-        if (!ok) continue;
+    const text = data?.choices?.[0]?.message?.content;
 
-        results.push(p);
-      }
+    if (!text) {
+      console.log("No content from OpenAI");
+      return res.json([]);
     }
 
-    res.json(results.slice(0, limit));
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (err) {
+      console.error("JSON parse error:", text);
+      return res.json([]);
+    }
+
+    if (!Array.isArray(parsed)) {
+      console.error("Response is not an array");
+      return res.json([]);
+    }
+
+    // 🛡️ Validation renforcée (image optionnelle)
+    const cleaned = parsed.filter(p =>
+      typeof p?.title === "string" &&
+      typeof p?.latitude === "number" &&
+      typeof p?.longitude === "number" &&
+      typeof p?.description === "string" &&
+      typeof p?.reason === "string" &&
+      typeof p?.source === "string" &&
+      p.source.startsWith("http") &&
+      (
+        !p.image ||
+        (typeof p.image === "string" && p.image.startsWith("http"))
+      )
+    );
+
+    return res.json(cleaned.slice(0, limit));
+
   } catch (err) {
-    console.error(err);
+    console.error("OpenAI request error:", err);
     res.json([]);
   }
 });
