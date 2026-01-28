@@ -20,6 +20,27 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 /* =====================
+   UTILS
+===================== */
+async function isValidUrl(url) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+
+    const res = await fetch(url, {
+      method: "HEAD",
+      redirect: "follow",
+      signal: controller.signal
+    });
+
+    clearTimeout(timeout);
+    return res.ok && res.status < 400;
+  } catch {
+    return false;
+  }
+}
+
+/* =====================
    ROUTE TEST
 ===================== */
 app.get("/", (req, res) => {
@@ -31,13 +52,10 @@ app.get("/", (req, res) => {
 ===================== */
 app.post("/search", async (req, res) => {
   const { query, limit = 5 } = req.body;
+  if (!query || typeof query !== "string") return res.json([]);
 
-  if (!query || typeof query !== "string") {
-    return res.json([]);
-  }
-
-  const MAX_ATTEMPTS = 3;      // sécurité
-  const BATCH_SIZE = 5;        // taille d’un lot raisonnable
+  const MAX_ATTEMPTS = 3;
+  const BATCH_SIZE = 5;
 
   let results = [];
   let attempts = 0;
@@ -65,66 +83,36 @@ app.post("/search", async (req, res) => {
               {
                 role: "system",
                 content: `
-Tu es un moteur de cartographie EXPERTE, destiné à un public exigeant.
+Tu es un moteur de cartographie EXPERTE.
 
-TA MISSION :
-Fournir des lieux et pratiques RÉELLES, SPÉCIFIQUES et NON TRIVIALES.
-
-RÈGLES ABSOLUES :
-- JSON VALIDE UNIQUEMENT
-- AUCUN texte hors JSON
-- AUCUNE généralité évidente
-- AUCUNE réponse que "tout le monde sait déjà"
-
-INTERDICTIONS :
-- Activités génériques sans valeur ajoutée
-- Conseils médicaux vagues
-- Lieux inventés
-- Sources fictives
-- Images inventées
-
-EXIGENCES DE QUALITÉ :
-- Chaque point doit apporter une information NOUVELLE
-- Le lien avec le concept doit être TECHNIQUE ou CONTEXTUEL
-- Si le concept implique une contrainte physique ou médicale :
-  → mentionner les adaptations reconnues
-  → rester factuel et prudent
-
-SOURCES :
-- Chaque point DOIT inclure une source publique fiable
-  (site institutionnel, station officielle, fédération, publication reconnue)
-
-IMAGES (OPTIONNEL) :
-- Champ "image" autorisé uniquement si URL directe réelle (jpg, png, webp)
-- Sinon, OMIT le champ
-
-FORMAT STRICT :
-[
-  {
-    "title": "Nom précis du lieu ou de la pratique",
-    "latitude": 0.0,
-    "longitude": 0.0,
-    "description": "Description précise, contextualisée et utile",
-    "reason": "Lien argumenté et défendable avec le concept",
-    "source": "https://source-fiable.org",
-    "image": "https://site-officiel.org/image.jpg"
-  }
-]
-`,
+RÈGLES :
+- JSON UNIQUEMENT
+- LIEUX RÉELS
+- SOURCES VÉRIFIABLES
+- PAS DE GÉNÉRALITÉS
+                `,
               },
               {
                 role: "user",
                 content: `
-Concept étudié : "${query}"
+Concept : "${query}"
 
-Génère ${batchCount} NOUVEAUX points,
-différents de ceux déjà fournis.
+Génère ${batchCount} nouveaux points FACTUELS
+(différents des précédents).
 
-IMPORTANT :
-- Pas de doublon
-- Refuse les points faibles
-- Privilégie la véracité à la quantité
-`,
+FORMAT JSON STRICT :
+[
+  {
+    "title": "",
+    "latitude": 0.0,
+    "longitude": 0.0,
+    "description": "",
+    "reason": "",
+    "source": "",
+    "image": ""
+  }
+]
+                `,
               },
             ],
           }),
@@ -132,8 +120,6 @@ IMPORTANT :
       );
 
       const data = await response.json();
-      console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
-
       const text = data?.choices?.[0]?.message?.content;
       if (!text) break;
 
@@ -144,31 +130,30 @@ IMPORTANT :
         break;
       }
 
-      if (!Array.isArray(parsed) || parsed.length === 0) break;
+      if (!Array.isArray(parsed)) break;
 
-      // 🛡️ Validation stricte
-      const cleanedBatch = parsed.filter(p =>
-        typeof p?.title === "string" &&
-        typeof p?.latitude === "number" &&
-        typeof p?.longitude === "number" &&
-        typeof p?.description === "string" &&
-        typeof p?.reason === "string" &&
-        typeof p?.source === "string" &&
-        p.source.startsWith("http") &&
-        (
-          !p.image ||
-          (typeof p.image === "string" && p.image.startsWith("http"))
-        )
-      );
+      for (const p of parsed) {
+        if (
+          typeof p?.title !== "string" ||
+          typeof p?.latitude !== "number" ||
+          typeof p?.longitude !== "number" ||
+          typeof p?.description !== "string" ||
+          typeof p?.reason !== "string" ||
+          typeof p?.source !== "string" ||
+          !p.source.startsWith("http")
+        ) continue;
 
-      results.push(...cleanedBatch);
+        const ok = await isValidUrl(p.source);
+        if (!ok) continue;
+
+        results.push(p);
+      }
     }
 
-    return res.json(results.slice(0, limit));
-
+    res.json(results.slice(0, limit));
   } catch (err) {
-    console.error("OpenAI request error:", err);
-    return res.json([]);
+    console.error(err);
+    res.json([]);
   }
 });
 
@@ -179,4 +164,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("IA backend running on port", PORT);
 });
+
 
