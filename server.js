@@ -7,9 +7,9 @@ const app = express();
    CORS (OBLIGATOIRE)
 ===================== */
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*"); // autorise tous les sites
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.header("Access-Control-Allow-Methods", "POST, OPTIONS, GET");
 
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
@@ -38,23 +38,25 @@ app.post("/search", async (req, res) => {
   }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Tu es un moteur de cartographie conceptuelle. Tu réponds uniquement en JSON.",
-          },
-          {
-            role: "user",
-            content: `
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini", // ✅ BON MODÈLE
+          messages: [
+            {
+              role: "system",
+              content:
+                "Tu es un moteur de cartographie conceptuelle. Tu réponds uniquement en JSON valide, sans texte autour.",
+            },
+            {
+              role: "user",
+              content: `
 Concept : "${query}"
 Nombre de points : ${limit}
 
@@ -69,13 +71,18 @@ Retourne UNIQUEMENT un tableau JSON valide :
   }
 ]
 `,
-          },
-        ],
-        temperature: 0.3,
-      }),
-    });
+            },
+          ],
+          temperature: 0.3,
+        }),
+      }
+    );
 
     const data = await response.json();
+
+    // 🔎 Log utile en cas de souci
+    console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
+
     const text = data?.choices?.[0]?.message?.content;
 
     if (!text) {
@@ -83,9 +90,16 @@ Retourne UNIQUEMENT un tableau JSON valide :
       return res.json([]);
     }
 
-    res.json(JSON.parse(text));
+    // Sécurité : on tente un parse JSON propre
+    try {
+      const parsed = JSON.parse(text);
+      return res.json(parsed);
+    } catch (e) {
+      console.error("JSON parse error:", text);
+      return res.json([]);
+    }
   } catch (err) {
-    console.error("OpenAI error:", err);
+    console.error("OpenAI request error:", err);
     res.json([]);
   }
 });
