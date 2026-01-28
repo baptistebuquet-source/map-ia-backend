@@ -20,6 +20,38 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 /* =====================
+   UTILS
+===================== */
+
+// Géocodage réel via OpenStreetMap
+async function geocode(place, city, country = "France") {
+  const q = `${place}, ${city}, ${country}`;
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+
+  const r = await fetch(url, {
+    headers: {
+      "User-Agent": "map-ia-backend/1.0"
+    }
+  });
+
+  const data = await r.json();
+  if (!data || !data[0]) return null;
+
+  return {
+    latitude: parseFloat(data[0].lat),
+    longitude: parseFloat(data[0].lon),
+    displayName: data[0].display_name
+  };
+}
+
+// Extraction simple de la ville depuis la requête
+function extractCity(query) {
+  // ex: "salle de sport à prix bas Evreux"
+  const parts = query.split(" ");
+  return parts[parts.length - 1];
+}
+
+/* =====================
    ROUTE TEST
 ===================== */
 app.get("/", (req, res) => {
@@ -36,6 +68,8 @@ app.post("/search", async (req, res) => {
     return res.json([]);
   }
 
+  const city = extractCity(query);
+
   try {
     const response = await fetch(
       "https://api.openai.com/v1/chat/completions",
@@ -47,130 +81,120 @@ app.post("/search", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0.15,
+          temperature: 0.1,
           max_tokens: 900,
           messages: [
             {
               role: "system",
               content: `
-Tu es un moteur de cartographie EXPERTE, destiné à un public exigeant.
+Tu es un moteur de cartographie EXPERTE.
 
-TA MISSION :
-Fournir des lieux et pratiques RÉELLES, SPÉCIFIQUES et NON TRIVIALES.
+OBJECTIF :
+Identifier des lieux RÉELS, VÉRIFIABLES et PRÉCIS.
 
 RÈGLES ABSOLUES :
 - JSON VALIDE UNIQUEMENT
 - AUCUN texte hors JSON
-- AUCUNE généralité évidente
-- AUCUNE réponse que "tout le monde sait déjà"
+- AUCUN lieu approximatif
+- AUCUN lieu hors de la ville demandée
 
-INTERDICTIONS :
-- Activités génériques sans valeur ajoutée
-- Conseils médicaux vagues
-- Lieux inventés
-- Sources fictives
-- Images inventées
-
-EXIGENCES DE QUALITÉ :
-- Chaque point doit apporter une information NOUVELLE
-- Le lien avec le concept doit être TECHNIQUE ou CONTEXTUEL
-- Si le concept implique une contrainte physique ou médicale :
-  → mentionner les adaptations reconnues
-  → rester factuel et prudent
-
-SOURCES :
-- Chaque point DOIT inclure une source publique fiable
-  (site institutionnel, station officielle, fédération, publication reconnue)
-
-IMAGES (OPTIONNEL) :
-- Tu PEUX inclure un champ "image"
-- L’image DOIT provenir d’un site officiel ou institutionnel
-- URL directe vers un fichier image réel (jpg, png)
-- Si aucune image fiable n’existe, OMIT le champ
+GÉOGRAPHIE (CRITIQUE) :
+- Chaque lieu DOIT se situer STRICTEMENT dans la commune demandée
+- Si le lieu est hors commune → NE PAS LE RETOURNER
+- Si tu n’es pas sûr → ABSTENTION
 
 FORMAT STRICT :
 [
   {
-    "title": "Nom précis du lieu ou de la pratique",
-    "latitude": 0.0,
-    "longitude": 0.0,
-    "description": "Description précise, contextualisée et utile",
-    "reason": "Lien argumenté et défendable avec le concept",
-    "source": "https://source-fiable.org",
-    "image": "https://site-officiel.org/image.jpg"
+    "title": "Nom exact de l’établissement",
+    "place": "Nom du lieu ou adresse précise",
+    "city": "Nom exact de la commune",
+    "country": "France",
+    "description": "Description factuelle et utile",
+    "reason": "Lien argumenté avec le concept",
+    "source": "https://source-officielle.fr",
+    "image": "https://site-officiel.fr/image.jpg"
   }
 ]
-`,
+`
             },
             {
               role: "user",
               content: `
 Concept étudié : "${query}"
+Ville cible : "${city}"
 Nombre maximum de points : ${limit}
 
-INSTRUCTIONS CRITIQUES :
-- Refuse toute réponse évidente ou pauvre
-- Privilégie la qualité à la quantité
-- Si nécessaire, retourne MOINS de points
-- Chaque point doit justifier son existence
-
-RAPPEL :
-Ce contenu est destiné à un client exigeant, pas à un débutant.
-`,
-            },
-          ],
-        }),
+CONTRAINTES :
+- Refuser tout lieu hors de "${city}"
+- Refuser toute approximation géographique
+- Qualité > quantité
+`
+            }
+          ]
+        })
       }
     );
 
     const data = await response.json();
-
-    console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
-
     const text = data?.choices?.[0]?.message?.content;
-
-    if (!text) {
-      console.log("No content from OpenAI");
-      return res.json([]);
-    }
+    if (!text) return res.json([]);
 
     let parsed;
     try {
       parsed = JSON.parse(text);
-    } catch (err) {
-      console.error("JSON parse error:", text);
+    } catch {
       return res.json([]);
     }
 
-    if (!Array.isArray(parsed)) {
-      console.error("Response is not an array");
-      return res.json([]);
+    if (!Array.isArray(parsed)) return res.json([]);
+
+    const results = [];
+
+    for (const p of parsed) {
+      if (
+        typeof p?.title !== "string" ||
+        typeof p?.place !== "string" ||
+        typeof p?.city !== "string" ||
+        typeof p?.description !== "string" ||
+        typeof p?.reason !== "string" ||
+        typeof p?.source !== "string" ||
+        !p.source.startsWith("http")
+      ) {
+        continue;
+      }
+
+      // Géocodage réel
+      const geo = await geocode(p.place, p.city, p.country || "France");
+      if (!geo) continue;
+
+      // Sécurité : vérifier que la ville correspond bien
+      if (!geo.displayName.toLowerCase().includes(p.city.toLowerCase())) {
+        continue;
+      }
+
+      results.push({
+        title: p.title,
+        latitude: geo.latitude,
+        longitude: geo.longitude,
+        description: p.description,
+        reason: p.reason,
+        source: p.source,
+        image:
+          p.image &&
+          /^https?:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(p.image)
+            ? p.image
+            : undefined
+      });
+
+      if (results.length >= limit) break;
     }
 
-    // 🛡️ Validation renforcée (image optionnelle)
-    const cleaned = parsed.filter(p =>
-      typeof p?.title === "string" &&
-      typeof p?.latitude === "number" &&
-      typeof p?.longitude === "number" &&
-      typeof p?.description === "string" &&
-      typeof p?.reason === "string" &&
-      typeof p?.source === "string" &&
-      p.source.startsWith("http") &&
-      (
-        !p.image ||
-        (
-           typeof p.image === "string" &&
-           /^https?:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(p.image)
-         )
-
-      )
-    );
-
-    return res.json(cleaned.slice(0, limit));
+    return res.json(results);
 
   } catch (err) {
-    console.error("OpenAI request error:", err);
-    res.json([]);
+    console.error("Backend error:", err);
+    return res.json([]);
   }
 });
 
@@ -181,4 +205,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("IA backend running on port", PORT);
 });
-
