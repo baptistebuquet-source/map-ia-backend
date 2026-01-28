@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 const app = express();
 
 /* =====================
-   CORS (OBLIGATOIRE)
+   CORS
 ===================== */
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -14,7 +14,6 @@ app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
-
   next();
 });
 
@@ -47,12 +46,27 @@ app.post("/search", async (req, res) => {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini", // ✅ BON MODÈLE
+          model: "gpt-4o-mini",
+          temperature: 0.3,
           messages: [
             {
               role: "system",
-              content:
-                "Tu es un moteur de cartographie conceptuelle. Tu réponds uniquement en JSON valide, sans texte autour.",
+              content: `
+Tu es un moteur de cartographie conceptuelle.
+
+RÈGLES ABSOLUES :
+- Tu réponds UNIQUEMENT avec du JSON valide
+- AUCUN texte hors du JSON
+- AUCUNE balise
+- AUCUNE explication
+
+Chaque point DOIT :
+- correspondre à un LIEU RÉEL
+- avoir des coordonnées GPS RÉALISTES
+- être historiquement ou culturellement cohérent
+
+Les coordonnées doivent être plausibles (Europe, monde réel).
+`,
             },
             {
               role: "user",
@@ -60,27 +74,32 @@ app.post("/search", async (req, res) => {
 Concept : "${query}"
 Nombre de points : ${limit}
 
-Retourne UNIQUEMENT un tableau JSON valide :
+Retourne STRICTEMENT un tableau JSON :
+
 [
   {
-    "title": "Nom",
-    "latitude": 0,
-    "longitude": 0,
-    "description": "...",
-    "reason": "..."
+    "title": "Nom du lieu ou concept",
+    "latitude": 48.8566,
+    "longitude": 2.3522,
+    "description": "Description courte et claire",
+    "reason": "Pourquoi ce lieu est lié au concept"
   }
 ]
+
+IMPORTANT :
+- Utilise de vrais lieux (villes, sites, régions)
+- Répartis les points géographiquement si pertinent
+- N'invente pas de coordonnées absurdes
 `,
             },
           ],
-          temperature: 0.3,
         }),
       }
     );
 
     const data = await response.json();
 
-    // 🔎 Log utile en cas de souci
+    // 🔎 Log complet pour debug
     console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
 
     const text = data?.choices?.[0]?.message?.content;
@@ -90,11 +109,17 @@ Retourne UNIQUEMENT un tableau JSON valide :
       return res.json([]);
     }
 
-    // Sécurité : on tente un parse JSON propre
     try {
       const parsed = JSON.parse(text);
+
+      // Sécurité minimale
+      if (!Array.isArray(parsed)) {
+        console.error("Response is not an array");
+        return res.json([]);
+      }
+
       return res.json(parsed);
-    } catch (e) {
+    } catch (err) {
       console.error("JSON parse error:", text);
       return res.json([]);
     }
@@ -111,3 +136,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("IA backend running on port", PORT);
 });
+
