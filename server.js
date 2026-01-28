@@ -2,8 +2,26 @@ import express from "express";
 import fetch from "node-fetch";
 
 const app = express();
+
+/* =========================
+   ✅ CORS (OBLIGATOIRE)
+========================= */
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.json());
 
+/* =========================
+   ROUTE IA
+========================= */
 app.post("/search", async (req, res) => {
   const { query, limit } = req.body;
 
@@ -23,7 +41,8 @@ app.post("/search", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "Tu es un moteur de cartographie conceptuelle. Tu réponds uniquement en JSON."
+            content:
+              "Tu es un moteur de cartographie conceptuelle. Tu réponds uniquement en JSON strictement valide."
           },
           {
             role: "user",
@@ -55,10 +74,14 @@ Retourne UNIQUEMENT un tableau JSON valide :
 
     res.json(JSON.parse(text));
   } catch (e) {
+    console.error(e);
     res.json([]);
   }
 });
 
+/* =========================
+   START SERVER
+========================= */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("IA backend running on port", PORT);
