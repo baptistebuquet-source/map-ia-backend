@@ -23,42 +23,30 @@ app.use(express.json());
    UTILS
 ===================== */
 
-// Géocodage STRICT à partir d’une ADRESSE
-async function geocodeAddress(address, city, country = "France") {
-  const q = `${address}, ${city}, ${country}`;
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&q=${encodeURIComponent(q)}`;
+// Géocodage par ADRESSE (fiable)
+async function geocodeAddress(address) {
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`;
 
   const r = await fetch(url, {
-    headers: { "User-Agent": "map-ia-backend/1.0" }
+    headers: {
+      "User-Agent": "map-ia-backend/1.0"
+    }
   });
 
   const data = await r.json();
   if (!data || !data[0]) return null;
 
-  const d = data[0];
-
-  // Vérification stricte de la commune
-  const cityMatch =
-    d.address?.city ||
-    d.address?.town ||
-    d.address?.village ||
-    "";
-
-  if (!cityMatch.toLowerCase().includes(city.toLowerCase())) {
-    return null;
-  }
-
   return {
-    latitude: parseFloat(d.lat),
-    longitude: parseFloat(d.lon),
-    displayName: d.display_name
+    latitude: parseFloat(data[0].lat),
+    longitude: parseFloat(data[0].lon),
+    displayName: data[0].display_name
   };
 }
 
-// Extraction naïve de la ville (à améliorer plus tard si besoin)
+// Extraction simple de la ville (fallback)
 function extractCity(query) {
-  const parts = query.split(" ");
-  return parts[parts.length - 1];
+  const words = query.trim().split(" ");
+  return words[words.length - 1];
 }
 
 /* =====================
@@ -91,7 +79,7 @@ app.post("/search", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0,
+          temperature: 0.05,
           max_tokens: 900,
           messages: [
             {
@@ -100,37 +88,37 @@ app.post("/search", async (req, res) => {
 Tu es un moteur d’IDENTIFICATION DE LIEUX RÉELS.
 
 RÈGLE ABSOLUE :
-Tu n’inventes JAMAIS de lieu, de nom, d’adresse ou de coordonnées.
+Tu n’inventes JAMAIS un lieu, un nom, une adresse ou un contact.
 
-Si un lieu n’a PAS :
-- un NOM officiel
-- une ADRESSE POSTALE précise
-- une SOURCE PUBLIQUE vérifiable
-→ TU NE LE RETOURNES PAS.
+OBJECTIF :
+Identifier des établissements RÉELS, EXISTANTS et LOCALISABLES.
 
-GÉOGRAPHIE :
-- Tous les lieux doivent être STRICTEMENT dans la commune demandée
-- Aucun lieu hors ville
-- Aucune approximation
+GÉOGRAPHIE (CRITIQUE) :
+- Tous les lieux doivent se situer STRICTEMENT dans la ville demandée
+- Si tu n’es pas certain → NE PAS RETOURNER le lieu
 
 INTERDICTIONS :
 - Lieux génériques
-- Synthèses abstraites
-- Regroupements imaginaires
+- Noms inventés
+- Adresses approximatives
+- Synthèses conceptuelles
+
+SOURCES :
+- Chaque lieu DOIT avoir une source publique vérifiable
 
 FORMAT STRICT (JSON UNIQUEMENT) :
 
 [
   {
-    "title": "Nom officiel exact",
+    "title": "Nom officiel exact de l’établissement",
     "address": "Adresse postale complète",
     "city": "Nom exact de la commune",
     "country": "France",
+    "phone": "+33...",
+    "source": "https://site-officiel.fr",
+    "image": "https://site-officiel.fr/image.jpg",
     "description": "Description factuelle",
-    "reason": "Pourquoi ce lieu répond précisément à la demande",
-    "source": "https://source-officielle.fr",
-    "phone": "+33123456789",
-    "image": "https://site-officiel.fr/image.jpg"
+    "reason": "Pourquoi ce lieu répond à la requête"
   }
 ]
 `
@@ -139,11 +127,12 @@ FORMAT STRICT (JSON UNIQUEMENT) :
               role: "user",
               content: `
 REQUÊTE : "${query}"
-VILLE CIBLE : "${city}"
+VILLE OBLIGATOIRE : "${city}"
 
-CONTRAINTES :
+CONSIGNES :
 - Refuser tout lieu hors de "${city}"
-- Refuser tout lieu sans adresse exacte
+- Refuser toute adresse incomplète
+- Refuser tout lieu non vérifiable
 - Qualité > quantité
 `
             }
@@ -180,14 +169,14 @@ CONTRAINTES :
         continue;
       }
 
-      // Géocodage STRICT par adresse
-      const geo = await geocodeAddress(
-        p.address,
-        p.city,
-        p.country || "France"
-      );
-
+      // Géocodage par adresse
+      const geo = await geocodeAddress(`${p.address}, ${p.city}, ${p.country || "France"}`);
       if (!geo) continue;
+
+      // Vérification stricte de la ville
+      if (!geo.displayName.toLowerCase().includes(p.city.toLowerCase())) {
+        continue;
+      }
 
       results.push({
         title: p.title,
@@ -196,12 +185,9 @@ CONTRAINTES :
         description: p.description,
         reason: p.reason,
         source: p.source,
-        phone:
-          typeof p.phone === "string" && p.phone.length > 5
-            ? p.phone
-            : undefined,
+        phone: typeof p.phone === "string" ? p.phone : undefined,
         image:
-          typeof p.image === "string" &&
+          p.image &&
           /^https?:\/\/.+\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(p.image)
             ? p.image
             : undefined
