@@ -47,44 +47,48 @@ app.post("/search", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0.2,
+          temperature: 0.15,
           messages: [
             {
               role: "system",
               content: `
-Tu es un moteur de cartographie historique et conceptuelle.
+Tu es un moteur de cartographie EXPERTE, destiné à un public exigeant.
 
-RÈGLES ABSOLUES (NON NÉGOCIABLES) :
-- Tu réponds UNIQUEMENT avec du JSON valide
-- AUCUN texte hors du JSON
-- AUCUNE balise Markdown
-- AUCUNE justification hors champ
+TA MISSION :
+Fournir des lieux et pratiques RÉELLES, SPÉCIFIQUES et NON TRIVIALES.
 
-RÈGLES DE VÉRACITÉ :
-- N'INVENTE JAMAIS de faits historiques
-- Si une information est incertaine, EXCLUS le point
-- PRÉFÈRE NE RIEN RENVOYER plutôt qu'une erreur
-- Chaque affirmation doit être historiquement ou culturellement admise
+RÈGLES ABSOLUES :
+- JSON VALIDE UNIQUEMENT
+- AUCUN texte hors JSON
+- AUCUNE généralité évidente
+- AUCUNE réponse que "tout le monde sait déjà"
 
-CONTRAINTES SUR LES LIEUX :
-- UNIQUEMENT des lieux réels (villes, sites, régions identifiables)
-- Coordonnées GPS plausibles et cohérentes
-- Cohérence stricte entre le lieu et le concept
+INTERDICTIONS :
+- Activités génériques sans valeur ajoutée
+- Conseils médicaux vagues
+- Lieux inventés
+- Sources fictives
 
-INTERDICTIONS EXPLICITES :
-- Pas d’anachronisme
-- Pas de confusion de titres (roi / empereur / lieu)
-- Pas de raccourci symbolique faux
-- Pas de généralisation abusive
+EXIGENCES DE QUALITÉ :
+- Chaque point doit apporter une information NOUVELLE
+- Le lien avec le concept doit être TECHNIQUE ou CONTEXTUEL
+- Si le concept implique une contrainte physique ou médicale :
+  → mentionner les adaptations reconnues
+  → rester factuel et prudent
 
-FORMAT STRICT À RESPECTER :
+SOURCES :
+- Chaque point DOIT inclure une source publique fiable
+  (site institutionnel, station officielle, fédération, publication reconnue)
+
+FORMAT STRICT :
 [
   {
-    "title": "Nom exact du lieu",
+    "title": "Nom précis du lieu ou de la pratique",
     "latitude": 0.0,
     "longitude": 0.0,
-    "description": "Fait court, neutre et vérifiable",
-    "reason": "Lien précis, factuel et historiquement admis"
+    "description": "Description précise, contextualisée et utile",
+    "reason": "Lien argumenté et défendable avec le concept",
+    "source": "https://source-fiable.org"
   }
 ]
 `,
@@ -95,14 +99,14 @@ FORMAT STRICT À RESPECTER :
 Concept étudié : "${query}"
 Nombre maximum de points : ${limit}
 
-INSTRUCTIONS :
-- Sélectionne uniquement des lieux FACTUELS
-- Chaque lien doit être défendable historiquement
-- Si le concept est abstrait, utilise uniquement des lieux reconnus pour ce rôle
-- N'ajoute PAS de lieu si tu doutes de sa pertinence
+INSTRUCTIONS CRITIQUES :
+- Refuse toute réponse évidente ou pauvre
+- Privilégie la qualité à la quantité
+- Si nécessaire, retourne MOINS de points
+- Chaque point doit justifier son existence
 
 RAPPEL :
-Mieux vaut 3 points exacts que 10 approximatifs.
+Ce contenu est destiné à un client exigeant, pas à un débutant.
 `,
             },
           ],
@@ -112,7 +116,6 @@ Mieux vaut 3 points exacts que 10 approximatifs.
 
     const data = await response.json();
 
-    // 🔎 Log brut pour audit
     console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
 
     const text = data?.choices?.[0]?.message?.content;
@@ -130,21 +133,23 @@ Mieux vaut 3 points exacts que 10 approximatifs.
       return res.json([]);
     }
 
-    // 🛡️ Validation minimale côté serveur
     if (!Array.isArray(parsed)) {
       console.error("Response is not an array");
       return res.json([]);
     }
 
+    // 🛡️ Validation renforcée
     const cleaned = parsed.filter(p =>
       typeof p?.title === "string" &&
       typeof p?.latitude === "number" &&
       typeof p?.longitude === "number" &&
       typeof p?.description === "string" &&
-      typeof p?.reason === "string"
+      typeof p?.reason === "string" &&
+      typeof p?.source === "string" &&
+      p.source.startsWith("http")
     );
 
-    return res.json(cleaned);
+    return res.json(cleaned.slice(0, limit));
 
   } catch (err) {
     console.error("OpenAI request error:", err);
