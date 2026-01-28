@@ -48,6 +48,7 @@ app.post("/search", async (req, res) => {
         body: JSON.stringify({
           model: "gpt-4o-mini",
           temperature: 0.15,
+          max_tokens: 900,
           messages: [
             {
               role: "system",
@@ -68,6 +69,7 @@ INTERDICTIONS :
 - Conseils médicaux vagues
 - Lieux inventés
 - Sources fictives
+- Images inventées
 
 EXIGENCES DE QUALITÉ :
 - Chaque point doit apporter une information NOUVELLE
@@ -80,6 +82,12 @@ SOURCES :
 - Chaque point DOIT inclure une source publique fiable
   (site institutionnel, station officielle, fédération, publication reconnue)
 
+IMAGES (OPTIONNEL) :
+- Tu PEUX inclure un champ "image"
+- L’image DOIT provenir d’un site officiel ou institutionnel
+- URL directe vers un fichier image réel (jpg, png)
+- Si aucune image fiable n’existe, OMIT le champ
+
 FORMAT STRICT :
 [
   {
@@ -88,7 +96,8 @@ FORMAT STRICT :
     "longitude": 0.0,
     "description": "Description précise, contextualisée et utile",
     "reason": "Lien argumenté et défendable avec le concept",
-    "source": "https://source-fiable.org"
+    "source": "https://source-fiable.org",
+    "image": "https://site-officiel.org/image.jpg"
   }
 ]
 `,
@@ -138,7 +147,7 @@ Ce contenu est destiné à un client exigeant, pas à un débutant.
       return res.json([]);
     }
 
-    // 🛡️ Validation renforcée
+    // 🛡️ Validation renforcée (image optionnelle)
     const cleaned = parsed.filter(p =>
       typeof p?.title === "string" &&
       typeof p?.latitude === "number" &&
@@ -146,7 +155,11 @@ Ce contenu est destiné à un client exigeant, pas à un débutant.
       typeof p?.description === "string" &&
       typeof p?.reason === "string" &&
       typeof p?.source === "string" &&
-      p.source.startsWith("http")
+      p.source.startsWith("http") &&
+      (
+        !p.image ||
+        (typeof p.image === "string" && p.image.startsWith("http"))
+      )
     );
 
     return res.json(cleaned.slice(0, limit));
