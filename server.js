@@ -47,7 +47,7 @@ app.post("/categorize", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4.1-mini",
-          temperature: 0,
+          temperature: 0.35,
           messages: [
             {
               role: "system",
@@ -57,7 +57,7 @@ app.post("/categorize", async (req, res) => {
             {
               role: "user",
               content: `
-Voici un sondage.
+Tu dois classifier un sondage.
 
 Question :
 "${question}"
@@ -65,15 +65,24 @@ Question :
 Propositions :
 ${answers.map(a => `- ${a}`).join("\n")}
 
-Catégories possibles :
+Catégories disponibles :
 ${categories.join(", ")}
 
-Règles STRICTES :
-- Choisis ENTRE 1 ET 3 catégories maximum
-- N'invente JAMAIS de nouvelle catégorie
+PROCÉDURE OBLIGATOIRE (SUIVRE DANS TA TÊTE) :
+1. Analyse le thème principal du sondage
+2. Évalue CHAQUE catégorie disponible sur une échelle de 0 à 100
+3. Sélectionne les catégories les PLUS pertinentes (score élevé)
+4. Retourne ENTRE 2 ET 3 catégories si possible
+5. N'utilise "Société" QUE si aucune autre catégorie n'est plus précise
+
+RÈGLES STRICTES DE SORTIE :
 - Réponds UNIQUEMENT avec un tableau JSON valide
-- Exemple de réponse attendue :
-["Tech","IA"]
+- 2 à 3 catégories OBLIGATOIRES (1 SEULEMENT si vraiment impossible)
+- Aucune explication
+- Aucun texte autour
+
+Exemple de sortie attendue :
+["Technologie","IA","Éthique"]
 
 Réponse :
 `,
