@@ -1,100 +1,71 @@
 import express from "express";
-import fetch from "node-fetch";
+import cors from "cors";
+import OpenAI from "openai";
 
 const app = express();
-
-/* =====================
-   CORS
-===================== */
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
+app.use(cors());
 app.use(express.json());
 
-/* =====================
-   TEST ROUTE
-===================== */
-app.get("/", (req, res) => {
-  res.send("API map-ia-backend OK");
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
 });
 
-/* =====================
-   SEARCH ROUTE
-===================== */
-app.post("/search", async (req, res) => {
-  const { query, limit = 5 } = req.body;
-  if (!query) return res.json([]);
+/* ============================
+   ROUTE : CATÉGORISATION
+============================ */
 
+app.post("/categorize", async (req, res) => {
   try {
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4.1-mini",
-          temperature: 0.3,
-          messages: [
-            {
-              role: "system",
-              content:
-                "Tu es un moteur de cartographie conceptuelle. Tu réponds UNIQUEMENT en JSON valide.",
-            },
-            {
-              role: "user",
-              content: `
-Concept : "${query}"
-Nombre de points : ${limit}
+    const { question, answers, categories } = req.body;
 
-Retourne UNIQUEMENT un tableau JSON valide, sans texte autour :
-
-[
-  {
-    "title": "Titre court",
-    "place_name": "Nom du lieu réel",
-    "address": "Adresse lisible (rue, ville, pays)",
-    "description": "Description courte",
-    "reason": "Lien avec le concept"
-  }
-]
-`,
-            },
-          ],
-        }),
-      }
-    );
-
-    const data = await response.json();
-    const text = data?.choices?.[0]?.message?.content;
-
-    if (!text) {
-      console.log("No content from OpenAI", data);
-      return res.json([]);
+    if (!question || !categories?.length) {
+      return res.status(400).json({ error: "Invalid payload" });
     }
 
-    const parsed = JSON.parse(text);
-    res.json(parsed);
-  } catch (err) {
-    console.error("OpenAI error:", err);
-    res.json([]);
+    const prompt = `
+Tu es un système de classification.
+Voici une question de sondage et ses propositions.
+
+Question :
+"${question}"
+
+Propositions :
+${answers.map(a => `- ${a}`).join("\n")}
+
+Catégories possibles :
+${categories.join(", ")}
+
+Règles :
+- Choisis entre 1 et 3 catégories maximum
+- Ne crée JAMAIS de nouvelle catégorie
+- Réponds UNIQUEMENT avec un JSON valide
+- Format exact : ["Catégorie1","Catégorie2"]
+
+Réponse :
+`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0
+    });
+
+    const content = completion.choices[0].message.content;
+
+    const parsed = JSON.parse(content);
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      throw new Error("Invalid AI response");
+    }
+
+    res.json({ categories: parsed });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "AI categorization failed" });
   }
 });
 
-/* =====================
-   START SERVER
-===================== */
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("IA backend running on port", PORT);
+app.listen(3001, () => {
+  console.log("IA backend running on port 3001");
 });
