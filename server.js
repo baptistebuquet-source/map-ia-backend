@@ -19,48 +19,41 @@ if (!OPENAI_KEY) {
    MIDDLEWARE
 ===================== */
 
+app.use(express.json());
+
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
   res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
 
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
 
-app.use(express.json());
-
 /* =====================
    HEALTH CHECK
 ===================== */
 
 app.get("/", (_, res) => {
-  res.send("✅ IA Categorization API running");
+  res.send("✅ IA Survey Analysis API running");
 });
 
 /* =====================
-   ROUTE : CATEGORIZE
+   ANALYZE SURVEY
 ===================== */
 
-app.post("/categorize", async (req, res) => {
-  const { question, answers, categories } = req.body;
+app.post("/analyze-survey", async (req, res) => {
+  const { establishment, survey_title, questions } = req.body;
 
-  console.log("\n==============================");
-  console.log("📥 REQUEST RECEIVED");
-  console.log("Question:", question);
-  console.log("Answers:", answers);
-  console.log("Categories:", categories);
-
-  // Validation basique
+  // Validation minimale
   if (
-    !question ||
-    !Array.isArray(answers) ||
-    answers.length < 2 ||
-    !Array.isArray(categories) ||
-    categories.length === 0
+    !survey_title ||
+    !Array.isArray(questions) ||
+    questions.length === 0
   ) {
-    console.error("❌ Invalid payload");
-    return res.status(400).json({ error: "Invalid payload" });
+    return res.status(400).json({
+      error: "Invalid payload"
+    });
   }
 
   try {
@@ -74,32 +67,49 @@ app.post("/categorize", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0.2,
+          temperature: 0.3,
           response_format: { type: "json_object" },
           messages: [
             {
               role: "system",
               content: `
-Tu es un système STRICT de classification de sondages.
+Tu es un expert en analyse de feedback terrain (lieux publics, commerces, musées, restaurants).
 
-RÈGLES ABSOLUES :
-- Choisis ENTRE 1 ET 3 catégories
-- N'utilise QUE les catégories fournies
-- "Société" est INTERDITE sauf si aucune autre catégorie n'est pertinente
-- Réponds UNIQUEMENT en JSON valide
+OBJECTIF :
+Transformer des réponses brutes en décisions claires.
 
-Format de réponse OBLIGATOIRE :
+RÈGLES :
+- Réponse STRICTEMENT en JSON valide
+- Ton clair, professionnel, non marketing
+- Analyse orientée action
+
+FORMAT OBLIGATOIRE :
 {
-  "categories": ["Cat1","Cat2"]
+  "summary": "Résumé global en 3–4 phrases",
+  "positive_points": [
+    "Point positif 1",
+    "Point positif 2"
+  ],
+  "pain_points": [
+    "Problème récurrent 1",
+    "Problème récurrent 2"
+  ],
+  "priorities": [
+    {
+      "issue": "Problème prioritaire",
+      "impact": "Impact pour les visiteurs",
+      "recommendation": "Action concrète recommandée"
+    }
+  ]
 }
 `
             },
             {
               role: "user",
               content: JSON.stringify({
-                question,
-                answers,
-                categories
+                establishment,
+                survey_title,
+                questions
               })
             }
           ]
@@ -108,54 +118,22 @@ Format de réponse OBLIGATOIRE :
     );
 
     const data = await response.json();
-    const text = data?.choices?.[0]?.message?.content;
+    const content = data?.choices?.[0]?.message?.content;
 
-    console.log("\n🤖 RAW AI RESPONSE:");
-    console.log(text);
-
-    if (!text) {
+    if (!content) {
       throw new Error("Empty AI response");
     }
 
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(content);
 
-    console.log("\n🧠 PARSED AI RESPONSE:");
-    console.log(parsed);
-
-    if (
-      !parsed.categories ||
-      !Array.isArray(parsed.categories) ||
-      parsed.categories.length === 0
-    ) {
-      throw new Error("Invalid categories format");
-    }
-
-    // Nettoyage & sécurisation
-    let finalCategories = parsed.categories.filter(c =>
-      categories.includes(c)
-    );
-
-    // Anti "Société" abusif
-    if (finalCategories.length > 1 && finalCategories.includes("Société")) {
-      finalCategories = finalCategories.filter(c => c !== "Société");
-    }
-
-    if (finalCategories.length === 0) {
-      console.warn("⚠️ Fallback intelligent déclenché");
-      finalCategories = ["Culture"];
-    }
-
-    console.log("\n✅ FINAL CATEGORIES:", finalCategories);
-    console.log("==============================\n");
-
-    res.json({ categories: finalCategories });
+    res.json(parsed);
 
   } catch (err) {
-    console.error("\n🔥 CATEGORIZE ERROR");
-    console.error(err);
-    console.log("==============================\n");
+    console.error("🔥 ANALYZE ERROR:", err);
 
-    res.json({ categories: ["Culture"] });
+    res.status(500).json({
+      error: "AI analysis failed"
+    });
   }
 });
 
