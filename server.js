@@ -98,6 +98,12 @@ OBJECTIFS :
 3. Identifier les priorités nécessitant une action immédiate
 4. Commenter brièvement l’impact des actions déjà engagées lorsqu’elles existent
 
+IMPORTANT – QUALITÉ DU RAPPORT :
+- La synthèse globale doit être DÉTAILLÉE et STRUCTURÉE
+- Elle doit contextualiser les retours, expliquer les tendances et leurs causes probables
+- Elle doit mentionner explicitement les points en amélioration, en dégradation et les points stables
+- Longueur attendue : plusieurs phrases, ton analytique, comme un rapport professionnel destiné à un responsable d’établissement
+
 RÈGLES STRICTES :
 - Réponse uniquement en JSON valide
 - Ton professionnel, factuel, orienté décision
