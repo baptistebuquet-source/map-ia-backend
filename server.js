@@ -48,7 +48,8 @@ app.post("/analyze-survey", async (req, res) => {
     survey_title,
     period,
     questions,
-    previous_report
+    previous_report,
+    actions_taken // 👈 maintenant utilisé explicitement
   } = req.body;
 
   if (
@@ -76,23 +77,36 @@ app.post("/analyze-survey", async (req, res) => {
             {
               role: "system",
               content: `
-Tu es un expert en analyse de feedback terrain pour lieux recevant du public.
+Tu es un expert en analyse de feedback terrain pour organisations recevant du public.
+
+IMPORTANT — CONTEXTE D'ÉVOLUTION :
+- Certaines priorités contiennent déjà :
+  - un champ "evolution" (nouveau | persistant | à surveiller)
+  - un champ "action_context" (actions engagées | aucune action déclarée)
+- Ces champs ont été calculés en amont.
+- TU NE DOIS PAS les recalculer.
+- TU DOIS les utiliser pour expliquer, hiérarchiser et contextualiser.
 
 CONTEXTE :
-- Tu analyses UNIQUEMENT les nouvelles réponses depuis le dernier rapport
-- Tu disposes éventuellement d’un rapport précédent
-- Ton rôle est de produire un rapport ÉVOLUTIF
+- Tu analyses UNIQUEMENT les nouvelles réponses depuis le dernier rapport.
+- Tu disposes éventuellement d’un rapport précédent.
+- Tu disposes éventuellement d’actions humaines déjà engagées.
 
 OBJECTIFS :
 1. Synthétiser les nouveaux retours
-2. Comparer avec le rapport précédent si fourni
-3. Identifier les améliorations, dégradations ou stagnations
-4. Mettre à jour les priorités d’action
+2. Mettre en perspective l’évolution des problématiques
+3. Identifier les priorités nécessitant une action immédiate
+4. Commenter brièvement l’impact des actions déjà engagées lorsqu’elles existent
 
 RÈGLES STRICTES :
 - Réponse uniquement en JSON valide
 - Ton professionnel, factuel, orienté décision
 - Pas de marketing, pas de suppositions non fondées
+- Ne propose PAS à nouveau une action déjà engagée
+- Mets l’accent sur :
+  - les problèmes persistants
+  - ceux sans action déclarée
+  - ceux en dégradation ou à surveiller
 
 FORMAT OBLIGATOIRE :
 {
@@ -109,8 +123,9 @@ FORMAT OBLIGATOIRE :
     {
       "issue": "Problème prioritaire",
       "impact": "Impact pour les visiteurs",
-      "recommendation": "Action concrète recommandée",
-      "evolution": "en amélioration | stable | en dégradation | nouveau"
+      "recommendation": "Action concrète recommandée (si aucune action n’est encore engagée)",
+      "evolution": "nouveau | persistant | à surveiller",
+      "action_context": "actions engagées | aucune action déclarée"
     }
   ]
 }
@@ -123,7 +138,8 @@ FORMAT OBLIGATOIRE :
                 survey_title,
                 period,
                 questions,
-                previous_report
+                previous_report,
+                actions_taken
               })
             }
           ]
@@ -154,4 +170,3 @@ FORMAT OBLIGATOIRE :
 app.listen(PORT, () => {
   console.log(`🚀 IA backend running on port ${PORT}`);
 });
-
