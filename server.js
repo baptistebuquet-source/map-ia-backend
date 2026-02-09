@@ -48,11 +48,6 @@ app.post("/analyze-survey", async (req, res) => {
     survey_title,
     period,
     questions,
-
-    // 👉 stats calculées côté backend
-    current_stats,
-    stats_comparison,
-
     previous_report
   } = req.body;
 
@@ -81,89 +76,40 @@ app.post("/analyze-survey", async (req, res) => {
             {
               role: "system",
               content: `
-Tu es un expert en analyse de feedback terrain pour lieux recevant du public
-(restaurants, commerces, établissements de services).
+Tu es un expert en analyse de feedback terrain pour lieux recevant du public.
 
-=====================
-DONNÉES FOURNIES
-=====================
+CONTEXTE :
+- Tu analyses UNIQUEMENT les nouvelles réponses depuis le dernier rapport
+- Tu disposes éventuellement d’un rapport précédent
+- Ton rôle est de produire un rapport ÉVOLUTIF
 
-Tu reçois :
-1. Des réponses clients QUALITATIVES (questions)
-2. Des statistiques chiffrées du rapport ACTUEL (current_stats)
-3. Une comparaison chiffrée avec le rapport PRÉCÉDENT (stats_comparison)
-4. Éventuellement un rapport précédent textuel (previous_report)
+OBJECTIFS :
+1. Synthétiser les nouveaux retours
+2. Comparer avec le rapport précédent si fourni
+3. Identifier les améliorations, dégradations ou stagnations
+4. Mettre à jour les priorités d’action
 
-Les statistiques sont calculées côté backend et sont FIABLES.
+RÈGLES STRICTES :
+- Réponse uniquement en JSON valide
+- Ton professionnel, factuel, orienté décision
+- Pas de marketing, pas de suppositions non fondées
 
-=====================
-RÈGLES FONDAMENTALES
-=====================
-
-- Toute notion d’évolution (amélioration, dégradation, stabilité)
-  DOIT être justifiée par les données chiffrées fournies.
-- Tu ne dois PAS inventer de tendance absente des chiffres.
-- Si une évolution ne peut pas être mesurée (volume insuffisant, données manquantes),
-  tu dois l’indiquer explicitement.
-- Le rapport doit évoluer dans le temps : évite les formulations génériques répétées.
-
-=====================
-OBJECTIF DU RAPPORT
-=====================
-
-Aider le responsable de l’établissement à :
-- comprendre ce qui évolue réellement
-- distinguer perception et faits mesurés
-- prioriser des actions simples et réalistes
-
-Le rapport doit être perçu comme :
-- utile
-- fiable
-- rassurant
-- orienté décision
-
-=====================
-CONSIGNES D’ANALYSE
-=====================
-
-1. La synthèse globale doit :
-   - s’appuyer sur les chiffres (moyennes, écarts, volumes)
-   - mentionner clairement ce qui s’améliore, se dégrade ou reste stable
-   - expliquer les limites d’interprétation si nécessaire
-
-2. Les points positifs :
-   - doivent être confirmés par les données
-   - ou clairement identifiés comme émergents
-
-3. Les points de friction :
-   - doivent refléter des problèmes persistants ou en dégradation
-   - éviter toute dramatisation non justifiée
-
-4. Les priorités d’action :
-   - doivent découler des tendances mesurées
-   - rester concrètes, simples et proportionnées
-
-=====================
-FORMAT DE SORTIE STRICT
-=====================
-
-Réponse uniquement en JSON valide.
-
+FORMAT OBLIGATOIRE :
 {
-  "summary": "Synthèse globale expliquant les tendances observées à partir des données chiffrées",
+  "summary": "Résumé global incluant l’évolution par rapport au précédent rapport",
   "positive_points": [
     "Point positif confirmé ou en amélioration",
     "Nouveau point positif émergent"
   ],
   "pain_points": [
     "Problème persistant",
-    "Problème en dégradation mesurée"
+    "Nouveau problème identifié"
   ],
   "priorities": [
     {
       "issue": "Problème prioritaire",
-      "impact": "Impact concret pour les visiteurs",
-      "recommendation": "Action simple et réaliste",
+      "impact": "Impact pour les visiteurs",
+      "recommendation": "Action concrète recommandée",
       "evolution": "en amélioration | stable | en dégradation | nouveau"
     }
   ]
@@ -177,8 +123,6 @@ Réponse uniquement en JSON valide.
                 survey_title,
                 period,
                 questions,
-                current_stats,
-                stats_comparison,
                 previous_report
               })
             }
@@ -210,5 +154,3 @@ Réponse uniquement en JSON valide.
 app.listen(PORT, () => {
   console.log(`🚀 IA backend running on port ${PORT}`);
 });
-
-
