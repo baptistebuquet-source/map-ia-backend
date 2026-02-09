@@ -48,8 +48,7 @@ app.post("/analyze-survey", async (req, res) => {
     survey_title,
     period,
     questions,
-    previous_report,
-    actions_taken // 👈 maintenant utilisé explicitement
+    previous_report
   } = req.body;
 
   if (
@@ -79,59 +78,45 @@ app.post("/analyze-survey", async (req, res) => {
               content: `
 Tu es un expert en analyse de feedback terrain pour organisations recevant du public.
 
-IMPORTANT — CONTEXTE D'ÉVOLUTION :
-- Certaines priorités contiennent déjà :
-  - un champ "evolution" (nouveau | persistant | à surveiller)
-  - un champ "action_context" (actions engagées | aucune action déclarée)
-- Ces champs ont été calculés en amont.
-- TU NE DOIS PAS les recalculer.
-- TU DOIS les utiliser pour expliquer, hiérarchiser et contextualiser.
-
 CONTEXTE :
-- Tu analyses UNIQUEMENT les nouvelles réponses depuis le dernier rapport.
-- Tu disposes éventuellement d’un rapport précédent.
-- Tu disposes éventuellement d’actions humaines déjà engagées.
+- Tu analyses UNIQUEMENT les nouvelles réponses depuis le dernier rapport
+- Tu disposes éventuellement d’un rapport précédent
+- Les questionnaires sont simples et portent sur des points concrets du quotidien
 
-OBJECTIFS :
-1. Synthétiser les nouveaux retours
-2. Mettre en perspective l’évolution des problématiques
-3. Identifier les priorités nécessitant une action immédiate
-4. Commenter brièvement l’impact des actions déjà engagées lorsqu’elles existent
+OBJECTIF PRINCIPAL :
+Aider l’établissement à comprendre clairement ce qui fonctionne,
+ce qui pose problème, et ce qui mérite d’être priorisé.
 
 IMPORTANT – QUALITÉ DU RAPPORT :
 - La synthèse globale doit être DÉTAILLÉE et STRUCTURÉE
-- Elle doit contextualiser les retours, expliquer les tendances et leurs causes probables
-- Elle doit mentionner explicitement les points en amélioration, en dégradation et les points stables
-- Longueur attendue : plusieurs phrases, ton analytique, comme un rapport professionnel destiné à un responsable d’établissement
+- Elle doit expliquer les tendances observées et leur évolution
+- Elle doit mentionner ce qui s’améliore, ce qui se dégrade ou ce qui reste stable
+- Ton analytique, clair, accessible à un responsable d’établissement
+- Le rapport doit être perçu comme utile et rassurant, pas complexe
 
 RÈGLES STRICTES :
 - Réponse uniquement en JSON valide
-- Ton professionnel, factuel, orienté décision
+- Ton professionnel, factuel, sans jargon inutile
 - Pas de marketing, pas de suppositions non fondées
-- Ne propose PAS à nouveau une action déjà engagée
-- Mets l’accent sur :
-  - les problèmes persistants
-  - ceux sans action déclarée
-  - ceux en dégradation ou à surveiller
+- Ne pas sur-interpréter les données
 
 FORMAT OBLIGATOIRE :
 {
-  "summary": "Résumé global incluant l’évolution par rapport au précédent rapport",
+  "summary": "Synthèse globale détaillée des retours et de leur évolution",
   "positive_points": [
     "Point positif confirmé ou en amélioration",
-    "Nouveau point positif émergent"
+    "Nouveau point positif identifié"
   ],
   "pain_points": [
-    "Problème persistant",
-    "Nouveau problème identifié"
+    "Problème récurrent",
+    "Problème nouvellement apparu"
   ],
   "priorities": [
     {
       "issue": "Problème prioritaire",
-      "impact": "Impact pour les visiteurs",
-      "recommendation": "Action concrète recommandée (si aucune action n’est encore engagée)",
-      "evolution": "nouveau | persistant | à surveiller",
-      "action_context": "actions engagées | aucune action déclarée"
+      "impact": "Impact concret pour les visiteurs",
+      "recommendation": "Action simple et concrète à envisager",
+      "evolution": "nouveau | persistant | en amélioration | en dégradation"
     }
   ]
 }
@@ -144,8 +129,7 @@ FORMAT OBLIGATOIRE :
                 survey_title,
                 period,
                 questions,
-                previous_report,
-                actions_taken
+                previous_report
               })
             }
           ]
