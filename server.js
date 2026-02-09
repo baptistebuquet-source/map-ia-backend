@@ -48,6 +48,11 @@ app.post("/analyze-survey", async (req, res) => {
     survey_title,
     period,
     questions,
+
+    // 👇 NOUVEAU : stats calculées côté backend
+    current_stats,
+    stats_comparison,
+
     previous_report
   } = req.body;
 
@@ -78,38 +83,55 @@ app.post("/analyze-survey", async (req, res) => {
               content: `
 Tu es un expert en analyse de feedback terrain pour lieux recevant du public.
 
+IMPORTANT — DONNÉES CHIFFRÉES FOURNIES :
+- Tu reçois :
+  1. Des statistiques du rapport ACTUEL (current_stats)
+  2. Une comparaison chiffrée avec le rapport PRÉCÉDENT (stats_comparison)
+- Ces données sont calculées en amont et sont fiables
+
+RÈGLE ABSOLUE :
+- Toute notion d’évolution (amélioration, dégradation, stabilité)
+  DOIT être cohérente avec les statistiques fournies
+- Tu ne dois PAS inventer de tendance non visible dans les chiffres
+- Si les stats sont insuffisantes, indique-le explicitement
+
 CONTEXTE :
 - Tu analyses UNIQUEMENT les nouvelles réponses depuis le dernier rapport
 - Tu disposes éventuellement d’un rapport précédent
-- Ton rôle est de produire un rapport ÉVOLUTIF
+- Ton rôle est de produire un rapport ÉVOLUTIF, factuel et rassurant
 
 OBJECTIFS :
 1. Synthétiser les nouveaux retours
-2. Comparer avec le rapport précédent si fourni
-3. Identifier les améliorations, dégradations ou stagnations
-4. Mettre à jour les priorités d’action
+2. Interpréter les tendances à partir des données chiffrées
+3. Identifier les améliorations, dégradations ou stagnations réelles
+4. Mettre à jour les priorités d’action de façon pragmatique
+
+QUALITÉ ATTENDUE :
+- La synthèse globale doit s’appuyer sur les chiffres
+- Les priorités doivent refléter les évolutions mesurées
+- Ton clair, professionnel, accessible à un responsable d’établissement
 
 RÈGLES STRICTES :
 - Réponse uniquement en JSON valide
 - Ton professionnel, factuel, orienté décision
-- Pas de marketing, pas de suppositions non fondées
+- Pas de marketing, pas de sur-interprétation
 
 FORMAT OBLIGATOIRE :
 {
-  "summary": "Résumé global incluant l’évolution par rapport au précédent rapport",
+  "summary": "Synthèse globale expliquant les tendances observées à partir des données chiffrées",
   "positive_points": [
     "Point positif confirmé ou en amélioration",
     "Nouveau point positif émergent"
   ],
   "pain_points": [
     "Problème persistant",
-    "Nouveau problème identifié"
+    "Problème en dégradation mesurée"
   ],
   "priorities": [
     {
       "issue": "Problème prioritaire",
-      "impact": "Impact pour les visiteurs",
-      "recommendation": "Action concrète recommandée",
+      "impact": "Impact concret pour les visiteurs",
+      "recommendation": "Action simple et réaliste",
       "evolution": "en amélioration | stable | en dégradation | nouveau"
     }
   ]
@@ -123,6 +145,8 @@ FORMAT OBLIGATOIRE :
                 survey_title,
                 period,
                 questions,
+                current_stats,
+                stats_comparison,
                 previous_report
               })
             }
