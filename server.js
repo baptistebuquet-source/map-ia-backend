@@ -49,7 +49,7 @@ app.post("/analyze-survey", async (req, res) => {
     period,
     questions,
 
-    // 👇 NOUVEAU : stats calculées côté backend
+    // 👉 stats calculées côté backend
     current_stats,
     stats_comparison,
 
@@ -81,42 +81,74 @@ app.post("/analyze-survey", async (req, res) => {
             {
               role: "system",
               content: `
-Tu es un expert en analyse de feedback terrain pour lieux recevant du public.
+Tu es un expert en analyse de feedback terrain pour lieux recevant du public
+(restaurants, commerces, établissements de services).
 
-IMPORTANT — DONNÉES CHIFFRÉES FOURNIES :
-- Tu reçois :
-  1. Des statistiques du rapport ACTUEL (current_stats)
-  2. Une comparaison chiffrée avec le rapport PRÉCÉDENT (stats_comparison)
-- Ces données sont calculées en amont et sont fiables
+=====================
+DONNÉES FOURNIES
+=====================
 
-RÈGLE ABSOLUE :
+Tu reçois :
+1. Des réponses clients QUALITATIVES (questions)
+2. Des statistiques chiffrées du rapport ACTUEL (current_stats)
+3. Une comparaison chiffrée avec le rapport PRÉCÉDENT (stats_comparison)
+4. Éventuellement un rapport précédent textuel (previous_report)
+
+Les statistiques sont calculées côté backend et sont FIABLES.
+
+=====================
+RÈGLES FONDAMENTALES
+=====================
+
 - Toute notion d’évolution (amélioration, dégradation, stabilité)
-  DOIT être cohérente avec les statistiques fournies
-- Tu ne dois PAS inventer de tendance non visible dans les chiffres
-- Si les stats sont insuffisantes, indique-le explicitement
+  DOIT être justifiée par les données chiffrées fournies.
+- Tu ne dois PAS inventer de tendance absente des chiffres.
+- Si une évolution ne peut pas être mesurée (volume insuffisant, données manquantes),
+  tu dois l’indiquer explicitement.
+- Le rapport doit évoluer dans le temps : évite les formulations génériques répétées.
 
-CONTEXTE :
-- Tu analyses UNIQUEMENT les nouvelles réponses depuis le dernier rapport
-- Tu disposes éventuellement d’un rapport précédent
-- Ton rôle est de produire un rapport ÉVOLUTIF, factuel et rassurant
+=====================
+OBJECTIF DU RAPPORT
+=====================
 
-OBJECTIFS :
-1. Synthétiser les nouveaux retours
-2. Interpréter les tendances à partir des données chiffrées
-3. Identifier les améliorations, dégradations ou stagnations réelles
-4. Mettre à jour les priorités d’action de façon pragmatique
+Aider le responsable de l’établissement à :
+- comprendre ce qui évolue réellement
+- distinguer perception et faits mesurés
+- prioriser des actions simples et réalistes
 
-QUALITÉ ATTENDUE :
-- La synthèse globale doit s’appuyer sur les chiffres
-- Les priorités doivent refléter les évolutions mesurées
-- Ton clair, professionnel, accessible à un responsable d’établissement
+Le rapport doit être perçu comme :
+- utile
+- fiable
+- rassurant
+- orienté décision
 
-RÈGLES STRICTES :
-- Réponse uniquement en JSON valide
-- Ton professionnel, factuel, orienté décision
-- Pas de marketing, pas de sur-interprétation
+=====================
+CONSIGNES D’ANALYSE
+=====================
 
-FORMAT OBLIGATOIRE :
+1. La synthèse globale doit :
+   - s’appuyer sur les chiffres (moyennes, écarts, volumes)
+   - mentionner clairement ce qui s’améliore, se dégrade ou reste stable
+   - expliquer les limites d’interprétation si nécessaire
+
+2. Les points positifs :
+   - doivent être confirmés par les données
+   - ou clairement identifiés comme émergents
+
+3. Les points de friction :
+   - doivent refléter des problèmes persistants ou en dégradation
+   - éviter toute dramatisation non justifiée
+
+4. Les priorités d’action :
+   - doivent découler des tendances mesurées
+   - rester concrètes, simples et proportionnées
+
+=====================
+FORMAT DE SORTIE STRICT
+=====================
+
+Réponse uniquement en JSON valide.
+
 {
   "summary": "Synthèse globale expliquant les tendances observées à partir des données chiffrées",
   "positive_points": [
@@ -178,4 +210,5 @@ FORMAT OBLIGATOIRE :
 app.listen(PORT, () => {
   console.log(`🚀 IA backend running on port ${PORT}`);
 });
+
 
