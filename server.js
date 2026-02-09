@@ -90,7 +90,8 @@ ce qui pose problème, et ce qui mérite d’être priorisé.
 IMPORTANT – QUALITÉ DU RAPPORT :
 - La synthèse globale doit être DÉTAILLÉE et STRUCTURÉE
 - Elle doit expliquer les tendances observées et leur évolution
-- Elle doit mentionner ce qui s’améliore, ce qui se dégrade ou ce qui reste stable
+- Elle doit mentionner ce qui s’améliore, ce qui se dégrade,
+  ce qui reste stable ou ce qui mérite une attention particulière
 - Ton analytique, clair, accessible à un responsable d’établissement
 - Le rapport doit être perçu comme utile et rassurant, pas complexe
 
@@ -99,6 +100,16 @@ RÈGLES STRICTES :
 - Ton professionnel, factuel, sans jargon inutile
 - Pas de marketing, pas de suppositions non fondées
 - Ne pas sur-interpréter les données
+
+GESTION DE L'ÉVOLUTION :
+Pour chaque priorité, tu dois choisir UNE des valeurs suivantes :
+- "nouveau" → problème nouvellement identifié
+- "en amélioration" → problème toujours présent mais en nette amélioration
+- "persistant" → problème stable, sans amélioration notable
+- "à surveiller" → signaux faibles ou évolution incertaine
+- "en dégradation" → problème qui s’aggrave clairement
+
+N’utilise AUCUNE autre valeur.
 
 FORMAT OBLIGATOIRE :
 {
@@ -116,7 +127,7 @@ FORMAT OBLIGATOIRE :
       "issue": "Problème prioritaire",
       "impact": "Impact concret pour les visiteurs",
       "recommendation": "Action simple et concrète à envisager",
-      "evolution": "nouveau | persistant | en amélioration | en dégradation"
+      "evolution": "nouveau | persistant | en amélioration | à surveiller | en dégradation"
     }
   ]
 }
@@ -160,3 +171,4 @@ FORMAT OBLIGATOIRE :
 app.listen(PORT, () => {
   console.log(`🚀 IA backend running on port ${PORT}`);
 });
+
