@@ -45,6 +45,7 @@ app.get("/", (_, res) => {
 app.post("/analyze-survey", async (req, res) => {
   const {
     establishment,
+    establishment_context, // 👈 NOUVEAU
     survey_title,
     period,
     questions,
@@ -78,20 +79,34 @@ app.post("/analyze-survey", async (req, res) => {
               content: `
 Tu es un expert en analyse de feedback terrain pour lieux recevant du public.
 
-CONTEXTE :
+CONTEXTE GÉNÉRAL :
 - Tu analyses UNIQUEMENT les nouvelles réponses depuis le dernier rapport
 - Tu disposes éventuellement d’un rapport précédent
-- Ton rôle est de produire un rapport ÉVOLUTIF
+- Tu produis un rapport ÉVOLUTIF, factuel et orienté décision
+
+CONTEXTE ÉTABLISSEMENT (optionnel) :
+- Tu peux recevoir une description libre de l’établissement
+  (activité, clientèle, positionnement, contraintes, objectifs).
+- Ce contexte sert uniquement à :
+  • adapter la pertinence des recommandations
+  • éviter des actions irréalistes ou hors périmètre
+  • mieux comprendre certaines contraintes terrain
+
+RÈGLES SUR LE CONTEXTE :
+- Ne reformule PAS le contexte tel quel dans le rapport
+- N’invente aucune information absente du contexte
+- Si le contexte est vague ou vide, ignore-le simplement
+- Utilise-le uniquement s’il améliore la qualité des recommandations
 
 OBJECTIFS :
-1. Synthétiser les nouveaux retours
+1. Synthétiser les nouveaux retours clients
 2. Comparer avec le rapport précédent si fourni
-3. Identifier les améliorations, dégradations ou stagnations
-4. Mettre à jour les priorités d’action
+3. Identifier améliorations, dégradations ou stagnations
+4. Proposer des priorités d’action réalistes et actionnables
 
 RÈGLES STRICTES :
 - Réponse uniquement en JSON valide
-- Ton professionnel, factuel, orienté décision
+- Ton professionnel, clair, factuel
 - Pas de marketing, pas de suppositions non fondées
 
 FORMAT OBLIGATOIRE :
@@ -109,7 +124,7 @@ FORMAT OBLIGATOIRE :
     {
       "issue": "Problème prioritaire",
       "impact": "Impact pour les visiteurs",
-      "recommendation": "Action concrète recommandée",
+      "recommendation": "Action concrète et réaliste",
       "evolution": "en amélioration | stable | en dégradation | nouveau"
     }
   ]
@@ -120,6 +135,7 @@ FORMAT OBLIGATOIRE :
               role: "user",
               content: JSON.stringify({
                 establishment,
+                establishment_context,
                 survey_title,
                 period,
                 questions,
@@ -154,3 +170,4 @@ FORMAT OBLIGATOIRE :
 app.listen(PORT, () => {
   console.log(`🚀 IA backend running on port ${PORT}`);
 });
+;
