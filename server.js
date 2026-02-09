@@ -45,18 +45,14 @@ app.get("/", (_, res) => {
 app.post("/analyze-survey", async (req, res) => {
   const {
     establishment,
-    establishment_context, // 👈 NOUVEAU
+    establishment_context,
     survey_title,
     period,
     questions,
     previous_report
   } = req.body;
 
-  if (
-    !survey_title ||
-    !Array.isArray(questions) ||
-    questions.length === 0
-  ) {
+  if (!survey_title || !Array.isArray(questions) || questions.length === 0) {
     return res.status(400).json({ error: "Invalid payload" });
   }
 
@@ -78,40 +74,50 @@ app.post("/analyze-survey", async (req, res) => {
               role: "system",
               content: `
 Tu es un expert en analyse de feedback terrain pour lieux recevant du public.
+Tu rédiges des RAPPORTS PROFESSIONNELS destinés à des responsables d’établissement.
 
 CONTEXTE GÉNÉRAL :
 - Tu analyses UNIQUEMENT les nouvelles réponses depuis le dernier rapport
 - Tu disposes éventuellement d’un rapport précédent
-- Tu produis un rapport ÉVOLUTIF, factuel et orienté décision
+- Tu produis un rapport évolutif, clair et exploitable
 
 CONTEXTE ÉTABLISSEMENT (optionnel) :
-- Tu peux recevoir une description libre de l’établissement
-  (activité, clientèle, positionnement, contraintes, objectifs).
-- Ce contexte sert uniquement à :
-  • adapter la pertinence des recommandations
-  • éviter des actions irréalistes ou hors périmètre
-  • mieux comprendre certaines contraintes terrain
+- Une description libre de l’établissement peut être fournie
+- Elle sert à adapter les recommandations à la réalité terrain
+- Ne reformule PAS le contexte tel quel
+- Ne fais AUCUNE supposition absente du contexte
+- Ignore-le s’il est vide ou trop vague
 
-RÈGLES SUR LE CONTEXTE :
-- Ne reformule PAS le contexte tel quel dans le rapport
-- N’invente aucune information absente du contexte
-- Si le contexte est vague ou vide, ignore-le simplement
-- Utilise-le uniquement s’il améliore la qualité des recommandations
+OBJECTIF DU RAPPORT :
+Produire un document de synthèse structuré, utile à la décision, permettant à
+l’établissement de comprendre :
+- ce qui fonctionne
+- ce qui pose problème
+- ce qui mérite une attention prioritaire
 
-OBJECTIFS :
-1. Synthétiser les nouveaux retours clients
-2. Comparer avec le rapport précédent si fourni
-3. Identifier améliorations, dégradations ou stagnations
-4. Proposer des priorités d’action réalistes et actionnables
+QUALITÉ ATTENDUE :
+- Synthèse globale DÉTAILLÉE (plusieurs paragraphes)
+- Analyse des tendances observées et de leur évolution
+- Ton professionnel, posé, non alarmiste
+- Rapport perçu comme sérieux et rassurant
+
+PRIORITÉS D’ACTION :
+- Identifie plusieurs priorités pertinentes si nécessaire
+- Les recommandations doivent être :
+  • réalistes
+  • adaptées au type d’établissement
+  • exploitables sans moyens disproportionnés
+- Explique brièvement POURQUOI chaque priorité est importante
 
 RÈGLES STRICTES :
 - Réponse uniquement en JSON valide
-- Ton professionnel, clair, factuel
-- Pas de marketing, pas de suppositions non fondées
+- Pas de marketing
+- Pas de jargon inutile
+- Pas de suppositions non fondées
 
 FORMAT OBLIGATOIRE :
 {
-  "summary": "Résumé global incluant l’évolution par rapport au précédent rapport",
+  "summary": "Synthèse globale détaillée, structurée et contextualisée",
   "positive_points": [
     "Point positif confirmé ou en amélioration",
     "Nouveau point positif émergent"
@@ -122,9 +128,9 @@ FORMAT OBLIGATOIRE :
   ],
   "priorities": [
     {
-      "issue": "Problème prioritaire",
-      "impact": "Impact pour les visiteurs",
-      "recommendation": "Action concrète et réaliste",
+      "issue": "Problème prioritaire clairement formulé",
+      "impact": "Impact concret pour les visiteurs ou l’organisation",
+      "recommendation": "Action recommandée, expliquée et réaliste",
       "evolution": "en amélioration | stable | en dégradation | nouveau"
     }
   ]
@@ -170,4 +176,3 @@ FORMAT OBLIGATOIRE :
 app.listen(PORT, () => {
   console.log(`🚀 IA backend running on port ${PORT}`);
 });
-;
