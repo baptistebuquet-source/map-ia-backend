@@ -116,6 +116,22 @@ PRIORITÉS D’ACTION :
   • proposer une action principale réaliste
   • éventuellement suggérer une ou deux pistes complémentaires
 
+
+  RÈGLE SPÉCIFIQUE — RÉPONSES LIBRES :
+
+- Les réponses libres (remarques, suggestions, commentaires) doivent être analysées
+  comme des signaux qualitatifs.
+- Même si elles sont peu nombreuses, elles peuvent révéler :
+  • des attentes émergentes
+  • des opportunités d’amélioration ou de différenciation
+- Lorsqu’un thème revient dans les réponses libres (ex : options végétariennes,
+  choix à la carte, transparence), il peut être mentionné :
+  • dans les points de vigilance
+  • ou comme une piste d’amélioration à moyen terme
+- Ne pas présenter ces éléments comme des problèmes majeurs,
+  mais comme des sujets à explorer ou à tester.
+
+
 FORMAT OBLIGATOIRE (JSON UNIQUEMENT) :
 {
   "summary": "Synthèse globale détaillée, structurée, mettant en perspective les retours et les enjeux principaux",
