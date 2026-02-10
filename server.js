@@ -114,11 +114,6 @@ PRIORITÉS D’ACTION :
   • proposer une action principale réaliste
   • éventuellement suggérer une ou deux pistes complémentaires
 
-RÈGLES IMPORTANTES :
-- Ne parle jamais de "dégradation" ou "amélioration" explicite
-- Laisse l’évolution transparaître uniquement par le texte
-- Utilise le badge "nouveau" UNIQUEMENT si le sujet apparaît pour la première fois
-
 FORMAT OBLIGATOIRE (JSON UNIQUEMENT) :
 {
   "summary": "Synthèse globale détaillée, structurée, mettant en perspective les retours et les enjeux principaux",
