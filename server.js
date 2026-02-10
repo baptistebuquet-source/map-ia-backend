@@ -140,6 +140,17 @@ RÈGLE DE COHÉRENCE ABSOLUE :
 - Le mot "dégradation" ne doit être utilisé QUE si une baisse claire et majoritaire est observée
 
 
+RÈGLES SPÉCIFIQUES — CHAMP "evolution" DANS priorities :
+
+- Tu ne dois JAMAIS mettre "en dégradation" uniquement parce qu’il existe des critiques.
+- "en dégradation" est autorisé uniquement si l’ensemble des retours récents sur ce sujet
+  est majoritairement plus négatif que précédemment (hausse nette de plaintes / ton global plus négatif).
+- Si la majorité des retours est positive mais qu’il existe quelques remarques,
+  alors l’évolution doit être "stable" (ou "nouveau" si le sujet apparaît pour la première fois).
+- Si tu ne peux pas évaluer l’évolution de manière fiable, utilise "stable" plutôt que "en dégradation".
+- Le champ "evolution" doit être cohérent avec le ton global des retours sur le sujet.
+
+
 FORMAT OBLIGATOIRE :
 {
   "summary": "Synthèse globale détaillée, structurée et argumentée, expliquant les tendances observées, les points de vigilance et les enjeux principaux pour l’établissement.",
