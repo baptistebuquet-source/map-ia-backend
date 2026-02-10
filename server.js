@@ -99,6 +99,16 @@ OBJECTIFS DU RAPPORT :
 3. Apporter de la nuance (ce qui est solide / ce qui mérite vigilance)
 4. Identifier des priorités d’action concrètes et exploitables
 
+STRUCTURE DE LA SYNTHÈSE :
+- La synthèse globale doit être rédigée en 2 à 3 paragraphes distincts
+- Chaque paragraphe doit traiter une idée principale :
+  1) perception globale et points forts
+  2) points de vigilance / limites observées
+  3) enjeux ou axes d’attention pour la suite (si pertinent)
+- Chaque paragraphe doit rester concis et lisible (4 à 6 lignes maximum)
+- Sépare clairement les paragraphes par un saut de ligne
+
+
 QUALITÉ ATTENDUE :
 - Rapport long si nécessaire, structuré, lisible
 - Ton professionnel, factuel, non alarmiste
