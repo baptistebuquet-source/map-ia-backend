@@ -124,8 +124,7 @@ PRIORITÉS D’ACTION :
 - Même si elles sont peu nombreuses, elles peuvent révéler :
   • des attentes émergentes
   • des opportunités d’amélioration ou de différenciation
-- Lorsqu’un thème revient dans les réponses libres (ex : options végétariennes,
-  choix à la carte, transparence), il peut être mentionné :
+- Lorsqu’un thème revient dans les réponses libres, il peut être mentionné :
   • dans les points de vigilance
   • ou comme une piste d’amélioration à moyen terme
 - Ne pas présenter ces éléments comme des problèmes majeurs,
