@@ -131,6 +131,15 @@ RÈGLES STRICTES :
 - Pas de sur-interprétation
 - Si une tendance n’est pas clairement mesurable, indique-le explicitement
 
+RÈGLE DE COHÉRENCE ABSOLUE :
+- Tu ne dois JAMAIS conclure à une dégradation si les retours globaux sont majoritairement positifs
+- Si des critiques existent mais que la tendance générale est positive ou stable,
+  utilise des formulations de type :
+  • "des points de vigilance subsistent"
+  • "quelques ajustements restent nécessaires"
+- Le mot "dégradation" ne doit être utilisé QUE si une baisse claire et majoritaire est observée
+
+
 FORMAT OBLIGATOIRE :
 {
   "summary": "Synthèse globale détaillée, structurée et argumentée, expliquant les tendances observées, les points de vigilance et les enjeux principaux pour l’établissement.",
