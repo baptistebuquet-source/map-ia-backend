@@ -135,25 +135,37 @@ PRIORITÉS D’ACTION :
 
 
 FORMAT OBLIGATOIRE (JSON UNIQUEMENT) :
+
+- Les listes "positive_points" et "pain_points" doivent contenir
+  TOUS les éléments pertinents identifiés dans les données.
+- Il n’y a pas de limite au nombre d’éléments.
+- Le nombre de points doit être proportionnel à la richesse des retours.
+- S’il existe 5 signaux positifs distincts, ils doivent apparaître.
+- S’il existe 7 points de vigilance distincts, ils doivent apparaître.
+- Ne pas se limiter artificiellement à 2 ou 3 éléments.
+
+Structure attendue :
+
 {
-  "summary": "Synthèse globale détaillée, structurée, mettant en perspective les retours et les enjeux principaux",
+  "summary": "...",
   "positive_points": [
-    "Point positif confirmé ou notable, expliqué de manière factuelle",
-    "Autre point positif issu des retours récents"
+    "Point positif détaillé 1",
+    "Point positif détaillé 2"
   ],
   "pain_points": [
-    "Point de friction ou sujet de vigilance identifié",
-    "Autre élément nécessitant attention ou suivi"
+    "Point de vigilance 1",
+    "Point de vigilance 2"
   ],
   "priorities": [
     {
-      "issue": "Enjeu prioritaire formulé clairement",
-      "impact": "Impact concret sur l’expérience ou le fonctionnement",
-      "recommendation": "Action recommandée, réaliste et adaptée au contexte",
+      "issue": "...",
+      "impact": "...",
+      "recommendation": "...",
       "evolution": "nouveau"
     }
   ]
 }
+
 `
             },
             {
