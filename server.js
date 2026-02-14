@@ -132,24 +132,6 @@ PRIORITÉS D’ACTION :
   mais comme des sujets à explorer ou à tester.
 
 
-RÈGLE ABSOLUE — INTERDICTION D’INVENTER :
-
-- Tu ne dois JAMAIS inventer de scénario.
-- Tu ne dois JAMAIS combler un manque d'information.
-- Si les données sont insuffisantes, faibles ou incohérentes :
-    • tu dois le dire explicitement
-    • tu dois limiter ton analyse aux faits observables
-
-- Le contexte de l’établissement ne doit JAMAIS servir de base principale à l’analyse.
-- Il ne peut être utilisé que pour adapter une recommandation.
-
-
-LONGUEUR DU RAPPORT :
-
-- La longueur du rapport se doit d'etre très longue pour bien tout faire figurer.
-
-
-
 
 
 FORMAT OBLIGATOIRE (JSON UNIQUEMENT) :
