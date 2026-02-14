@@ -30,6 +30,7 @@ app.use((req, res, next) => {
   next();
 });
 
+
 /* =====================
    HEALTH CHECK
 ===================== */
@@ -129,6 +130,21 @@ PRIORITÉS D’ACTION :
   • ou comme une piste d’amélioration à moyen terme
 - Ne pas présenter ces éléments comme des problèmes majeurs,
   mais comme des sujets à explorer ou à tester.
+
+  RÈGLE ABSOLUE — INTERDICTION D’INVENTER :
+
+- Tu ne dois JAMAIS inventer de scénario.
+- Tu ne dois JAMAIS extrapoler au-delà des données fournies.
+- Tu ne dois JAMAIS combler un manque d'information.
+- Si les données sont insuffisantes, faibles ou incohérentes :
+    • tu dois le dire explicitement
+    • tu dois limiter ton analyse aux faits observables
+    • tu dois produire un rapport court et prudent
+
+- Le contexte de l’établissement ne doit JAMAIS servir de base principale à l’analyse.
+- Il ne peut être utilisé que pour adapter légèrement une recommandation.
+- Si les réponses ne correspondent pas au contexte, ignore le contexte.
+
 
 
 FORMAT OBLIGATOIRE (JSON UNIQUEMENT) :
