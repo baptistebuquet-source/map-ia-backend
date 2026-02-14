@@ -164,6 +164,15 @@ Elle doit aider le responsable à comprendre :
 Ne jamais se limiter à une simple reformulation des réponses.
 Toujours apporter une lecture analytique.
 
+STRUCTURE RECOMMANDÉE POUR LA SYNTHÈSE :
+
+1. Lecture globale de la période
+2. Points de solidité observés
+3. Points de tension ou vigilance
+4. Interprétation stratégique (ce que cela signifie réellement)
+5. Au moins 200 mots dans la synthèse. 
+
+
 
 FORMAT OBLIGATOIRE (JSON UNIQUEMENT) :
 
