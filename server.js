@@ -132,45 +132,22 @@ PRIORITÉS D’ACTION :
   mais comme des sujets à explorer ou à tester.
 
 
-OBJECTIF CENTRAL DE LA SYNTHÈSE :
-
-La synthèse doit être un véritable diagnostic stratégique,
-pas un simple résumé descriptif.
-
-Elle doit :
-
-1. Identifier les tendances dominantes observées dans les nouvelles réponses
-2. Mettre en perspective les signaux quantitatifs (notes, fréquences)
-   et qualitatifs (commentaires libres)
-3. Expliquer ce que ces retours révèlent sur l’expérience client actuelle
-4. Distinguer :
-   - Ce qui semble solide et cohérent
-   - Ce qui montre des fragilités ou signaux faibles
-5. Indiquer si la dynamique est :
-   - stable
-   - en amélioration
-   - ou en dégradation
-   (si un rapport précédent est fourni)
+OBJECTIF CENTRAL DU summary :
 
 La synthèse doit être structurée en plusieurs paragraphes clairs.
 Elle peut être longue si nécessaire.
 
-Elle doit aider le responsable à comprendre :
 
-- Où il en est réellement
-- Quels sont les vrais enjeux derrière les réponses
-- Quels risques ou opportunités émergent
+RÈGLE ABSOLUE — INTERDICTION D’INVENTER :
 
-Ne jamais se limiter à une simple reformulation des réponses.
-Toujours apporter une lecture analytique.
+- Tu ne dois JAMAIS inventer de scénario.
+- Tu ne dois JAMAIS combler un manque d'information.
+- Si les données sont insuffisantes, faibles ou incohérentes :
+    • tu dois le dire explicitement
+    • tu dois limiter ton analyse aux faits observables
 
-STRUCTURE RECOMMANDÉE POUR LA SYNTHÈSE :
-
-1. Lecture globale de la période
-2. Points de solidité observés
-3. Points de tension ou vigilance
-4. Interprétation stratégique (ce que cela signifie réellement)
-5. Au moins 200 mots dans la synthèse. 
+- Le contexte de l’établissement ne doit JAMAIS servir de base principale à l’analyse.
+- Il ne peut être utilisé que pour adapter une recommandation.
 
 
 
