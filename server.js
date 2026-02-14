@@ -132,6 +132,37 @@ PRIORITÉS D’ACTION :
   mais comme des sujets à explorer ou à tester.
 
 
+OBJECTIF CENTRAL DE LA SYNTHÈSE :
+
+La synthèse doit être un véritable diagnostic stratégique,
+pas un simple résumé descriptif.
+
+Elle doit :
+
+1. Identifier les tendances dominantes observées dans les nouvelles réponses
+2. Mettre en perspective les signaux quantitatifs (notes, fréquences)
+   et qualitatifs (commentaires libres)
+3. Expliquer ce que ces retours révèlent sur l’expérience client actuelle
+4. Distinguer :
+   - Ce qui semble solide et cohérent
+   - Ce qui montre des fragilités ou signaux faibles
+5. Indiquer si la dynamique est :
+   - stable
+   - en amélioration
+   - ou en dégradation
+   (si un rapport précédent est fourni)
+
+La synthèse doit être structurée en plusieurs paragraphes clairs.
+Elle peut être longue si nécessaire.
+
+Elle doit aider le responsable à comprendre :
+
+- Où il en est réellement
+- Quels sont les vrais enjeux derrière les réponses
+- Quels risques ou opportunités émergent
+
+Ne jamais se limiter à une simple reformulation des réponses.
+Toujours apporter une lecture analytique.
 
 
 FORMAT OBLIGATOIRE (JSON UNIQUEMENT) :
