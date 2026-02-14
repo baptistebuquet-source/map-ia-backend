@@ -146,11 +146,7 @@ RÈGLE ABSOLUE — INTERDICTION D’INVENTER :
 
 LONGUEUR DU RAPPORT :
 
-- La longueur du rapport n’est pas limitée.
-- Le rapport peut être détaillé et structuré si les données le justifient.
-- Si de nombreux éléments pertinents émergent (commentaires libres positifs, suggestions d’amélioration, remarques qualitatives, signaux faibles), ils doivent être intégrés dans l’analyse.
-- L’objectif est d’informer clairement le responsable, même si cela implique un rapport long.
-- La longueur ne doit jamais se faire au détriment de la clarté ou de la structure.
+- La longueur du rapport se doit d'etre très longue pour bien tout faire figurer.
 
 
 
