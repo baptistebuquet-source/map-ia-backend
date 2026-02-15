@@ -164,6 +164,7 @@ app.post("/generate-questions", async (req, res) => {
 
   const {
     establishment,
+    establishment_type,
     establishment_context,
     survey_title
   } = req.body;
@@ -184,7 +185,7 @@ app.post("/generate-questions", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0.4,
+          temperature: 0.35,
           response_format: { type: "json_object" },
           messages: [
             {
@@ -192,9 +193,36 @@ app.post("/generate-questions", async (req, res) => {
               content: `
 Tu es expert en conception de questionnaires courts, efficaces et professionnels.
 
+CONTEXTE DISPONIBLE :
+- Type d’établissement (si fourni)
+- Description de l’établissement (si fournie)
+- Titre du questionnaire
+
+⚠️ ÉVALUATION OBLIGATOIRE AVANT GÉNÉRATION :
+
+Si :
+- le titre est trop vague (ex : "Questionnaire", "Test", "Avis")
+ET
+- le contexte est vide ou insuffisant
+
+ALORS tu dois REFUSER de générer des questions.
+
+Dans ce cas, tu dois retourner STRICTEMENT :
+
+{
+  "insufficient_data": true,
+  "message": "Contexte ou titre insuffisant pour générer des questions pertinentes."
+}
+
+Tu ne dois PAS générer de questions dans ce cas.
+
+-------------------------------------------------------
+
+SI les données sont suffisantes :
+
 OBJECTIF :
 Générer entre 4 et 6 questions pertinentes,
-adaptées au nom du questionnaire et au contexte.
+adaptées au nom du questionnaire ET au type d’établissement.
 
 RÈGLES :
 
@@ -205,9 +233,7 @@ RÈGLES :
 - Pas de question inutile
 - Pas de question hors sujet
 - Maximum 6 questions
-
-Si le titre est imprécis :
-→ Proposer des questions génériques mais utiles.
+- Adapter le ton au type d’établissement
 
 TYPES AUTORISÉS :
 - rating
@@ -216,8 +242,10 @@ TYPES AUTORISÉS :
 - open
 
 Pour les questions "choice" :
-→ Fournir 3 à 5 options pertinentes
-→ allow_multiple = true uniquement si logique
+- Fournir 3 à 5 options pertinentes
+- allow_multiple = true uniquement si cela est logique
+- Jamais moins de 2 options
+- Jamais plus de 6 options
 
 FORMAT JSON STRICT :
 
@@ -237,6 +265,7 @@ FORMAT JSON STRICT :
               role: "user",
               content: JSON.stringify({
                 establishment,
+                establishment_type,
                 establishment_context,
                 survey_title
               })
@@ -260,7 +289,8 @@ FORMAT JSON STRICT :
     }
 
     const parsed = JSON.parse(content);
-    res.json(parsed);
+
+    return res.json(parsed);
 
   } catch (err) {
     console.error("🔥 GENERATE ERROR:", err);
@@ -268,6 +298,7 @@ FORMAT JSON STRICT :
   }
 
 });
+
 
 
 /* =====================
