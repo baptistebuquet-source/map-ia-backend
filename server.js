@@ -198,28 +198,6 @@ CONTEXTE DISPONIBLE :
 - Description de l’établissement (si fournie)
 - Titre du questionnaire
 
-⚠️ ÉVALUATION OBLIGATOIRE AVANT GÉNÉRATION :
-
-Si :
-- le titre est trop vague (ex : "Questionnaire", "Test", "Avis")
-ET
-- le contexte est vide ou insuffisant
-
-ALORS tu dois REFUSER de générer des questions.
-
-Dans ce cas, tu dois retourner STRICTEMENT :
-
-{
-  "insufficient_data": true,
-  "message": "Contexte ou titre insuffisant pour générer des questions pertinentes."
-}
-
-Tu ne dois PAS générer de questions dans ce cas.
-
--------------------------------------------------------
-
-SI les données sont suffisantes :
-
 OBJECTIF :
 Générer entre 4 et 6 questions pertinentes,
 adaptées au nom du questionnaire ET au type d’établissement.
