@@ -196,6 +196,21 @@ OBJECTIF :
 Générer entre 4 et 6 questions pertinentes,
 adaptées au nom du questionnaire et au contexte.
 
+⚠️ RÈGLE ABSOLUE :
+
+Tu ne dois PAS générer de questions si :
+
+- le titre du questionnaire est trop vague
+- le titre ne permet pas de comprendre l’objectif du questionnaire
+- le contexte est absent ET le titre est imprécis
+- les informations sont incohérentes ou insuffisantes
+
+Dans ces cas :
+
+→ Ne génère aucune question  
+→ Explique brièvement le problème  
+→ Retourne le JSON spécial indiqué plus bas  
+
 RÈGLES :
 
 - Questions claires
@@ -205,9 +220,13 @@ RÈGLES :
 - Pas de question inutile
 - Pas de question hors sujet
 - Maximum 6 questions
+- Questions directement exploitables
 
-Si le titre est imprécis :
-→ Proposer des questions génériques mais utiles.
+UTILISATION DU CONTEXTE :
+
+- Le contexte sert uniquement à affiner la pertinence
+- Il ne doit jamais remplacer l’objectif du questionnaire
+- Ne pas extrapoler au-delà des informations données
 
 TYPES AUTORISÉS :
 - rating
@@ -221,7 +240,10 @@ Pour les questions "choice" :
 
 FORMAT JSON STRICT :
 
+SI génération possible :
+
 {
+  "status": "ok",
   "questions": [
     {
       "question_text": "...",
@@ -230,6 +252,13 @@ FORMAT JSON STRICT :
       "options": []
     }
   ]
+}
+
+SI données insuffisantes :
+
+{
+  "status": "insufficient_data",
+  "message": "Titre trop vague ou contexte insuffisant pour générer des questions pertinentes."
 }
 `
             },
