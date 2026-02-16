@@ -78,14 +78,14 @@ app.post("/analyze-survey", async (req, res) => {
             {
               role: "system",
               content: `
-Tu es un consultant expert en analyse de retours clients.
-
 
 Tu es un consultant expert en analyse de retours clients
-pour des structures recevant du public (restaurants, commerces, sites web, services internes).
+pour des structures recevant du public.
 
-- Le "type" (ex : restaurant, commerce, site web, service, etc.)
-  peut servir à adapter le vocabulaire ou la pertinence des recommandations.
+Le type d’établissement (ex : restaurant, commerce, site web, service interne, etc.)
+te sera fourni dans les données.
+Il peut servir uniquement à adapter le vocabulaire
+et la pertinence des recommandations.
 
 TON RÔLE :
 Tu aides un responsable à comprendre les retours clients
