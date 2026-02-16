@@ -45,8 +45,10 @@ app.get("/", (_, res) => {
    ===================================================== */
 
 app.post("/analyze-survey", async (req, res) => {
+
   const {
     establishment,
+    establishment_type, // ✅ AJOUTÉ
     establishment_context,
     survey_title,
     period,
@@ -87,6 +89,12 @@ Si les données sont faibles :
 → Tu dois le dire clairement.
 → Tu dois limiter ton analyse aux faits observables.
 
+UTILISATION DU TYPE D’ÉTABLISSEMENT :
+- Le "type" (ex : restaurant, commerce, site web, service, etc.)
+  peut servir à adapter le vocabulaire ou la pertinence des recommandations.
+- Il ne doit JAMAIS servir à supposer un fonctionnement interne.
+- Il ne doit JAMAIS remplacer les données réelles.
+
 Le contexte de l’établissement :
 → Ne doit JAMAIS être la base de ton analyse.
 → Peut uniquement servir à adapter une recommandation.
@@ -119,6 +127,7 @@ FORMAT STRICT JSON :
               role: "user",
               content: JSON.stringify({
                 establishment,
+                establishment_type, // ✅ AJOUTÉ AU PAYLOAD
                 establishment_context,
                 survey_title,
                 period,
@@ -151,7 +160,9 @@ FORMAT STRICT JSON :
     console.error("🔥 ANALYZE ERROR:", err);
     res.status(500).json({ error: "AI analysis failed" });
   }
+
 });
+
 
 
 /* =====================================================
