@@ -48,9 +48,10 @@ app.post("/analyze-survey", async (req, res) => {
 
   const {
     establishment,
-    establishment_type, // ✅ AJOUTÉ
+    establishment_type,
     establishment_context,
     survey_title,
+    survey_objective, // ✅ AJOUTÉ
     period,
     questions,
     previous_report
@@ -86,6 +87,10 @@ Le type d’établissement (ex : restaurant, commerce, site web, service interne
 te sera fourni dans les données.
 Il peut servir uniquement à adapter le vocabulaire
 et la pertinence des recommandations.
+
+Une description de l’objectif du questionnaire peut être fournie.
+Si elle est présente, utilise-la pour orienter l’analyse
+et prioriser les éléments les plus pertinents.
 
 TON RÔLE :
 Tu aides un responsable à comprendre les retours clients
@@ -125,45 +130,20 @@ PRIORITÉS D’ACTION :
   • proposer une action principale réaliste
   • éventuellement suggérer une ou deux pistes complémentaires
 
-  RÈGLE SPÉCIFIQUE — RÉPONSES LIBRES :
-- Les réponses libres (remarques, suggestions, commentaires) doivent être analysées
-  comme des signaux qualitatifs.
-- Même si elles sont peu nombreuses, elles peuvent révéler :
-  • des attentes émergentes
-  • des opportunités d’amélioration ou de différenciation
-- Lorsqu’un thème revient dans les réponses libres, il peut être mentionné :
-  • dans les points de vigilance
-  • ou comme une piste d’amélioration à moyen terme
-- Ne pas présenter ces éléments comme des problèmes majeurs,
-  mais comme des sujets à explorer ou à tester.
-
+RÈGLE SPÉCIFIQUE — RÉPONSES LIBRES :
+- Les réponses libres doivent être analysées comme des signaux qualitatifs.
+- Même peu nombreuses, elles peuvent révéler des attentes émergentes.
+- Ne pas présenter ces éléments comme des problèmes majeurs.
 
 OBJECTIF CENTRAL DU summary :
 La synthèse doit être structurée en plusieurs paragraphes clairs.
-Elle peut être longue si nécessaire.
-
 
 RÈGLE ABSOLUE — INTERDICTION D’INVENTER :
-- Tu ne dois JAMAIS inventer de scénario.
-- Tu ne dois JAMAIS combler un manque d'information.
-- Si les données sont insuffisantes, faibles ou incohérentes :
-    • tu dois le dire explicitement
-    • tu dois limiter ton analyse aux faits observables
-
-- Le contexte de l’établissement ne doit JAMAIS servir de base principale à l’analyse.
-- Il ne peut être utilisé que pour adapter une recommandation.
-
+- Ne jamais inventer.
+- Si les données sont insuffisantes, le dire explicitement.
+- Le contexte ne doit jamais servir de base principale à l’analyse.
 
 FORMAT OBLIGATOIRE (JSON UNIQUEMENT) :
-- Les listes "positive_points" et "pain_points" doivent contenir
-  TOUS les éléments pertinents identifiés dans les données.
-- Il n’y a pas de limite au nombre d’éléments.
-- Le nombre de points doit être proportionnel à la richesse des retours.
-- S’il existe 5 signaux positifs distincts, ils doivent apparaître.
-- S’il existe 7 points de vigilance distincts, ils doivent apparaître.
-- Ne pas se limiter artificiellement à 2 ou 3 éléments.
-
-Structure attendue :
 
 {
   "summary": "...",
@@ -184,9 +164,10 @@ Structure attendue :
               role: "user",
               content: JSON.stringify({
                 establishment,
-                establishment_type, // ✅ AJOUTÉ AU PAYLOAD
+                establishment_type,
                 establishment_context,
                 survey_title,
+                survey_objective, // ✅ ENVOYÉ AU MODÈLE
                 period,
                 questions,
                 previous_report
@@ -221,7 +202,6 @@ Structure attendue :
 });
 
 
-
 /* =====================================================
    =====================================================
    GENERATE QUESTIONS
@@ -234,7 +214,8 @@ app.post("/generate-questions", async (req, res) => {
     establishment,
     establishment_type,
     establishment_context,
-    survey_title
+    survey_title,
+    survey_objective // ✅ AJOUTÉ
   } = req.body;
 
   if (!survey_title) {
@@ -265,33 +246,25 @@ CONTEXTE DISPONIBLE :
 - Type d’établissement (si fourni)
 - Description de l’établissement (si fournie)
 - Titre du questionnaire
+- Une description de l’objectif du questionnaire peut être fournie.
+  Si elle est présente, elle doit guider la formulation des questions.
 
 OBJECTIF :
 Générer entre 4 et 6 questions pertinentes,
 adaptées au nom du questionnaire ET au type d’établissement.
 
 RÈGLES :
-
 - Questions claires
 - Une idée par question
-- Pas de doublons
 - Pas de généralités vagues
-- Pas de question inutile
-- Pas de question hors sujet
+- Adapter au contexte et à l’objectif s’il est fourni
 - Maximum 6 questions
-- Adapter le ton au type d’établissement
 
 TYPES AUTORISÉS :
 - rating
 - choice
 - binary
 - open
-
-Pour les questions "choice" :
-- Fournir 3 à 5 options pertinentes
-- allow_multiple = true uniquement si cela est logique
-- Jamais moins de 2 options
-- Jamais plus de 6 options
 
 FORMAT JSON STRICT :
 
@@ -313,7 +286,8 @@ FORMAT JSON STRICT :
                 establishment,
                 establishment_type,
                 establishment_context,
-                survey_title
+                survey_title,
+                survey_objective // ✅ ENVOYÉ AU MODÈLE
               })
             }
           ]
@@ -346,7 +320,6 @@ FORMAT JSON STRICT :
 });
 
 
-
 /* =====================
    START SERVER
 ===================== */
@@ -354,3 +327,4 @@ FORMAT JSON STRICT :
 app.listen(PORT, () => {
   console.log(`🚀 IA backend running on port ${PORT}`);
 });
+
