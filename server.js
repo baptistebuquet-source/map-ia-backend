@@ -46,16 +46,18 @@ app.get("/", (_, res) => {
 
 app.post("/analyze-survey", async (req, res) => {
 
-  const {
-    establishment,
-    establishment_type,
-    establishment_context,
-    survey_title,
-    survey_objective, // ✅ AJOUTÉ
-    period,
-    questions,
-    previous_report
-  } = req.body;
+     const {
+     establishment,
+     establishment_type,
+     establishment_context,
+     survey_title,
+     survey_objective,
+     period,
+     questions,
+     statistics, // ✅ AJOUTÉ
+     previous_report
+   } = req.body;
+
 
   if (!survey_title || !Array.isArray(questions) || questions.length === 0) {
     return res.status(400).json({ error: "Invalid payload" });
@@ -162,16 +164,17 @@ FORMAT OBLIGATOIRE (JSON UNIQUEMENT) :
             },
             {
               role: "user",
-              content: JSON.stringify({
-                establishment,
-                establishment_type,
-                establishment_context,
-                survey_title,
-                survey_objective, // ✅ ENVOYÉ AU MODÈLE
-                period,
-                questions,
-                previous_report
-              })
+               content: JSON.stringify({
+                 establishment,
+                 establishment_type,
+                 establishment_context,
+                 survey_title,
+                 survey_objective,
+                 period,
+                 questions,
+                 statistics, // ✅ AJOUTÉ
+                 previous_report
+               })
             }
           ]
         }),
