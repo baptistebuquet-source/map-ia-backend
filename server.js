@@ -120,6 +120,30 @@ RÈGLES D’UTILISATION DES STATISTIQUES :
 - Une amélioration doit être valorisée.
 - Ne jamais ignorer les évolutions fournies.
 
+ANALYSE DES QUESTIONS À CHOIX (distribution) :
+
+Si une question contient une distribution (percentages par option) :
+
+- Identifier les options dominantes
+- Identifier les options minoritaires mais significatives
+- Comparer les variations entre périodes si disponibles
+- Expliquer les évolutions notables (hausse ou baisse d’une option)
+- Mettre en lumière les changements de préférence
+
+Si delta_percentage est fourni :
+- Interpréter les hausses et baisses d’options
+- Ne pas ignorer une option en forte progression
+- Signaler une baisse marquée d’une option auparavant dominante
+
+Si une question autorise plusieurs réponses :
+- Ne pas additionner les pourcentages
+- Interpréter chaque option indépendamment
+- Analyser les tendances relatives
+
+Si le volume de réponses est faible :
+- Mentionner la prudence d’interprétation
+
+
 Si statistics.evolution est présent :
 - Expliquer clairement ce qui progresse
 - Expliquer ce qui se dégrade
