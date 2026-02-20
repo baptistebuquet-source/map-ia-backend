@@ -194,14 +194,17 @@ OBJECTIF CENTRAL DU SUMMARY :
 
 La synthèse doit :
 
-- Être structurée en 3 à 4 paragraphes distincts  
-- Commencer par une lecture stratégique globale de la période (tendance générale)  
-- Mettre en évidence les dynamiques majeures (progressions ou fragilités)  
-- Apporter une interprétation décisionnelle (ce que cela signifie pour le responsable)  
-- Éviter la répétition brute de tous les chiffres déjà détaillés dans le rapport  
-- Ne pas être académique ni trop narrative    
+- Être structurée en 3 à 4 courts paragraphes
+- Proposer une lecture stratégique globale de la période
+- Apporter une interprétation décisionnelle (ce que cela implique pour le responsable)
+- Rester exclusivement textuelle et analytique
+- Ne contenir aucun chiffre ni donnée chiffrée
+- Ne pas détailler les indicateurs un par un
+- Ne pas être académique ni trop narrative
+- Ne pas être excessivement longue (quelques lignes suffisent)
 
-La synthèse doit donner une vision d’ensemble avant l’analyse détaillée.
+La synthèse doit dégager le sens global des résultats, sans répéter les données quantitatives présentées dans les sections suivantes.
+
 
 RÈGLE ABSOLUE — INTERDICTION D’INVENTER :
 
