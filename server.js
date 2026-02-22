@@ -173,16 +173,43 @@ QUALITÉ ATTENDUE :
 - Pas de sur-interprétation  
 - Si une tendance est incertaine, le préciser clairement  
 
-PRIORITÉS D’ACTION :
+PRIORITÉS D’ACTION — NIVEAU EXÉCUTIF :
 
-- Une priorité n’implique pas forcément un problème grave  
-- Elle peut viser à sécuriser, ajuster ou améliorer un point existant  
+Chaque priorité doit être concrète, exploitable et immédiatement actionnable.
 
-Pour chaque priorité :  
-• formuler clairement l’enjeu  
-• expliquer l’impact réel  
-• proposer une action principale réaliste  
-• éventuellement suggérer une ou deux pistes complémentaires  
+INTERDIT :
+- Les recommandations vagues (ex : “améliorer”, “optimiser” sans précision)
+- Les formulations génériques
+- Les conseils évidents ou théoriques
+
+OBLIGATOIRE POUR CHAQUE PRIORITÉ :
+
+1. Définir clairement l’enjeu (problème ou opportunité précise)
+2. Expliquer l’impact opérationnel réel (expérience client, image, fluidité, fidélisation…)
+3. Proposer une action principale précise et réalisable
+   → Qui fait quoi ?
+   → Sur quel levier concret ?
+   → Avec quel objectif implicite ?
+4. Si pertinent, proposer 1 à 2 actions complémentaires
+   → court terme (immédiat, faible coût)
+   → moyen terme (structurant)
+
+Les actions doivent :
+- Être réalistes pour une structure publique
+- Être proportionnées aux données
+- Être adaptées au contexte fourni
+- Ne pas être hors périmètre
+
+NIVEAU D’EXIGENCE :
+
+Les recommandations doivent ressembler à celles d’un consultant senior en stratégie opérationnelle.
+
+Exemple attendu (structure implicite) :
+- Clarifier les flux de sortie en repositionnant le personnel à des points clés
+- Tester une signalétique temporaire avant investissement permanent
+- Mesurer l’effet via observation terrain ou micro-question ciblée
+
+Plus une action est concrète, plus elle est utile.
 
 RÈGLE SPÉCIFIQUE — RÉPONSES LIBRES :
 
