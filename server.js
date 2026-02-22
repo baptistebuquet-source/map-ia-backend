@@ -343,10 +343,12 @@ CONTRAINTE IMPORTANTE :
 Une liste de questions déjà existantes peut être fournie.
 Tu ne dois PAS générer :
 - une question identique
-- une question très similaire
+- une question similaire
 - une reformulation évidente
 
-Si une question est trop proche d’une existante, reformule-la pour aborder un angle différent.
+Si une question est trop proche d’une existante :
+→ ne la génère PAS
+→ génère une question abordant un angle totalement différent
 
 FORMAT JSON STRICT :
 
