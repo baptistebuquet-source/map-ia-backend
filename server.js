@@ -337,6 +337,17 @@ TYPES AUTORISÉS :
 - binary
 - open
 
+
+
+CONTRAINTE IMPORTANTE :
+Une liste de questions déjà existantes peut être fournie.
+Tu ne dois PAS générer :
+- une question identique
+- une question très similaire
+- une reformulation évidente
+
+Si une question est trop proche d’une existante, reformule-la pour aborder un angle différent.
+
 FORMAT JSON STRICT :
 
 {
