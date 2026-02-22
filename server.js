@@ -339,16 +339,28 @@ TYPES AUTORISÉS :
 
 
 
-CONTRAINTE IMPORTANTE :
+CONTRAINTE CRITIQUE — ANTI-DOUBLON STRICT :
+
 Une liste de questions déjà existantes peut être fournie.
-Tu ne dois PAS générer :
+
+Il est STRICTEMENT INTERDIT de générer :
 - une question identique
-- une question similaire
-- une reformulation évidente
+- une question reformulée
+- une question très proche sémantiquement
+- une question abordant exactement le même angle d’analyse
+
+Deux questions sont considérées comme similaires si :
+- elles évaluent la même dimension (ex : rapidité, accueil, prix, satisfaction globale)
+- elles mesurent la même idée avec une formulation différente
+- elles ne changent que légèrement le contexte ou la structure grammaticale
 
 Si une question est trop proche d’une existante :
 → ne la génère PAS
 → génère une question abordant un angle totalement différent
+
+Les nouvelles questions doivent apporter une perspective réellement complémentaire.
+
+Si aucun angle nouveau n’est possible, retourne moins de questions plutôt que de produire des doublons.
 
 FORMAT JSON STRICT :
 
