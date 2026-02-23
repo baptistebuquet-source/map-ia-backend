@@ -253,6 +253,21 @@ evolution doit être :
 - aggravation
 - amélioration
 
+
+Le nombre de points positifs, de points de friction et de priorités 
+ne doit pas être fixé par convention.
+
+Il doit refléter strictement :
+- le volume réel des signaux
+- leur intensité
+- leur diversité
+
+Il peut y avoir :
+- 1 seule priorité
+- aucune priorité
+- 5 priorités si les données le justifient
+
+Ne jamais produire un nombre équilibré par convention.
 ────────────────────────────
 FORMAT OBLIGATOIRE — JSON UNIQUEMENT
 ────────────────────────────
