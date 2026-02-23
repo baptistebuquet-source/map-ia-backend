@@ -260,7 +260,19 @@ app.post("/analyze-survey", async (req, res) => {
             - Recommandations vagues.
             - Conseils génériques.
             
-            Les priorités doivent être proportionnées au volume et à l’intensité des données.
+            Les priorités ne doivent jamais être une reformulation directe d’une suggestion.
+            
+            Une suggestion représente une proposition client.
+            
+            Une priorité représente une décision stratégique de pilotage.
+            
+            Si une suggestion influence une priorité :
+            - La priorité doit élargir l’enjeu
+            - Elle doit intégrer une logique d’arbitrage
+            - Elle ne doit pas reprendre le même intitulé
+            
+            Éviter toute redondance entre section suggestions et section priorités.
+            Les deux sections doivent être complémentaires.
             
             ────────────────────────────
             STRUCTURATION DES PRIORITÉS
@@ -292,7 +304,8 @@ app.post("/analyze-survey", async (req, res) => {
             - persistant
             - aggravation
             - amélioration
-            
+
+
             ────────────────────────────
             FORMAT OBLIGATOIRE — JSON UNIQUEMENT
             ────────────────────────────
