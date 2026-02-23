@@ -59,9 +59,9 @@ app.post("/analyze-survey", async (req, res) => {
    } = req.body;
 
 
-  if (!survey_title || !Array.isArray(questions) || questions.length === 0) {
-    return res.status(400).json({ error: "Invalid payload" });
-  }
+   if (!survey_title || !questions || Object.keys(questions).length === 0) {
+     return res.status(400).json({ error: "Invalid payload" });
+   }
 
   try {
 
