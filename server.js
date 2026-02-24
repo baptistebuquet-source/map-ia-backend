@@ -298,50 +298,74 @@ Une suggestion peut influencer une priorité si justifiée.
 SECTION PRIORITÉS — NIVEAU STRATÉGIQUE
 ────────────────────────────
 
-Les priorités doivent être hiérarchisées implicitement.
+Les priorités stratégiques doivent refléter les véritables enjeux de pilotage identifiés dans l’analyse.
+
+Elles ne constituent pas une simple liste d’actions, mais une lecture décisionnelle des données.
 
 Chaque priorité doit :
 
-1. Définir précisément l’enjeu.
-2. Expliquer l’impact opérationnel réel.
-3. Formuler une décision claire.
-4. Proposer une action principale concrète :
-   - Qui agit ?
-   - Sur quel levier précis ?
-   - Dans quel objectif ?
-5. Ajouter si pertinent :
-   - Une action court terme
-   - Une action moyen terme
+1. Définir clairement l’enjeu identifié.
+2. Expliquer son impact opérationnel réel sur l’activité.
+3. Formuler une décision stratégique explicite.
+4. Proposer une action principale concrète, précisant :
+   - Qui doit agir,
+   - Sur quel levier précis,
+   - Dans quel objectif opérationnel.
+5. Ajouter, si pertinent :
+   - Une action court terme (mise en œuvre rapide),
+   - Une action moyen terme (ajustement structurel).
 
 Les priorités peuvent s’appuyer sur :
-- Les évolutions statistiques
-- Les signaux récurrents
-- L’analyse des facteurs d’impact
+- Les évolutions statistiques observées,
+- Les signaux récurrents issus des réponses,
+- L’analyse des facteurs d’impact si elle est disponible.
 
 INTERDIT :
 
-- "Améliorer", "Optimiser" sans précision.
-- Recommandations vagues.
-- Conseils génériques.
+- Les formulations vagues (“améliorer”, “optimiser” sans précision).
+- Les recommandations génériques.
+- Les décisions non justifiées par les données.
 
-Les priorités ne doivent jamais être une reformulation directe d’une suggestion.
+Une priorité ne doit jamais être une reformulation directe d’une suggestion client.
+Une suggestion exprime une perception.
+Une priorité traduit une décision stratégique de pilotage.
 
-Une suggestion représente une proposition client.
-Une priorité représente une décision stratégique de pilotage.
+Les sections “Suggestions” et “Priorités” doivent être complémentaires et non redondantes.
 
-Si une suggestion influence une priorité :
-- La priorité doit élargir l’enjeu
-- Elle doit intégrer une logique d’arbitrage
-- Elle ne doit pas reprendre le même intitulé
 
-Éviter toute redondance entre section suggestions et section priorités.
-Les deux sections doivent être complémentaires.
+────────────────────────────
+EXEMPLES D’ACTIONS CONCRÈTES
+────────────────────────────
+
+Pour chaque priorité stratégique, proposer 2 à 3 pistes d’action concrètes adaptées :
+
+- Au type d’établissement,
+- Au contexte structurel fourni,
+- Aux statistiques observées,
+- À l’analyse d’influence si disponible.
+
+Ces actions doivent être :
+
+- Opérationnelles et réellement applicables,
+- Spécifiques au contexte analysé,
+- Directement liées au problème identifié,
+- Cohérentes avec la réalité d’un établissement recevant du public.
+
+INTERDIT :
+
+- Les conseils universels non contextualisés,
+- Les banalités opérationnelles,
+- Les répétitions implicites entre priorités.
+
+Chaque action doit être formulée en une phrase concise.
+Maximum 3 actions par priorité.
+
 
 ────────────────────────────
 STRUCTURATION DES PRIORITÉS
 ────────────────────────────
 
-Chaque priorité doit contenir :
+Chaque priorité doit obligatoirement contenir les champs suivants :
 
 - issue
 - impact
@@ -349,6 +373,7 @@ Chaque priorité doit contenir :
 - priority_level
 - decision_type
 - evolution
+- action_examples
 
 priority_level :
 - critique
@@ -384,16 +409,21 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
       "strategic_interest": "..."
     }
   ],
-  "priorities": [
-    {
-      "issue": "...",
-      "impact": "...",
-      "recommendation": "...",
-      "priority_level": "critique | important | ajustement | opportunité",
-      "decision_type": "risque_structurel | point_sensible | optimisation | consolidation",
-      "evolution": "nouveau | persistant | aggravation | amélioration"
-    }
-  ],
+   "priorities": [
+     {
+       "issue": "...",
+       "impact": "...",
+       "recommendation": "...",
+       "priority_level": "critique | important | ajustement | opportunité",
+       "decision_type": "risque_structurel | point_sensible | optimisation | consolidation",
+       "evolution": "nouveau | persistant | aggravation | amélioration",
+       "action_examples": [
+         "...",
+         "...",
+         "..."
+       ]
+     }
+   ],
    "impact_analysis_section": [
      {
        "title": "...",
