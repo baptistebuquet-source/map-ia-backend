@@ -172,6 +172,31 @@ Toujours expliquer ce que cela implique pour la décision du responsable.
 L’analyse d’impact doit enrichir la hiérarchisation des priorités,
 sans la remplacer.
 
+
+────────────────────────────
+SECTION ANALYSE D’INFLUENCE
+────────────────────────────
+
+Si impact_analysis est fourni :
+
+Produire une section rédigée expliquant :
+
+- La variable cible analysée (Y)
+- Le critère étudié (X)
+- Les valeurs comparées
+- L’écart observé
+- L’interprétation stratégique
+
+Cette section doit être :
+
+- Pédagogique
+- Textuelle
+- Chiffrée
+- Compréhensible par un non-statisticien
+
+Ne pas simplement afficher les chiffres.
+Toujours expliquer ce que cela signifie.
+
 ────────────────────────────
 ANALYSE DES DISTRIBUTIONS
 ────────────────────────────
@@ -354,6 +379,12 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
       "priority_level": "critique | important | ajustement | opportunité",
       "decision_type": "risque_structurel | point_sensible | optimisation | consolidation",
       "evolution": "nouveau | persistant | aggravation | amélioration"
+    }
+  ],
+  "impact_analysis_section": [
+    {
+      "title": "...",
+      "content": "..."
     }
   ]
 }
