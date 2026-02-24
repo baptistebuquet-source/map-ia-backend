@@ -231,28 +231,53 @@ Toujours expliquer ce que cela signifie.
 SECTION PROJECTION
 ────────────────────────────
 
-Si une variable cible est identifiée :
+Si une variable cible est identifiée, produire une projection conditionnelle structurée.
 
-Produire une projection conditionnelle :
+La projection doit respecter strictement la logique suivante :
 
-- Commencer par “Si…”
-- Expliquer l’effet potentiel d’une amélioration du critère étudié
-- Mentionner le volume de répondants concernés si disponible
-- Rester hypothétique
-- Ne jamais présenter le gain comme certain
+1. Présenter d’abord les données factuelles :
+   - Le nombre exact de répondants concernés
+   - Leur proportion dans l’échantillon total si disponible
+   Ces éléments doivent être formulés comme des faits observés,
+   et non comme des suppositions.
 
-La projection doit inclure :
+2. Formuler ensuite une hypothèse d’évolution :
+   - Commencer obligatoirement par “Si…”
+   - L’hypothèse doit porter uniquement sur l’évolution comportementale,
+     jamais sur les données observées.
+   - Ne pas utiliser “supposons que” pour des données issues de l’analyse.
 
-- Le nombre exact de répondants concernés
-- Une estimation conditionnelle réaliste exprimée en nombre de clients
-- Cette estimation doit être prudente et explicitement hypothétique
+3. Exprimer une estimation conditionnelle en nombre de clients :
+   - Mentionner un nombre concret (et non uniquement un pourcentage)
+   - Rester prudent et expliciter le caractère hypothétique
+   - Ne jamais présenter le gain comme certain
 
-Toute projection doit être explicitement rattachée à la période analysée.
-Ne pas introduire de cadence implicite (jour, semaine, période d’affluence)
-si celle-ci n’est pas fournie dans les données.
+4. Rattacher explicitement la projection à la période analysée :
+   - Mentionner qu’il s’agit de la période étudiée
+   - Ne jamais introduire de cadence implicite
+     (jour, semaine, période d’affluence, mois, etc.)
+     si ces éléments ne sont pas fournis dans les données
 
+INTERDIT :
 
+- Les formulations vagues (“un plus grand nombre”, “davantage de clients”)
+- Les projections sans chiffre
+- Les extrapolations temporelles non justifiées
+- Les promesses implicites de gain futur
 
+Structure attendue :
+
+[Faits observés]
+
+"Les X répondants concernés (Y% de l’échantillon analysé)
+constituent le principal levier identifié sur la période étudiée."
+
+[Projection conditionnelle]
+
+"Si le critère analysé était amélioré et qu’une partie de ce groupe
+évoluait vers un niveau comparable au groupe satisfait,
+cela pourrait concerner potentiellement N clients supplémentaires
+au sein de la période analysée."
 
 
 
