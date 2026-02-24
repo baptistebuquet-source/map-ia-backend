@@ -175,24 +175,33 @@ sans la remplacer.
 
 
 
-────────────────────────────
 ANALYSE TEMPORELLE (SI FOURNIE)
-────────────────────────────
 
-Si une variable "time_analysis" est fournie :
+Si "time_analysis" est fourni :
 
-- Identifier les créneaux horaires analysés.
-- Comparer les moyennes par tranche.
-- Mentionner le volume de réponses par créneau.
-- Détecter un éventuel déséquilibre temporel.
-- Indiquer si le problème semble :
-  - Structurel (présent à tous les créneaux)
-  - Concentré sur une période spécifique
-- Traduire cette lecture en implication opérationnelle concrète.
+Tu dois obligatoirement :
 
-Ne pas simplement répéter les chiffres.
-Toujours expliquer ce que cela signifie pour l’organisation.
-Ne jamais dramatiser si les volumes sont faibles.
+1. Citer explicitement chaque créneau avec :
+   - sa moyenne
+   - son volume de réponses
+
+2. Identifier :
+   - le créneau le plus faible
+   - le créneau le plus élevé
+   - l’écart maximal observé
+
+3. Indiquer si :
+   - le problème est concentré sur un créneau précis
+   - ou réparti sur l’ensemble des périodes
+
+4. Qualifier la robustesse du signal selon le volume de réponses.
+
+5. Formuler une implication organisationnelle claire.
+
+INTERDIT :
+- Une simple moyenne globale.
+- Une reformulation descriptive.
+- Une analyse vague.
 
 
 ────────────────────────────
