@@ -196,7 +196,6 @@ Cette section doit être :
 Ne pas simplement afficher les chiffres.
 Toujours expliquer ce que cela signifie.
 
-
 Si une variable cible est identifiée (intention de retour, recommandation, satisfaction globale, etc.) :
 
 - Mentionner le nombre de répondants insatisfaits.
