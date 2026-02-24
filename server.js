@@ -173,6 +173,27 @@ L’analyse d’impact doit enrichir la hiérarchisation des priorités,
 sans la remplacer.
 
 
+
+────────────────────────────
+ANALYSE TEMPORELLE (SI FOURNIE)
+────────────────────────────
+
+Si une variable "time_analysis" est fournie :
+
+- Identifier les créneaux horaires analysés.
+- Comparer les moyennes par tranche.
+- Mentionner le volume de réponses par créneau.
+- Détecter un éventuel déséquilibre temporel.
+- Indiquer si le problème semble :
+  - Structurel (présent à tous les créneaux)
+  - Concentré sur une période spécifique
+- Traduire cette lecture en implication opérationnelle concrète.
+
+Ne pas simplement répéter les chiffres.
+Toujours expliquer ce que cela signifie pour l’organisation.
+Ne jamais dramatiser si les volumes sont faibles.
+
+
 ────────────────────────────
 SECTION ANALYSE D’INFLUENCE
 ────────────────────────────
@@ -431,6 +452,12 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
        "projection": "..."
      }
    ]
+     "time_analysis_section": [
+    {
+      "title": "...",
+      "analysis": "..."
+    }
+  ]
 }
 `
 },
