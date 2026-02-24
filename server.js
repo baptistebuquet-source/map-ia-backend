@@ -247,6 +247,10 @@ La projection doit inclure :
 - Une estimation conditionnelle réaliste exprimée en nombre de clients
 - Cette estimation doit être prudente et explicitement hypothétique
 
+Toute projection doit être explicitement rattachée à la période analysée.
+Ne pas introduire de cadence implicite (jour, semaine, période d’affluence)
+si celle-ci n’est pas fournie dans les données.
+
 
 
 
