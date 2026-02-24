@@ -464,18 +464,19 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
 },
             {
               role: "user",
-              content: JSON.stringify({
-                establishment,
-                establishment_type,
-                establishment_context,
-                survey_title,
-                survey_objective,
-                period,
-                questions,
-                statistics,
-                impact_analysis,
-                previous_report
-              })
+               content: JSON.stringify({
+                 establishment,
+                 establishment_type,
+                 establishment_context,
+                 survey_title,
+                 survey_objective,
+                 period,
+                 questions,
+                 statistics,
+                 impact_analysis,
+                 time_analysis,      // ✅ AJOUT ICI
+                 previous_report
+               })
             }
           ]
         }),
