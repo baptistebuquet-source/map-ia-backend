@@ -196,13 +196,19 @@ Cette section doit être :
 Ne pas simplement afficher les chiffres.
 Toujours expliquer ce que cela signifie.
 
-Si une variable cible est identifiée (intention de retour, recommandation, satisfaction globale, etc.) :
+────────────────────────────
+SECTION PROJECTION
+────────────────────────────
 
-- Mentionner le nombre de répondants insatisfaits.
-- Expliquer qu’ils représentent un potentiel d’amélioration sur cette variable cible.
-- Adapter le vocabulaire au contexte (retour, réutilisation, recommandation, engagement, etc.).
-- Rester conditionnel.
-- Ne jamais présenter le gain comme garanti.
+Si une variable cible est identifiée :
+
+Produire une projection conditionnelle :
+
+- Commencer par “Si…”
+- Expliquer l’effet potentiel d’une amélioration du critère étudié
+- Mentionner le volume de répondants concernés si disponible
+- Rester hypothétique
+- Ne jamais présenter le gain comme certain
 
 ────────────────────────────
 ANALYSE DES DISTRIBUTIONS
@@ -388,12 +394,13 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
       "evolution": "nouveau | persistant | aggravation | amélioration"
     }
   ],
-  "impact_analysis_section": [
-    {
-      "title": "...",
-      "content": "..."
-    }
-  ]
+   "impact_analysis_section": [
+     {
+       "title": "...",
+       "analysis": "...",
+       "projection": "..."
+     }
+   ]
 }
 `
 },
