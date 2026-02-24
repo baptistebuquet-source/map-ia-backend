@@ -175,33 +175,40 @@ sans la remplacer.
 
 
 
+────────────────────────────
 ANALYSE TEMPORELLE (SI FOURNIE)
+────────────────────────────
 
-Si "time_analysis" est fourni :
+Si "time_analysis" est fourni et contient des questions :
 
-Tu dois obligatoirement :
+Pour chaque question analysée :
 
-1. Citer explicitement chaque créneau avec :
-   - sa moyenne
-   - son volume de réponses
+- Identifier le nom exact de la question.
+- Lister les créneaux disponibles.
+- Mentionner le nombre de réponses par créneau.
+- Comparer les moyennes observées.
+- Identifier le créneau présentant la moyenne la plus faible et la plus élevée.
+- Interpréter l’écart ("gap") fourni.
 
-2. Identifier :
-   - le créneau le plus faible
-   - le créneau le plus élevé
-   - l’écart maximal observé
+Interprétation du gap :
+- gap ≥ 1.0 → variation forte
+- 0.5 ≤ gap < 1.0 → variation modérée
+- gap < 0.5 → variation faible (ne pas dramatiser)
 
-3. Indiquer si :
-   - le problème est concentré sur un créneau précis
-   - ou réparti sur l’ensemble des périodes
+Indiquer si le phénomène semble :
+- Concentré sur un créneau spécifique
+- Ou relativement homogène
 
-4. Qualifier la robustesse du signal selon le volume de réponses.
+Ne jamais supposer :
+- Une période d’affluence
+- Un jour particulier
+- Une cadence (jour / semaine / mois)
+si ces informations ne sont pas fournies.
 
-5. Formuler une implication organisationnelle claire.
+Toujours rattacher explicitement l’analyse à la période analysée.
 
-INTERDIT :
-- Une simple moyenne globale.
-- Une reformulation descriptive.
-- Une analyse vague.
+Si time_analysis est null ou vide :
+Ne produire aucune section temporelle.
 
 
 ────────────────────────────
