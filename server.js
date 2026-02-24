@@ -55,7 +55,8 @@ app.post("/analyze-survey", async (req, res) => {
      period,
      questions,
      statistics,
-     impact_analysis, // ← AJOUTER ICI
+     impact_analysis,
+     time_analysis,   // ✅ AJOUT ICI
      previous_report
    } = req.body;
 
@@ -451,13 +452,13 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
        "analysis": "...",
        "projection": "..."
      }
+   ],
+   "time_analysis_section": [
+     {
+       "title": "...",
+       "analysis": "..."
+     }
    ]
-     "time_analysis_section": [
-    {
-      "title": "...",
-      "analysis": "..."
-    }
-  ]
 }
 `
 },
@@ -472,7 +473,7 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
                 period,
                 questions,
                 statistics,
-                impact_analysis, // ← AJOUTER ICI
+                impact_analysis,
                 previous_report
               })
             }
