@@ -196,6 +196,15 @@ Cette section doit être :
 Ne pas simplement afficher les chiffres.
 Toujours expliquer ce que cela signifie.
 
+
+Si une variable cible est identifiée (intention de retour, recommandation, satisfaction globale, etc.) :
+
+- Mentionner le nombre de répondants insatisfaits.
+- Expliquer qu’ils représentent un potentiel d’amélioration sur cette variable cible.
+- Adapter le vocabulaire au contexte (retour, réutilisation, recommandation, engagement, etc.).
+- Rester conditionnel.
+- Ne jamais présenter le gain comme garanti.
+
 ────────────────────────────
 ANALYSE DES DISTRIBUTIONS
 ────────────────────────────
