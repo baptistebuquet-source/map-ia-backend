@@ -241,6 +241,19 @@ Produire une projection conditionnelle :
 - Rester hypothétique
 - Ne jamais présenter le gain comme certain
 
+La projection doit inclure :
+
+- Le nombre exact de répondants concernés
+- Une estimation conditionnelle réaliste exprimée en nombre de clients
+- Cette estimation doit être prudente et explicitement hypothétique
+
+
+
+
+
+
+
+
 ────────────────────────────
 ANALYSE DES DISTRIBUTIONS
 ────────────────────────────
