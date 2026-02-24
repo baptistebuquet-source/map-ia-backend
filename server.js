@@ -192,7 +192,6 @@ Cette section doit être :
 - Pédagogique
 - Textuelle
 - Chiffrée
-- Compréhensible par un non-statisticien
 
 Ne pas simplement afficher les chiffres.
 Toujours expliquer ce que cela signifie.
