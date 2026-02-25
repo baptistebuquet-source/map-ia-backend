@@ -601,6 +601,13 @@ TYPES AUTORISÉS
 - binary
 - open
 
+Chaque question doit être associée à :
+
+- un strategic_role cohérent
+- un axis_key cohérent parmi les axes fournis
+
+Ne jamais inventer un axis_key en dehors de la liste.
+
 RÈGLES SUPPLÉMENTAIRES :
 
 - rating : échelle cohérente et exploitable (ex : 1–5)
@@ -618,7 +625,9 @@ FORMAT JSON STRICT — AUCUN TEXTE HORS JSON
       "question_text": "...",
       "question_type": "rating | choice | binary | open",
       "allow_multiple": false,
-      "options": []
+      "options": [],
+      "strategic_role": "performance | secondary | segmentation | informational",
+      "axis_key": "service | product | fluidity | experience | loyalty | acquisition | clarity | pricing | interface | logistics"
     }
   ]
 }
