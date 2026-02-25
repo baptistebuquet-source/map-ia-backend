@@ -226,24 +226,29 @@ ANALYSE D’INFLUENCE & PROJECTION
 
 Si impact_analysis est fourni :
 
-L’analyse doit obligatoirement inclure, dans cet ordre :
+Pour chaque facteur, utiliser exclusivement les données chiffrées transmises
+(low_group_size, high_group_size, low_group_percentage,
+low_intention_avg, high_intention_avg, gap, total_sample_size,
+max_potential_shift).
+
+L’analyse doit obligatoirement inclure :
 
 1. La variable cible analysée.
-2. La taille exacte des deux groupes comparés.
+2. La taille exacte des groupes comparés.
 3. Les moyennes observées pour chaque groupe.
-4. L’écart chiffré (gap) sur la variable cible.
+4. L’écart chiffré (gap).
 5. Une qualification explicite de l’intensité :
    - ≥ 1.0 : effet fort
    - 0.5 à 0.99 : effet modéré
-   - < 0.5 : effet faible
-6. Une conclusion positionnant clairement le critère comme :
+   - < 0.5 : effet faible.
+6. Une conclusion positionnant le critère comme
    levier structurant, secondaire ou marginal sur la période étudiée.
 
 INTERDIT :
 
-- Toute analyse sans chiffres précis.
-- Les formulations psychologiques ou évidentes.
-- Les qualificatifs vagues (“écart important” sans seuil).
+- Recalculer les volumes.
+- Produire une analyse sans chiffres.
+- Utiliser des formulations psychologiques ou évidentes.
 
 ────────────────────────────
 PROJECTION (OBLIGATOIRE)
@@ -251,24 +256,22 @@ PROJECTION (OBLIGATOIRE)
 
 La projection doit :
 
-1. S’appuyer exclusivement sur la taille réelle du groupe présentant l’intention la plus faible.
+1. S’appuyer exclusivement sur low_group_size et low_group_percentage.
 2. Rappeler explicitement :
-   - le nombre exact de personnes dans ce groupe,
-   - leur proportion dans l’échantillon.
-3. Formuler une hypothèse commençant par “Si…”.
-4. Estimer un nombre maximal ne dépassant jamais la taille réelle de ce groupe.
+   - le nombre exact de personnes concernées,
+   - leur proportion dans l’échantillon total.
+3. Formuler une hypothèse conditionnelle (structure libre).
+4. Utiliser max_potential_shift comme plafond théorique.
 5. Mentionner explicitement que l’estimation concerne uniquement la période étudiée.
-6. Rester strictement conditionnelle.
+6. Rester prudente et conditionnelle.
 
 INTERDIT :
 
-- Toute estimation supérieure à la taille du groupe faible.
-- Les projections floues ou non justifiées.
-- Les extrapolations temporelles.
-- Les promesses implicites de gain.
+- Toute estimation supérieure à max_potential_shift.
+- Toute extrapolation temporelle.
+- Toute promesse implicite de gain.
 
-Le rendu doit être chiffré, sobre, analytique et décisionnel.
-
+Le rendu doit être chiffré, clair, analytique et décisionnel.
 
 ────────────────────────────
 ANALYSE DES DISTRIBUTIONS
