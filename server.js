@@ -57,7 +57,7 @@ app.post("/analyze-survey", async (req, res) => {
      statistics,
      impact_analysis,
      time_analysis,   // ✅ AJOUT ICI
-     previous_report
+     previous_period_reference
    } = req.body;
 
 
@@ -118,6 +118,31 @@ Peuvent être fournis :
 Tu dois utiliser uniquement les données fournies.
 Ne jamais inventer.
 Si les données sont insuffisantes, le dire explicitement.
+
+
+
+────────────────────────────
+PÉRIMÈTRE D’ANALYSE (RÈGLE FONDAMENTALE)
+────────────────────────────
+
+Le rapport doit être généré exclusivement à partir des données
+de la période actuelle transmises dans le payload.
+
+Si un champ "previous_period_reference" ou "previous_report" est fourni,
+il sert uniquement à comparer les évolutions statistiques.
+
+Il ne doit en aucun cas servir de source
+pour générer des suggestions, priorités ou analyses.
+
+Toute suggestion, priorité ou point mentionné
+doit apparaître explicitement dans les données actuelles.
+
+Ne jamais réutiliser une suggestion issue d’une période précédente
+si elle n’est pas présente dans les données actuelles.
+
+Si un thème était présent précédemment
+mais n’apparaît pas dans les données actuelles,
+il ne doit pas être mentionné.
 
 ────────────────────────────
 LOGIQUE D’ANALYSE
@@ -533,7 +558,7 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
                  statistics,
                  impact_analysis,
                  time_analysis,      // ✅ AJOUT ICI
-                 previous_report
+                 previous_period_reference
                })
             }
           ]
