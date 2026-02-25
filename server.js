@@ -226,38 +226,48 @@ ANALYSE D’INFLUENCE & PROJECTION
 
 Si impact_analysis est fourni :
 
-L’analyse doit impérativement contenir :
+L’analyse doit obligatoirement inclure, dans cet ordre :
 
-- La variable cible analysée.
-- La taille des groupes comparés.
-- Les moyennes exactes observées.
-- L’écart chiffré (gap).
-- Une qualification explicite de l’intensité (forte / modérée / faible).
-- Une conclusion positionnant le critère comme levier prioritaire ou secondaire sur la période étudiée.
-
-INTERDIT :
-
-- Les constats évidents ou psychologiques.
-- Les phrases génériques.
-- Une analyse sans chiffres précis.
-
-Projection obligatoire (si variable cible identifiée) :
-
-1. Rappeler le nombre exact de répondants concernés et leur proportion.
-2. Formuler une hypothèse commençant par “Si…”.
-3. Estimer un nombre concret de personnes potentiellement concernées.
-4. Mentionner explicitement que cela concerne uniquement la période étudiée.
-5. Rester prudent et conditionnel.
+1. La variable cible analysée.
+2. La taille exacte des deux groupes comparés.
+3. Les moyennes observées pour chaque groupe.
+4. L’écart chiffré (gap) sur la variable cible.
+5. Une qualification explicite de l’intensité :
+   - ≥ 1.0 : effet fort
+   - 0.5 à 0.99 : effet modéré
+   - < 0.5 : effet faible
+6. Une conclusion positionnant clairement le critère comme :
+   levier structurant, secondaire ou marginal sur la période étudiée.
 
 INTERDIT :
 
-- Les projections vagues.
+- Toute analyse sans chiffres précis.
+- Les formulations psychologiques ou évidentes.
+- Les qualificatifs vagues (“écart important” sans seuil).
+
+────────────────────────────
+PROJECTION (OBLIGATOIRE)
+────────────────────────────
+
+La projection doit :
+
+1. S’appuyer exclusivement sur la taille réelle du groupe présentant l’intention la plus faible.
+2. Rappeler explicitement :
+   - le nombre exact de personnes dans ce groupe,
+   - leur proportion dans l’échantillon.
+3. Formuler une hypothèse commençant par “Si…”.
+4. Estimer un nombre maximal ne dépassant jamais la taille réelle de ce groupe.
+5. Mentionner explicitement que l’estimation concerne uniquement la période étudiée.
+6. Rester strictement conditionnelle.
+
+INTERDIT :
+
+- Toute estimation supérieure à la taille du groupe faible.
+- Les projections floues ou non justifiées.
 - Les extrapolations temporelles.
 - Les promesses implicites de gain.
 
-L’ensemble doit être chiffré, clair, décisionnel et neutre sectoriellement.
-
-
+Le rendu doit être chiffré, sobre, analytique et décisionnel.
 
 
 ────────────────────────────
