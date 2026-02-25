@@ -55,8 +55,6 @@ app.post("/analyze-survey", async (req, res) => {
      period,
      questions,
      statistics,
-     impact_analysis,
-     time_analysis,   // ✅ AJOUT ICI
      previous_period_reference
    } = req.body;
 
@@ -180,98 +178,6 @@ Si aucune période précédente n’est disponible :
 - Ne pas évoquer d’évolution.
 
 
-────────────────────────────
-ANALYSE TEMPORELLE (SI FOURNIE)
-────────────────────────────
-
-Si "time_analysis" est fourni et contient des questions :
-
-Pour chaque question analysée :
-
-- Identifier le nom exact de la question.
-- Lister les créneaux disponibles.
-- Mentionner le nombre de réponses par créneau.
-- Comparer les moyennes observées.
-- Identifier le créneau présentant la moyenne la plus faible et la plus élevée.
-- Interpréter l’écart ("gap") fourni.
-
-Interprétation du gap :
-- gap ≥ 1.0 → variation forte
-- 0.5 ≤ gap < 1.0 → variation modérée
-- gap < 0.5 → variation faible (ne pas dramatiser)
-
-Indiquer si le phénomène semble :
-- Concentré sur un créneau spécifique
-- Ou relativement homogène
-
-Ne jamais supposer :
-- Une période d’affluence
-- Un jour particulier
-- Une cadence (jour / semaine / mois)
-si ces informations ne sont pas fournies.
-
-Toujours rattacher explicitement l’analyse à la période analysée.
-
-Si time_analysis est null ou vide :
-Ne produire aucune section temporelle.
-
-
-
-
-
-
-────────────────────────────
-ANALYSE D’INFLUENCE & PROJECTION
-────────────────────────────
-
-Si impact_analysis est fourni :
-
-Pour chaque facteur, utiliser exclusivement les données chiffrées transmises
-(low_group_size, high_group_size, low_group_percentage,
-low_intention_avg, high_intention_avg, gap, total_sample_size,
-max_potential_shift).
-
-L’analyse doit obligatoirement inclure :
-
-1. La variable cible analysée.
-2. La taille exacte des groupes comparés.
-3. Les moyennes observées pour chaque groupe.
-4. L’écart chiffré (gap).
-5. Une qualification explicite de l’intensité :
-   - ≥ 1.0 : effet fort
-   - 0.5 à 0.99 : effet modéré
-   - < 0.5 : effet faible.
-6. Une conclusion positionnant le critère comme
-   levier structurant, secondaire ou marginal sur la période étudiée.
-
-INTERDIT :
-
-- Recalculer les volumes.
-- Produire une analyse sans chiffres.
-- Utiliser des formulations psychologiques ou évidentes.
-
-────────────────────────────
-PROJECTION (OBLIGATOIRE)
-────────────────────────────
-
-La projection doit :
-
-1. S’appuyer exclusivement sur low_group_size et low_group_percentage.
-2. Rappeler explicitement :
-   - le nombre exact de personnes concernées,
-   - leur proportion dans l’échantillon total.
-3. Formuler une hypothèse conditionnelle (structure libre).
-4. Utiliser max_potential_shift comme plafond théorique.
-5. Mentionner explicitement que l’estimation concerne uniquement la période étudiée.
-6. Rester prudente et conditionnelle.
-
-INTERDIT :
-
-- Toute estimation supérieure à max_potential_shift.
-- Toute extrapolation temporelle.
-- Toute promesse implicite de gain.
-
-Le rendu doit être chiffré, clair, analytique et décisionnel.
 
 ────────────────────────────
 ANALYSE DES DISTRIBUTIONS
@@ -486,19 +392,6 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
          "..."
        ]
      }
-   ],
-   "impact_analysis_section": [
-     {
-       "title": "...",
-       "analysis": "...",
-       "projection": "..."
-     }
-   ],
-   "time_analysis_section": [
-     {
-       "title": "...",
-       "analysis": "..."
-     }
    ]
 }
 `
@@ -514,8 +407,6 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
                  period,
                  questions,
                  statistics,
-                 impact_analysis,
-                 time_analysis,      // ✅ AJOUT ICI
                  previous_period_reference
                })
             }
