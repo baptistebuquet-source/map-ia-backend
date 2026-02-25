@@ -179,26 +179,6 @@ Si aucune période précédente n’est disponible :
 - L’indiquer clairement.
 - Ne pas évoquer d’évolution.
 
-────────────────────────────
-ANALYSE DES FACTEURS D’IMPACT
-────────────────────────────
-
-Si impact_analysis est fourni :
-
-- Identifier la question d’intention mesurée.
-- Analyser les facteurs présentant le plus fort écart d’influence ("gap").
-- Expliquer clairement ce que signifie cet écart en termes de fidélisation.
-- Traduire l’impact en implication opérationnelle concrète.
-- Classer implicitement les facteurs du plus structurant au plus secondaire.
-- Si le volume des groupes est faible, mentionner la prudence d’interprétation.
-
-Ne pas simplement répéter les chiffres.
-Toujours expliquer ce que cela implique pour la décision du responsable.
-
-L’analyse d’impact doit enrichir la hiérarchisation des priorités,
-sans la remplacer.
-
-
 
 ────────────────────────────
 ANALYSE TEMPORELLE (SI FOURNIE)
@@ -236,6 +216,52 @@ Si time_analysis est null ou vide :
 Ne produire aucune section temporelle.
 
 
+
+
+
+
+────────────────────────────
+ANALYSE DES FACTEURS D’IMPACT
+────────────────────────────
+
+Si impact_analysis est fourni :
+
+- Identifier clairement la variable cible analysée (intention mesurée).
+- Identifier les critères explicatifs présentant les écarts d’influence les plus significatifs ("gap").
+- Interpréter chaque écart comme un différenciateur comportemental mesuré au sein de la période étudiée.
+- Expliquer en quoi cet écart modifie la hiérarchie des leviers d’action.
+- Positionner explicitement chaque critère comme :
+  - levier structurant,
+  - levier secondaire,
+  - effet modéré,
+  - ou effet faible.
+- Traduire l’impact observé en implication opérationnelle concrète.
+- Mentionner explicitement toute prudence nécessaire si les groupes comparés sont de faible taille.
+
+INTERDIT :
+
+- Les formulations évidentes ou tautologiques.
+- Les constats psychologiques généraux.
+- Les phrases du type “les clients insatisfaits reviennent moins”.
+- La simple répétition descriptive des chiffres.
+
+OBLIGATOIRE :
+
+- Exprimer l’écart comme un différenciateur mesuré.
+- Expliquer pourquoi cet écart change (ou non) la priorité stratégique du critère.
+- Relier l’analyse à la décision managériale.
+- Toujours rattacher l’interprétation à la période étudiée.
+- Ne jamais supposer un secteur spécifique : l’analyse doit rester valable pour tout type de structure recevant du public.
+
+L’analyse d’impact doit enrichir la hiérarchisation des priorités,
+sans la remplacer.
+
+
+
+
+
+
+
 ────────────────────────────
 SECTION ANALYSE D’INFLUENCE
 ────────────────────────────
@@ -244,20 +270,28 @@ Si impact_analysis est fourni :
 
 Produire une section rédigée expliquant :
 
-- La variable cible analysée (Y)
-- Le critère étudié (X)
-- Les valeurs comparées
-- L’écart observé
-- L’interprétation stratégique
+- La variable cible analysée (Y).
+- Le critère étudié (X).
+- Les valeurs comparées.
+- L’écart observé.
+- L’interprétation stratégique.
 
-Cette section doit être :
+La section doit :
 
-- Pédagogique
-- Textuelle
-- Chiffrée
+- Être analytique et décisionnelle.
+- Mettre en évidence l’intensité réelle de l’écart.
+- Indiquer si le critère constitue un levier prioritaire ou secondaire.
+- Expliquer en quoi ce critère influence concrètement le comportement mesuré.
+- Rester neutre sectoriellement.
 
-Ne pas simplement afficher les chiffres.
-Toujours expliquer ce que cela signifie.
+Ne jamais produire un simple constat logique.
+Toujours expliciter ce que cela implique pour le pilotage.
+
+
+
+
+
+
 
 ────────────────────────────
 SECTION PROJECTION
@@ -267,35 +301,33 @@ Si une variable cible est identifiée, produire une projection conditionnelle st
 
 La projection doit respecter strictement la logique suivante :
 
-1. Présenter d’abord les données factuelles :
-   - Le nombre exact de répondants concernés
-   - Leur proportion dans l’échantillon total si disponible
-   Ces éléments doivent être formulés comme des faits observés,
-   et non comme des suppositions.
+1. Présenter d’abord les données factuelles observées :
+   - Le nombre exact de répondants concernés.
+   - Leur proportion dans l’échantillon total si disponible.
+   Ces éléments doivent être formulés comme des faits issus de la période étudiée,
+   sans extrapolation.
 
-2. Formuler ensuite une hypothèse d’évolution :
+2. Formuler ensuite une hypothèse conditionnelle :
    - Commencer obligatoirement par “Si…”
-   - L’hypothèse doit porter uniquement sur l’évolution comportementale,
-     jamais sur les données observées.
-   - Ne pas utiliser “supposons que” pour des données issues de l’analyse.
+   - L’hypothèse doit porter uniquement sur une évolution comportementale possible.
+   - Ne jamais supposer des données non observées.
 
-3. Exprimer une estimation conditionnelle en nombre de clients :
-   - Mentionner un nombre concret (et non uniquement un pourcentage)
-   - Rester prudent et expliciter le caractère hypothétique
-   - Ne jamais présenter le gain comme certain
+3. Exprimer une estimation conditionnelle chiffrée :
+   - Mentionner un nombre concret de personnes concernées.
+   - Indiquer explicitement le caractère hypothétique.
+   - Ne jamais présenter l’estimation comme certaine.
 
-4. Rattacher explicitement la projection à la période analysée :
-   - Mentionner qu’il s’agit de la période étudiée
-   - Ne jamais introduire de cadence implicite
-     (jour, semaine, période d’affluence, mois, etc.)
-     si ces éléments ne sont pas fournis dans les données
+4. Rattacher explicitement la projection à la période étudiée :
+   - Mentionner qu’il s’agit exclusivement de la période analysée.
+   - Ne jamais introduire de cadence implicite (jour, semaine, mois, saison, etc.)
+     si ces éléments ne sont pas fournis.
 
 INTERDIT :
 
-- Les formulations vagues (“un plus grand nombre”, “davantage de clients”)
-- Les projections sans chiffre
-- Les extrapolations temporelles non justifiées
-- Les promesses implicites de gain futur
+- Les formulations vagues (“davantage”, “plus de clients” sans chiffre).
+- Les extrapolations temporelles.
+- Les promesses implicites de gain.
+- Les projections déconnectées des volumes réellement observés.
 
 Structure attendue :
 
@@ -306,10 +338,9 @@ constituent le principal levier identifié sur la période étudiée."
 
 [Projection conditionnelle]
 
-"Si le critère analysé était amélioré et qu’une partie de ce groupe
-évoluait vers un niveau comparable au groupe satisfait,
-cela pourrait concerner potentiellement N clients supplémentaires
-au sein de la période analysée."
+"Si le critère analysé évoluait vers un niveau comparable au groupe le plus favorable,
+cela pourrait concerner potentiellement N personnes supplémentaires
+au sein de la période étudiée."
 
 
 
