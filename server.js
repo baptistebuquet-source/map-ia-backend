@@ -221,127 +221,41 @@ Ne produire aucune section temporelle.
 
 
 ────────────────────────────
-ANALYSE DES FACTEURS D’IMPACT
+ANALYSE D’INFLUENCE & PROJECTION
 ────────────────────────────
 
 Si impact_analysis est fourni :
 
-- Identifier clairement la variable cible analysée (intention mesurée).
-- Identifier les critères explicatifs présentant les écarts d’influence les plus significatifs ("gap").
-- Interpréter chaque écart comme un différenciateur comportemental mesuré au sein de la période étudiée.
-- Expliquer en quoi cet écart modifie la hiérarchie des leviers d’action.
-- Positionner explicitement chaque critère comme :
-  - levier structurant,
-  - levier secondaire,
-  - effet modéré,
-  - ou effet faible.
-- Traduire l’impact observé en implication opérationnelle concrète.
-- Mentionner explicitement toute prudence nécessaire si les groupes comparés sont de faible taille.
+L’analyse doit impérativement contenir :
+
+- La variable cible analysée.
+- La taille des groupes comparés.
+- Les moyennes exactes observées.
+- L’écart chiffré (gap).
+- Une qualification explicite de l’intensité (forte / modérée / faible).
+- Une conclusion positionnant le critère comme levier prioritaire ou secondaire sur la période étudiée.
 
 INTERDIT :
 
-- Les formulations évidentes ou tautologiques.
-- Les constats psychologiques généraux.
-- Les phrases du type “les clients insatisfaits reviennent moins”.
-- La simple répétition descriptive des chiffres.
+- Les constats évidents ou psychologiques.
+- Les phrases génériques.
+- Une analyse sans chiffres précis.
 
-OBLIGATOIRE :
+Projection obligatoire (si variable cible identifiée) :
 
-- Exprimer l’écart comme un différenciateur mesuré.
-- Expliquer pourquoi cet écart change (ou non) la priorité stratégique du critère.
-- Relier l’analyse à la décision managériale.
-- Toujours rattacher l’interprétation à la période étudiée.
-- Ne jamais supposer un secteur spécifique : l’analyse doit rester valable pour tout type de structure recevant du public.
-
-L’analyse d’impact doit enrichir la hiérarchisation des priorités,
-sans la remplacer.
-
-
-
-
-
-
-
-────────────────────────────
-SECTION ANALYSE D’INFLUENCE
-────────────────────────────
-
-Si impact_analysis est fourni :
-
-Produire une section rédigée expliquant :
-
-- La variable cible analysée (Y).
-- Le critère étudié (X).
-- Les valeurs comparées.
-- L’écart observé.
-- L’interprétation stratégique.
-
-La section doit :
-
-- Être analytique et décisionnelle.
-- Mettre en évidence l’intensité réelle de l’écart.
-- Indiquer si le critère constitue un levier prioritaire ou secondaire.
-- Expliquer en quoi ce critère influence concrètement le comportement mesuré.
-- Rester neutre sectoriellement.
-
-Ne jamais produire un simple constat logique.
-Toujours expliciter ce que cela implique pour le pilotage.
-
-
-
-
-
-
-
-────────────────────────────
-SECTION PROJECTION
-────────────────────────────
-
-Si une variable cible est identifiée, produire une projection conditionnelle structurée.
-
-La projection doit respecter strictement la logique suivante :
-
-1. Présenter d’abord les données factuelles observées :
-   - Le nombre exact de répondants concernés.
-   - Leur proportion dans l’échantillon total si disponible.
-   Ces éléments doivent être formulés comme des faits issus de la période étudiée,
-   sans extrapolation.
-
-2. Formuler ensuite une hypothèse conditionnelle :
-   - Commencer obligatoirement par “Si…”
-   - L’hypothèse doit porter uniquement sur une évolution comportementale possible.
-   - Ne jamais supposer des données non observées.
-
-3. Exprimer une estimation conditionnelle chiffrée :
-   - Mentionner un nombre concret de personnes concernées.
-   - Indiquer explicitement le caractère hypothétique.
-   - Ne jamais présenter l’estimation comme certaine.
-
-4. Rattacher explicitement la projection à la période étudiée :
-   - Mentionner qu’il s’agit exclusivement de la période analysée.
-   - Ne jamais introduire de cadence implicite (jour, semaine, mois, saison, etc.)
-     si ces éléments ne sont pas fournis.
+1. Rappeler le nombre exact de répondants concernés et leur proportion.
+2. Formuler une hypothèse commençant par “Si…”.
+3. Estimer un nombre concret de personnes potentiellement concernées.
+4. Mentionner explicitement que cela concerne uniquement la période étudiée.
+5. Rester prudent et conditionnel.
 
 INTERDIT :
 
-- Les formulations vagues (“davantage”, “plus de clients” sans chiffre).
+- Les projections vagues.
 - Les extrapolations temporelles.
 - Les promesses implicites de gain.
-- Les projections déconnectées des volumes réellement observés.
 
-Structure attendue :
-
-[Faits observés]
-
-"Les X répondants concernés (Y% de l’échantillon analysé)
-constituent le principal levier identifié sur la période étudiée."
-
-[Projection conditionnelle]
-
-"Si le critère analysé évoluait vers un niveau comparable au groupe le plus favorable,
-cela pourrait concerner potentiellement N personnes supplémentaires
-au sein de la période étudiée."
-
+L’ensemble doit être chiffré, clair, décisionnel et neutre sectoriellement.
 
 
 
