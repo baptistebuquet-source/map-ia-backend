@@ -259,9 +259,27 @@ Chaque suggestion doit contenir :
   - structurant
 - description (synthèse claire de la suggestion)
 - strategic_interest (ce que cela peut impliquer stratégiquement)
+- exploration_tracks (2 à 3 pistes complémentaires à explorer)
 
-Ne jamais transformer automatiquement une suggestion en priorité.
-Une suggestion peut influencer une priorité si justifiée.
+Règles pour exploration_tracks :
+
+- Ce sont des axes d’analyse ou hypothèses à vérifier.
+- Elles doivent enrichir la compréhension du signal.
+- Elles ne doivent pas être formulées comme des décisions.
+- Elles ne doivent pas répéter la suggestion.
+- Elles ne doivent pas être des priorités stratégiques.
+- Elles doivent rester neutres sectoriellement.
+- Elles doivent être formulées comme des angles d’observation.
+
+INTERDIT :
+
+- Transformer automatiquement une suggestion en priorité.
+- Les formulations vagues.
+- Les injonctions directes (“mettre en place”, “il faut”).
+- Les banalités génériques.
+
+Une suggestion peut influencer une priorité si justifiée,
+mais les deux sections doivent rester distinctes.
 
 ────────────────────────────
 SECTION PRIORITÉS — NIVEAU STRATÉGIQUE
@@ -370,14 +388,19 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
   "summary": "...",
   "positive_points": [],
   "pain_points": [],
-  "suggestions": [
-    {
-      "theme": "...",
-      "signal_strength": "isolé | récurrent | structurant",
-      "description": "...",
-      "strategic_interest": "..."
-    }
-  ],
+   "suggestions": [
+     {
+       "theme": "...",
+       "signal_strength": "isolé | récurrent | structurant",
+       "description": "...",
+       "strategic_interest": "...",
+       "exploration_tracks": [
+         "...",
+         "...",
+         "..."
+       ]
+     }
+   ],
    "priorities": [
      {
        "issue": "...",
