@@ -673,6 +673,138 @@ FORMAT JSON STRICT — AUCUN TEXTE HORS JSON
 });
 
 
+
+
+
+
+
+
+
+
+/* =====================================================
+   =====================================================
+   CLASSIFY QUESTION
+   =====================================================
+   ===================================================== */
+
+app.post("/classify-question", async (req, res) => {
+
+  const {
+    question_text,
+    question_type,
+    establishment_type,
+    available_axes
+  } = req.body;
+
+  if (!question_text || !available_axes) {
+    return res.status(400).json({ error: "Invalid payload" });
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          temperature: 0.2,
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content: `
+Tu es un expert senior en structuration stratégique de questionnaires.
+
+OBJECTIF :
+Classer UNE question dans :
+
+- un strategic_role :
+    performance
+    secondary
+    segmentation
+    informational
+
+- un axis_id parmi les axes fournis.
+
+────────────────────────────
+RÈGLES
+────────────────────────────
+
+1. PERFORMANCE :
+   Indicateur clé de pilotage décisionnel.
+
+2. SECONDARY :
+   Indicateur utile mais non central.
+
+3. SEGMENTATION :
+   Sert à profiler ou segmenter les répondants.
+
+4. INFORMATIONAL :
+   Question qualitative ou exploratoire.
+
+────────────────────────────
+CONTRAINTES
+────────────────────────────
+
+- Ne jamais inventer un axe.
+- axis_id doit correspondre exactement à un id_axis fourni.
+- Si aucun axe pertinent → axis_id = null.
+- Réponse STRICTEMENT JSON.
+
+────────────────────────────
+FORMAT
+────────────────────────────
+
+{
+  "strategic_role": "performance | secondary | segmentation | informational",
+  "axis_id": 3
+}
+`
+            },
+            {
+              role: "user",
+              content: JSON.stringify({
+                question_text,
+                question_type,
+                establishment_type,
+                available_axes
+              })
+            }
+          ]
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("OpenAI error:", errText);
+      throw new Error("OpenAI API failed");
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Empty AI response");
+    }
+
+    const parsed = JSON.parse(content);
+
+    return res.json(parsed);
+
+  } catch (err) {
+    console.error("🔥 CLASSIFY ERROR:", err);
+    res.status(500).json({ error: "AI classification failed" });
+  }
+
+});
+
+
 /* =====================
    START SERVER
 ===================== */
