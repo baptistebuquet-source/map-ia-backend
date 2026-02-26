@@ -709,45 +709,47 @@ app.post("/classify-question", async (req, res) => {
           Authorization: `Bearer ${OPENAI_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4.1-mini",
+          model: "gpt-4o-mini",
           temperature: 0.1,
           response_format: { type: "json_object" },
           messages: [
-            {
-              role: "system",
-              content: `
-Tu es un expert senior en structuration stratégique de questionnaires.
-
-OBJECTIF :
-Attribuer obligatoirement :
-
-- un strategic_role
-- un axis_id parmi la liste fournie
-
-────────────────────────────
-CONTRAINTES FORTES
-────────────────────────────
-
-- axis_id DOIT être un nombre correspondant EXACTEMENT
-  à un id_axis présent dans available_axes.
-
-- Ne jamais inventer un id.
-
-- Si le rôle est "segmentation", axis_id peut être null.
-- Sinon axis_id est OBLIGATOIRE.
-
-- Toujours choisir l’axe le plus pertinent sémantiquement.
-
-────────────────────────────
-FORMAT STRICT
-────────────────────────────
-
-{
-  "strategic_role": "performance | secondary | segmentation | informational",
-  "axis_id": number | null
-}
-`
-            },
+                     {
+           role: "system",
+           content: `
+         Tu es un expert senior en structuration stratégique de questionnaires.
+         
+         Tu dois répondre EXCLUSIVEMENT en JSON valide.
+         
+         OBJECTIF :
+         Attribuer obligatoirement :
+         
+         - un strategic_role
+         - un axis_id parmi la liste fournie
+         
+         ────────────────────────────
+         CONTRAINTES FORTES
+         ────────────────────────────
+         
+         - axis_id DOIT être un nombre correspondant EXACTEMENT
+           à un id_axis présent dans available_axes.
+         
+         - Ne jamais inventer un id.
+         
+         - Si le rôle est "segmentation", axis_id peut être null.
+         - Sinon axis_id est OBLIGATOIRE.
+         
+         - Toujours choisir l’axe le plus pertinent sémantiquement.
+         
+         ────────────────────────────
+         FORMAT STRICT — JSON UNIQUEMENT
+         ────────────────────────────
+         
+         {
+           "strategic_role": "performance | secondary | segmentation | informational",
+           "axis_id": number | null
+         }
+         `
+         },
             {
               role: "user",
               content: JSON.stringify({
