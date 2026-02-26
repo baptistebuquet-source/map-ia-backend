@@ -780,9 +780,12 @@ FORMAT STRICT
     return res.json(parsed);
 
   } catch (err) {
-    console.error("🔥 CLASSIFY ERROR:", err);
-    res.status(500).json({ error: "AI classification failed" });
-  }
+  console.error("🔥 CLASSIFY ERROR FULL:", err);
+  res.status(500).json({ 
+    error: "AI classification failed",
+    details: err.message
+  });
+}
 
 });
 
