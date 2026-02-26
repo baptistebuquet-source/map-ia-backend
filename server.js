@@ -817,27 +817,26 @@ app.post("/classify-question", async (req, res) => {
          CONTRAINTES FORTES
          ────────────────────────────
          
-         CONTRAINTES STRICTES :
+         RÈGLE ABSOLUE :
          
-         - axis_id DOIT être un nombre correspondant EXACTEMENT
-           à un id_axis présent dans available_axes.
+         Toute question DOIT recevoir un axis_id
+         correspondant à un id_axis présent dans available_axes.
          
-         - Si available_axes contient au moins un axe pertinent,
-           axis_id est OBLIGATOIRE.
+         axis_id ne peut jamais être null.
          
-         - axis_id ne peut être null que si :
-             strategic_role = "segmentation"
-             ET la question ne mesure aucune dimension opérationnelle.
+         Si plusieurs axes sont pertinents,
+         choisir le plus proche sémantiquement.
          
-         - En cas d’hésitation entre plusieurs axes,
-           toujours choisir le plus proche sémantiquement.
+         Si aucun axe ne semble parfaitement adapté,
+         choisir le plus cohérent par approximation.
+         
          ────────────────────────────
          FORMAT STRICT — JSON UNIQUEMENT
          ────────────────────────────
          
          {
            "strategic_role": "performance | secondary | segmentation | informational",
-           "axis_id": number | null
+           "axis_id": number
          }
          `
          },
