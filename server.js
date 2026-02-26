@@ -712,9 +712,12 @@ FORMAT JSON STRICT — AUCUN TEXTE HORS JSON
       throw new Error("Empty AI response");
     }
 
-    const parsed = JSON.parse(content);
-
-    return res.json(parsed);
+   const parsed = JSON.parse(content);
+   
+   console.log("=== IA GENERATE QUESTIONS RESPONSE ===");
+   console.log(JSON.stringify(parsed, null, 2));
+   
+   return res.json(parsed);
 
   } catch (err) {
     console.error("🔥 GENERATE ERROR:", err);
