@@ -682,10 +682,8 @@ FORMAT JSON STRICT — AUCUN TEXTE HORS JSON
 
 
 /* =====================================================
-   =====================================================
    CLASSIFY QUESTION
-   =====================================================
-   ===================================================== */
+===================================================== */
 
 app.post("/classify-question", async (req, res) => {
 
@@ -712,7 +710,7 @@ app.post("/classify-question", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0.2,
+          temperature: 0.1,
           response_format: { type: "json_object" },
           messages: [
             {
@@ -721,48 +719,32 @@ app.post("/classify-question", async (req, res) => {
 Tu es un expert senior en structuration stratégique de questionnaires.
 
 OBJECTIF :
-Classer UNE question dans :
+Attribuer obligatoirement :
 
-- un strategic_role :
-    performance
-    secondary
-    segmentation
-    informational
-
-- un axis_id parmi les axes fournis.
+- un strategic_role
+- un axis_id parmi la liste fournie
 
 ────────────────────────────
-RÈGLES
+CONTRAINTES FORTES
 ────────────────────────────
 
-1. PERFORMANCE :
-   Indicateur clé de pilotage décisionnel.
+- axis_id DOIT être un nombre correspondant EXACTEMENT
+  à un id_axis présent dans available_axes.
 
-2. SECONDARY :
-   Indicateur utile mais non central.
+- Ne jamais inventer un id.
 
-3. SEGMENTATION :
-   Sert à profiler ou segmenter les répondants.
+- Si le rôle est "segmentation", axis_id peut être null.
+- Sinon axis_id est OBLIGATOIRE.
 
-4. INFORMATIONAL :
-   Question qualitative ou exploratoire.
+- Toujours choisir l’axe le plus pertinent sémantiquement.
 
 ────────────────────────────
-CONTRAINTES
-────────────────────────────
-
-- Ne jamais inventer un axe.
-- axis_id doit correspondre exactement à un id_axis fourni.
-- Si aucun axe pertinent → axis_id = null.
-- Réponse STRICTEMENT JSON.
-
-────────────────────────────
-FORMAT
+FORMAT STRICT
 ────────────────────────────
 
 {
   "strategic_role": "performance | secondary | segmentation | informational",
-  "axis_id": 3
+  "axis_id": number | null
 }
 `
             },
