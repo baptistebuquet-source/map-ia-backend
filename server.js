@@ -709,7 +709,7 @@ app.post("/classify-question", async (req, res) => {
           Authorization: `Bearer ${OPENAI_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
+          model: "gpt-4.1-mini",
           temperature: 0.1,
           response_format: { type: "json_object" },
           messages: [
@@ -765,7 +765,7 @@ FORMAT STRICT
     if (!response.ok) {
       const errText = await response.text();
       console.error("OpenAI error:", errText);
-      throw new Error("OpenAI API failed");
+      throw new Error(errText);
     }
 
     const data = await response.json();
