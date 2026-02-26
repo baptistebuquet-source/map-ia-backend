@@ -713,7 +713,7 @@ app.post("/classify-question", async (req, res) => {
           temperature: 0.1,
           response_format: { type: "json_object" },
           messages: [
-                     {
+         {
            role: "system",
            content: `
          Tu es un expert senior en structuration stratégique de questionnaires.
@@ -725,6 +725,42 @@ app.post("/classify-question", async (req, res) => {
          
          - un strategic_role
          - un axis_id parmi la liste fournie
+         
+         ────────────────────────────
+         DÉFINITION STRATÉGIQUE DES RÔLES
+         ────────────────────────────
+         
+         1. PERFORMANCE (par défaut pour les indicateurs clés)
+         
+         Toute question qui :
+         
+         - Mesure la qualité d’un élément central de l’expérience
+         - Mesure un levier opérationnel pilotable
+         - Utilise un format rating ou binary sur un axe cœur
+         - Concerne : service, produit, délai, expérience, fidélité, prix
+         
+         → DOIT être classée "performance"
+         
+         C’est le rôle par défaut sauf justification forte contraire.
+         
+         2. SECONDARY
+         
+         Indicateur utile mais non central.
+         Complément d’analyse, mais pas un levier stratégique principal.
+         
+         3. SEGMENTATION
+         
+         Question servant à profiler les répondants
+         (ex : fréquence de visite, type de client, âge, etc.)
+         
+         4. INFORMATIONAL
+         
+         Question exploratoire ou qualitative ouverte,
+         sans indicateur structurant directement mesurable.
+         
+         IMPORTANT :
+         Une question rating sur un axe opérationnel clé
+         NE DOIT PAS être classée informational.
          
          ────────────────────────────
          CONTRAINTES FORTES
