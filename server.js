@@ -601,12 +601,63 @@ TYPES AUTORISÉS
 - binary
 - open
 
+
+
+
+
+
+
+DÉFINITION STRATÉGIQUE DES RÔLES :
+
+
+
 Chaque question doit être associée à :
 
 - un strategic_role cohérent
 - un axis_key cohérent parmi les axes fournis
 
 Ne jamais inventer un axis_key en dehors de la liste.
+
+performance :
+Indicateur clé de pilotage opérationnel.
+Mesure directe d’un levier stratégique central
+(service, produit, délai, fidélité, prix).
+
+segmentation :
+Variable servant à catégoriser les répondants
+(frécence, profil client, canal, type de visite).
+
+informational :
+Question qualitative exploratoire
+destinée à enrichir la compréhension
+mais non utilisée comme KPI principal.
+
+secondary :
+Indicateur complémentaire utile
+mais non central dans la prise de décision.
+À utiliser uniquement si la question
+ne constitue ni un KPI principal,
+ni une variable de segmentation.
+
+
+HIÉRARCHIE DÉCISIONNELLE OBLIGATOIRE :
+
+Lors de l’attribution du strategic_role, appliquer l’ordre de priorité suivant :
+
+1. Si la question mesure un levier opérationnel central → performance
+2. Sinon si elle sert à profiler le répondant → segmentation
+3. Sinon si elle est qualitative exploratoire → informational
+4. Sinon → secondary
+
+Ne jamais utiliser "secondary" si la question peut légitimement être classée en performance.
+
+
+
+
+
+
+
+
 
 RÈGLES SUPPLÉMENTAIRES :
 
@@ -766,16 +817,20 @@ app.post("/classify-question", async (req, res) => {
          CONTRAINTES FORTES
          ────────────────────────────
          
+         CONTRAINTES STRICTES :
+         
          - axis_id DOIT être un nombre correspondant EXACTEMENT
            à un id_axis présent dans available_axes.
          
-         - Ne jamais inventer un id.
+         - Si available_axes contient au moins un axe pertinent,
+           axis_id est OBLIGATOIRE.
          
-         - Si le rôle est "segmentation", axis_id peut être null.
-         - Sinon axis_id est OBLIGATOIRE.
+         - axis_id ne peut être null que si :
+             strategic_role = "segmentation"
+             ET la question ne mesure aucune dimension opérationnelle.
          
-         - Toujours choisir l’axe le plus pertinent sémantiquement.
-         
+         - En cas d’hésitation entre plusieurs axes,
+           toujours choisir le plus proche sémantiquement.
          ────────────────────────────
          FORMAT STRICT — JSON UNIQUEMENT
          ────────────────────────────
