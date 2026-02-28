@@ -77,35 +77,34 @@ app.post("/analyze-decline", async (req, res) => {
             {
               role: "system",
               content: `
-Tu es un consultant senior en stratégie opérationnelle spécialisé en analyse de performance d’établissements recevant du public.
+Tu es un consultant senior en stratégie opérationnelle.
 
-Un établissement observe une baisse significative sur une question précise.
+Un établissement observe une baisse sur une question précise.
 
-Ta mission est STRICTEMENT encadrée :
+Les actions fournies ont réellement été mises en œuvre par des structures similaires et ont généré une amélioration mesurée (delta_observed) sur un volume réel de réponses (response_count).
 
-1. Analyser la problématique EXACTE de la question concernée.
-2. Évaluer la cohérence sémantique entre la question et les actions fournies.
-3. Sélectionner UNIQUEMENT les actions dont le lien avec la problématique est DIRECT, opérationnel et évident.
-4. Ne jamais extrapoler.
-5. Ne jamais généraliser à partir d’un axe trop large.
-6. Ne jamais recommander une action si son lien avec la question est indirect, vague ou interprétatif.
-7. Si aucune action n’est réellement pertinente, retourner une liste vide.
+Ta mission :
 
-CRITÈRES DE VALIDATION D’UNE ACTION :
+1. Analyser précisément la problématique exprimée dans la question.
+2. Évaluer la pertinence DIRECTE des actions fournies.
+3. Sélectionner jusqu’à 3 actions maximum.
+4. Si une seule est pertinente → retourner 1.
+5. Si aucune n’est suffisamment pertinente → retourner une liste vide.
+6. Ne jamais inventer d’action.
+7. Ne jamais modifier les données statistiques fournies.
+8. Ne jamais inventer de delta ou de volume.
 
-Une action ne peut être retenue que si :
-- Elle répond directement à la problématique exprimée dans la question.
-- Son mécanisme d’impact est clair et explicite.
-- Elle agit sur la même dimension opérationnelle (ex : accompagnement ≠ ambiance).
+CRITÈRES STRICTS :
 
-INTERDICTIONS ABSOLUES :
-- Ne pas reformuler une action pour la faire paraître pertinente.
-- Ne pas créer de logique causale non démontrée.
-- Ne pas supposer des liens implicites.
-- Ne pas inventer d’action.
-- Ne pas proposer d’action générique si elle n’est pas dans la liste fournie.
+- L’action doit agir sur la dimension principale de la question.
+- Le lien doit être opérationnel et explicite.
+- Si le lien est partiel ou secondaire → ne pas sélectionner.
 
-Si le lien est faible → ne pas sélectionner.
+Pour chaque action retenue :
+
+- Reprendre exactement delta_observed et response_count.
+- Ne pas les recalculer.
+- Ne pas les modifier.
 
 Réponds UNIQUEMENT en JSON au format :
 
@@ -115,7 +114,9 @@ Réponds UNIQUEMENT en JSON au format :
     {
       "title": "...",
       "justification": "...",
-      "expected_impact": "..."
+      "expected_impact": "...",
+      "delta_observed": 0,
+      "response_count": 0
     }
   ]
 }
@@ -151,6 +152,7 @@ Réponds UNIQUEMENT en JSON au format :
     }
 
     const parsed = JSON.parse(content);
+
     res.json(parsed);
 
   } catch (err) {
