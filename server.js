@@ -44,24 +44,20 @@ app.get("/", (_, res) => {
    =====================================================
    ===================================================== */
 
-app.post("/analyze-survey", async (req, res) => {
+app.post("/analyze-decline", async (req, res) => {
 
-   const {
-     establishment,
-     establishment_type,
-     establishment_context,
-     survey_title,
-     survey_objective,
-     period,
-     questions,
-     statistics,
-     previous_period_reference
-   } = req.body;
+  const {
+    establishment_type,
+    axis_label,
+    question_text,
+    current_score,
+    delta,
+    actions_pool
+  } = req.body;
 
-
-   if (!survey_title || !questions || Object.keys(questions).length === 0) {
-     return res.status(400).json({ error: "Invalid payload" });
-   }
+  if (!question_text || !actions_pool || actions_pool.length === 0) {
+    return res.status(400).json({ error: "Invalid payload" });
+  }
 
   try {
 
@@ -78,98 +74,44 @@ app.post("/analyze-survey", async (req, res) => {
           temperature: 0.2,
           response_format: { type: "json_object" },
           messages: [
-{
-  role: "system",
-  content: `
-Tu es un consultant senior en stratégie opérationnelle spécialisé dans l’analyse de retours clients pour des structures recevant du public.
+            {
+              role: "system",
+              content: `
+Tu es un consultant senior en stratégie opérationnelle.
 
-Ton niveau d’analyse doit correspondre à celui d’un cabinet de conseil expérimenté.
+Un établissement observe une baisse significative sur un axe stratégique.
 
+Ta mission :
 
-────────────────────────────
-STRUCTURATION DES PRIORITÉS
-────────────────────────────
+1. Analyser la problématique spécifique.
+2. Sélectionner les actions les plus pertinentes parmi celles fournies.
+3. Reformuler 3 recommandations concrètes adaptées à la situation.
+4. Ne jamais inventer d'actions qui ne figurent pas dans la liste fournie.
 
-Chaque priorité doit obligatoirement contenir les champs suivants :
-
-- issue
-- impact
-- recommendation
-- priority_level
-- decision_type
-- evolution
-- action_examples
-
-priority_level :
-- critique
-- important
-- ajustement
-- opportunité
-
-decision_type :
-- risque_structurel
-- point_sensible
-- optimisation
-- consolidation
-
-evolution :
-- nouveau
-- persistant
-- aggravation
-- amélioration
-
-────────────────────────────
-FORMAT OBLIGATOIRE — JSON UNIQUEMENT
-────────────────────────────
+Réponds UNIQUEMENT en JSON au format :
 
 {
-  "summary": "...",
-  "positive_points": [],
-  "pain_points": [],
-   "suggestions": [
-     {
-       "theme": "...",
-       "signal_strength": "isolé | récurrent | structurant",
-       "description": "...",
-       "strategic_interest": "...",
-       "exploration_tracks": [
-         "...",
-         "...",
-         "..."
-       ]
-     }
-   ],
-   "priorities": [
-     {
-       "issue": "...",
-       "impact": "...",
-       "recommendation": "...",
-       "priority_level": "critique | important | ajustement | opportunité",
-       "decision_type": "risque_structurel | point_sensible | optimisation | consolidation",
-       "evolution": "nouveau | persistant | aggravation | amélioration",
-       "action_examples": [
-         "...",
-         "...",
-         "..."
-       ]
-     }
-   ]
+  "context_analysis": "...",
+  "recommended_actions": [
+    {
+      "title": "...",
+      "justification": "...",
+      "expected_impact": "..."
+    }
+  ]
 }
 `
-},
+            },
             {
               role: "user",
-               content: JSON.stringify({
-                 establishment,
-                 establishment_type,
-                 establishment_context,
-                 survey_title,
-                 survey_objective,
-                 period,
-                 questions,
-                 statistics,
-                 previous_period_reference
-               })
+              content: JSON.stringify({
+                establishment_type,
+                axis_label,
+                question_text,
+                current_score,
+                delta,
+                actions_pool
+              })
             }
           ]
         }),
@@ -193,8 +135,8 @@ FORMAT OBLIGATOIRE — JSON UNIQUEMENT
     res.json(parsed);
 
   } catch (err) {
-    console.error("🔥 ANALYZE ERROR:", err);
-    res.status(500).json({ error: "AI analysis failed" });
+    console.error("🔥 DECLINE ANALYZE ERROR:", err);
+    res.status(500).json({ error: "AI decline analysis failed" });
   }
 
 });
