@@ -264,6 +264,130 @@ Réponds UNIQUEMENT en JSON au format :
 
 
 /* =====================================================
+   ANALYSIS CHAT
+===================================================== */
+
+app.post("/analysis-chat", async (req, res) => {
+
+  const {
+    establishment_type,
+    establishment_context,
+    survey_objective,
+    analysis_context,
+    conversation
+  } = req.body;
+
+  if (!conversation) {
+    return res.status(400).json({ error: "Invalid payload" });
+  }
+
+  try {
+
+    const messages = [
+
+      {
+        role: "system",
+        content: `
+Tu es un assistant d'analyse stratégique pour des établissements (restaurants, boutiques, services).
+
+Tu aides le responsable de l'établissement à comprendre les résultats de son questionnaire client.
+
+Ton rôle :
+
+- analyser les performances
+- expliquer les évolutions
+- interpréter les retours clients
+- proposer des pistes d'amélioration
+- répondre aux questions du responsable
+
+IMPORTANT :
+
+- ne jamais inventer de données
+- t'appuyer uniquement sur les données fournies
+- être clair et opérationnel
+- répondre en français
+- rester synthétique (5-10 lignes maximum)
+
+CONTEXTES :
+
+Type d'établissement :
+${establishment_type ?? "non spécifié"}
+
+Contexte établissement :
+${establishment_context ?? "non fourni"}
+
+Objectif du questionnaire :
+${survey_objective ?? "non fourni"}
+
+SYNTHÈSE CLIENTS :
+${analysis_context?.insight ?? "aucune synthèse disponible"}
+
+PERFORMANCES MESURÉES :
+
+${JSON.stringify(analysis_context?.metrics ?? [], null, 2)}
+
+Tu dois répondre comme un consultant stratégique qui aide le responsable à interpréter les résultats.
+`
+      }
+
+    ];
+
+    /* Ajouter historique conversation */
+
+    for (const msg of conversation) {
+      messages.push({
+        role: msg.role,
+        content: msg.message
+      });
+    }
+
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          temperature: 0.3,
+          messages: messages
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("OpenAI error:", errText);
+      throw new Error("OpenAI API failed");
+    }
+
+    const data = await response.json();
+
+    const answer =
+      data?.choices?.[0]?.message?.content ||
+      "Je n'ai pas pu analyser les données.";
+
+    res.json({
+      answer
+    });
+
+  } catch (err) {
+    console.error("🔥 ANALYSIS CHAT ERROR:", err);
+    res.status(500).json({ error: "AI chat failed" });
+  }
+
+});
+
+
+
+
+
+
+
+
+/* =====================================================
    =====================================================
    GENERATE QUESTIONS
    =====================================================
