@@ -288,9 +288,11 @@ app.post("/analysis-chat", async (req, res) => {
       {
         role: "system",
         content: `
-Tu es un assistant d'analyse stratégique pour des établissements (restaurants, boutiques, services).
+Tu es un assistant d'analyse stratégique pour des établissements
+(restaurants, boutiques, services).
 
-Tu aides le responsable de l'établissement à comprendre les résultats de son questionnaire client.
+Tu aides le responsable de l'établissement à comprendre les résultats
+de son questionnaire client.
 
 Ton rôle :
 
@@ -306,9 +308,27 @@ IMPORTANT :
 - t'appuyer uniquement sur les données fournies
 - être clair et opérationnel
 - répondre en français
-- rester synthétique (5-10 lignes maximum)
+- rester synthétique (5 à 10 lignes maximum)
 
-CONTEXTES :
+En plus de ta réponse, tu dois proposer
+3 questions pertinentes que le responsable
+pourrait poser pour approfondir l'analyse.
+
+Ces questions doivent être directement liées
+aux résultats fournis.
+
+Tu dois répondre STRICTEMENT au format JSON suivant :
+
+{
+  "answer": "...",
+  "suggestions": [
+    "...",
+    "...",
+    "..."
+  ]
+}
+
+CONTEXTE :
 
 Type d'établissement :
 ${establishment_type ?? "non spécifié"}
@@ -326,13 +346,16 @@ PERFORMANCES MESURÉES :
 
 ${JSON.stringify(analysis_context?.metrics ?? [], null, 2)}
 
-Tu dois répondre comme un consultant stratégique qui aide le responsable à interpréter les résultats.
+Tu dois répondre comme un consultant stratégique
+qui aide le responsable à interpréter les résultats.
 `
       }
 
     ];
 
-    /* Ajouter historique conversation */
+    /* =============================
+       Ajouter historique conversation
+    ============================= */
 
     for (const msg of conversation) {
       messages.push({
@@ -340,6 +363,10 @@ Tu dois répondre comme un consultant stratégique qui aide le responsable à in
         content: msg.message
       });
     }
+
+    /* =============================
+       Appel OpenAI
+    ============================= */
 
     const response = await fetch(
       "https://api.openai.com/v1/chat/completions",
@@ -352,6 +379,7 @@ Tu dois répondre comme un consultant stratégique qui aide le responsable à in
         body: JSON.stringify({
           model: "gpt-4o-mini",
           temperature: 0.3,
+          response_format: { type: "json_object" },
           messages: messages
         }),
       }
@@ -365,24 +393,45 @@ Tu dois répondre comme un consultant stratégique qui aide le responsable à in
 
     const data = await response.json();
 
-    const answer =
-      data?.choices?.[0]?.message?.content ||
-      "Je n'ai pas pu analyser les données.";
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Empty AI response");
+    }
+
+    let parsed;
+
+    try {
+      parsed = JSON.parse(content);
+    } catch (e) {
+      console.error("JSON parse error:", content);
+      throw new Error("Invalid AI JSON response");
+    }
+
+    const answer = parsed.answer || "Je n'ai pas pu analyser les données.";
+    const suggestions = parsed.suggestions || [];
+
+    /* =============================
+       Réponse API
+    ============================= */
 
     res.json({
-      answer
+      answer,
+      suggestions
     });
 
   } catch (err) {
+
     console.error("🔥 ANALYSIS CHAT ERROR:", err);
-    res.status(500).json({ error: "AI chat failed" });
+
+    res.status(500).json({
+      answer: "Une erreur est survenue lors de l'analyse.",
+      suggestions: []
+    });
+
   }
 
 });
-
-
-
-
 
 
 
