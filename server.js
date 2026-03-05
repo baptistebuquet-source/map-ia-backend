@@ -163,6 +163,106 @@ Réponds UNIQUEMENT en JSON au format :
 });
 
 
+
+
+
+/* =====================================================
+   ANALYZE INSIGHTS (QUESTIONS INFORMATIONAL)
+===================================================== */
+
+app.post("/analyze-insights", async (req, res) => {
+
+  const { questions } = req.body;
+
+  if (!questions || questions.length === 0) {
+    return res.status(400).json({ error: "Invalid payload" });
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          temperature: 0.2,
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content: `
+Tu es un analyste expert en expérience client.
+
+Tu reçois des réponses ouvertes issues d’un questionnaire client.
+
+Ta mission :
+
+1. Identifier les thèmes dominants dans les réponses.
+2. Résumer les motivations ou attentes principales.
+3. Produire une synthèse stratégique utile pour un responsable d’établissement.
+
+RÈGLES :
+
+- Ne jamais répéter les réponses individuellement.
+- Produire une synthèse claire et concise.
+- Maximum 4 idées principales.
+- Ton texte doit être exploitable dans un rapport stratégique.
+
+Réponds UNIQUEMENT en JSON au format :
+
+{
+  "insight_text": "Synthèse des enseignements clients..."
+}
+`
+            },
+            {
+              role: "user",
+              content: JSON.stringify({
+                questions
+              })
+            }
+          ]
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("OpenAI error:", errText);
+      throw new Error("OpenAI API failed");
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Empty AI response");
+    }
+
+    const parsed = JSON.parse(content);
+
+    res.json(parsed);
+
+  } catch (err) {
+    console.error("🔥 INSIGHT ANALYZE ERROR:", err);
+    res.status(500).json({ error: "AI insight analysis failed" });
+  }
+
+});
+
+
+
+
+
+
+
+
+
 /* =====================================================
    =====================================================
    GENERATE QUESTIONS
