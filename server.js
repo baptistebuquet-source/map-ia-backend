@@ -340,7 +340,13 @@ error: "Document context mapping failed"
 
 app.post("/analyze-insights", async (req, res) => {
 
-  const { questions } = req.body;
+  const { 
+    questions,
+    survey_title,
+    survey_objective,
+    establishment_type,
+    establishment_context
+  } = req.body;
 
   if (!questions || questions.length === 0) {
     return res.status(400).json({ error: "Invalid payload" });
@@ -364,33 +370,70 @@ app.post("/analyze-insights", async (req, res) => {
             {
               role: "system",
               content: `
-Tu es un analyste expert en expérience client.
+Tu es un analyste senior en expérience client.
 
-Tu reçois des réponses ouvertes issues d’un questionnaire client.
+Tu analyses des réponses ouvertes issues d’un questionnaire client.
 
-Ta mission :
+CONTEXTE DISPONIBLE :
 
-1. Identifier les thèmes dominants dans les réponses.
-2. Résumer les motivations ou attentes principales.
-3. Produire une synthèse stratégique utile pour un responsable d’établissement.
+- type d’établissement
+- description de la structure
+- titre du questionnaire
+- objectif du questionnaire
+
+Utilise ce contexte uniquement pour interpréter les réponses.
+
+MISSION :
+
+Identifier les enseignements clés utiles pour un responsable d’établissement.
+
+Tu dois produire **3 types d'insights** :
+
+1. satisfaction  
+Ce qui fonctionne bien selon les clients.
+
+2. friction  
+Les irritants, problèmes ou insatisfactions mentionnés.
+
+3. opportunity  
+Les pistes d'amélioration ou opportunités détectées.
 
 RÈGLES :
 
-- Ne jamais répéter les réponses individuellement.
-- Produire une synthèse claire et concise.
-- Maximum 4 idées principales.
-- Ton texte doit être exploitable dans un rapport stratégique.
+- Ne jamais répéter les réponses individuelles
+- Regrouper les tendances
+- Être synthétique
+- Chaque insight doit faire 2 à 3 phrases maximum
+- Le texte doit être exploitable dans un rapport professionnel
+- Si aucune donnée claire n’existe pour un type d’insight, retourner un texte vide
 
-Réponds UNIQUEMENT en JSON au format :
+FORMAT JSON STRICT :
 
 {
-  "insight_text": "Synthèse des enseignements clients..."
+  "insights": [
+    {
+      "type": "satisfaction",
+      "text": "..."
+    },
+    {
+      "type": "friction",
+      "text": "..."
+    },
+    {
+      "type": "opportunity",
+      "text": "..."
+    }
+  ]
 }
 `
             },
             {
               role: "user",
               content: JSON.stringify({
+                survey_title,
+                survey_objective,
+                establishment_type,
+                establishment_context,
                 questions
               })
             }
@@ -406,6 +449,7 @@ Réponds UNIQUEMENT en JSON au format :
     }
 
     const data = await response.json();
+
     const content = data?.choices?.[0]?.message?.content;
 
     if (!content) {
@@ -417,13 +461,16 @@ Réponds UNIQUEMENT en JSON au format :
     res.json(parsed);
 
   } catch (err) {
+
     console.error("🔥 INSIGHT ANALYZE ERROR:", err);
-    res.status(500).json({ error: "AI insight analysis failed" });
+
+    res.status(500).json({
+      error: "AI insight analysis failed"
+    });
+
   }
 
 });
-
-
 
 
 
