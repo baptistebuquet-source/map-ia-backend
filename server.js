@@ -166,6 +166,114 @@ Réponds UNIQUEMENT en JSON au format :
 
 
 
+
+
+/* =====================================================
+   MAP DOCUMENT CONTEXT
+   ===================================================== */
+
+app.post("/map-document-context", async (req, res) => {
+
+  const { text } = req.body;
+
+  if (!text || text.length < 30) {
+    return res.status(400).json({ error: "Invalid payload" });
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          temperature: 0.2,
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content: `
+Tu analyses un document décrivant un établissement.
+
+Objectif :
+extraire les informations utiles pour comprendre le contexte de cet établissement.
+
+Cherche notamment :
+
+- type d'établissement
+- positionnement
+- clientèle cible
+- ambiance
+- services ou produits principaux
+- particularités
+
+RÈGLES :
+
+- produire un résumé court
+- maximum 5 lignes
+- ne pas inventer d'informations
+- ne pas décrire le document lui-même
+- uniquement le contexte de l'établissement
+
+Réponds UNIQUEMENT en JSON au format :
+
+{
+  "summary": "Résumé du contexte de l'établissement..."
+}
+`
+            },
+            {
+              role: "user",
+              content: text
+            }
+          ]
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("OpenAI error:", errText);
+      throw new Error("OpenAI API failed");
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Empty AI response");
+    }
+
+    const parsed = JSON.parse(content);
+
+    res.json(parsed);
+
+  } catch (err) {
+
+    console.error("🔥 DOCUMENT CONTEXT ERROR:", err);
+
+    res.status(500).json({
+      error: "Document context mapping failed"
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
+
+
+
 /* =====================================================
    ANALYZE INSIGHTS (QUESTIONS INFORMATIONAL)
 ===================================================== */
