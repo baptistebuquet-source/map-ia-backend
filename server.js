@@ -480,17 +480,57 @@ FORMAT JSON STRICT :
       throw new Error("OpenAI API failed");
     }
 
-    const data = await response.json();
 
-    const content = data?.choices?.[0]?.message?.content;
 
-    if (!content) {
-      throw new Error("Empty AI response");
-    }
 
-    const parsed = JSON.parse(content);
 
-    res.json(parsed);
+
+
+const data = await response.json();
+
+const content = data?.choices?.[0]?.message?.content;
+
+if (!content) {
+  throw new Error("Empty AI response");
+}
+
+let parsed;
+
+try {
+  parsed = JSON.parse(content);
+} catch (e) {
+
+  console.error("Invalid AI JSON:", content);
+
+  parsed = {
+    context_analysis: "",
+    recommended_actions: []
+  };
+
+}
+
+/* =========================
+   Sécuriser structure
+========================= */
+
+if (!parsed.recommended_actions || !Array.isArray(parsed.recommended_actions)) {
+
+  parsed.recommended_actions = [];
+
+}
+
+if (!parsed.context_analysis) {
+
+  parsed.context_analysis = "";
+
+}
+
+res.json(parsed);
+
+
+     
+
+     
 
   } catch (err) {
 
