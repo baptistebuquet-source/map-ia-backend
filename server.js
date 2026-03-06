@@ -167,7 +167,6 @@ Réponds UNIQUEMENT en JSON au format :
 
 
 
-
 /* =====================================================
    MAP DOCUMENT CONTEXT
    ===================================================== */
@@ -220,7 +219,7 @@ RÈGLES :
 - ne pas décrire le document lui-même
 - uniquement le contexte de l'établissement
 
-Réponds UNIQUEMENT en JSON au format :
+Réponds UNIQUEMENT en JSON :
 
 {
   "summary": "Résumé du contexte de l'établissement..."
@@ -243,6 +242,7 @@ Réponds UNIQUEMENT en JSON au format :
     }
 
     const data = await response.json();
+
     const content = data?.choices?.[0]?.message?.content;
 
     if (!content) {
@@ -264,7 +264,6 @@ Réponds UNIQUEMENT en JSON au format :
   }
 
 });
-
 
 
 
