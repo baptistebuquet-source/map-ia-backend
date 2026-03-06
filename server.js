@@ -1,7 +1,10 @@
 import express from "express";
 import fetch from "node-fetch";
+import pdf from "pdf-parse";
 
 const app = express();
+
+app.use(express.json({ limit: "20mb" }));
 
 /* =====================
    CONFIG
@@ -166,8 +169,6 @@ Réponds UNIQUEMENT en JSON au format :
 
 
 
-
-const pdf = require("pdf-parse");
 
 /* =====================================================
    MAP DOCUMENT CONTEXT
