@@ -170,8 +170,19 @@ Réponds UNIQUEMENT en JSON au format :
 /* =====================================================
    MAP DOCUMENT CONTEXT
    ===================================================== */
-
 app.post("/map-document-context", async (req, res) => {
+
+console.log("===== MAP DOCUMENT CONTEXT CALLED =====");
+
+const { text } = req.body;
+
+console.log("Incoming text length:", text ? text.length : "NO TEXT");
+
+if (!text || text.length < 30) {
+console.log("Payload rejected: text too short");
+return res.status(400).json({ error: "Invalid payload" });
+}
+
 
   const { text } = req.body;
 
