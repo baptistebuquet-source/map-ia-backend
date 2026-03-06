@@ -148,16 +148,48 @@ Réponds UNIQUEMENT en JSON au format :
       throw new Error("OpenAI API failed");
     }
 
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content;
-
-    if (!content) {
-      throw new Error("Empty AI response");
-    }
-
-    const parsed = JSON.parse(content);
-
-    res.json(parsed);
+      const data = await response.json();
+      
+      const content = data?.choices?.[0]?.message?.content;
+      
+      if (!content) {
+        throw new Error("Empty AI response");
+      }
+      
+      let parsed;
+      
+      try {
+        parsed = JSON.parse(content);
+      } catch (e) {
+      
+        console.error("Invalid AI JSON:", content);
+      
+        parsed = {
+          insights: [
+            { type: "satisfaction", text: "" },
+            { type: "friction", text: "" },
+            { type: "opportunity", text: "" }
+          ]
+        };
+      }
+      
+      /* =========================
+         Sécuriser structure
+      ========================= */
+      
+      if (!parsed.insights || !Array.isArray(parsed.insights)) {
+      
+        parsed = {
+          insights: [
+            { type: "satisfaction", text: "" },
+            { type: "friction", text: "" },
+            { type: "opportunity", text: "" }
+          ]
+        };
+      
+      }
+      
+      res.json(parsed);
 
   } catch (err) {
     console.error("🔥 DECLINE ANALYZE ERROR:", err);
