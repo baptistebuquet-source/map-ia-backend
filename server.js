@@ -796,6 +796,9 @@ AXES AUTORISÉS (OBLIGATOIRES) :
 - loyalty
 - pricing
 - logistics
+- acquisition
+- clarity
+- interface
 
 Tu DOIS choisir STRICTEMENT l’un de ces axis_key.
 Tout autre valeur est interdite.
