@@ -148,48 +148,44 @@ Réponds UNIQUEMENT en JSON au format :
       throw new Error("OpenAI API failed");
     }
 
-      const data = await response.json();
-      
-      const content = data?.choices?.[0]?.message?.content;
-      
-      if (!content) {
-        throw new Error("Empty AI response");
-      }
-      
-      let parsed;
-      
-      try {
-        parsed = JSON.parse(content);
-      } catch (e) {
-      
-        console.error("Invalid AI JSON:", content);
-      
-        parsed = {
-          insights: [
-            { type: "satisfaction", text: "" },
-            { type: "friction", text: "" },
-            { type: "opportunity", text: "" }
-          ]
-        };
-      }
-      
-      /* =========================
-         Sécuriser structure
-      ========================= */
-      
-      if (!parsed.insights || !Array.isArray(parsed.insights)) {
-      
-        parsed = {
-          insights: [
-            { type: "satisfaction", text: "" },
-            { type: "friction", text: "" },
-            { type: "opportunity", text: "" }
-          ]
-        };
-      
-      }
-      
-      res.json(parsed);
+   const data = await response.json();
+   
+   const content = data?.choices?.[0]?.message?.content;
+   
+   if (!content) {
+     throw new Error("Empty AI response");
+   }
+   
+   let parsed;
+   
+   try {
+   
+     parsed = JSON.parse(content);
+   
+   } catch (e) {
+   
+     console.error("Invalid AI JSON:", content);
+   
+     parsed = {
+       context_analysis: "",
+       recommended_actions: []
+     };
+   
+   }
+   
+   /* =========================
+      Sécuriser structure
+   ========================= */
+   
+   if (!parsed.recommended_actions || !Array.isArray(parsed.recommended_actions)) {
+     parsed.recommended_actions = [];
+   }
+   
+   if (!parsed.context_analysis) {
+     parsed.context_analysis = "";
+   }
+   
+   res.json(parsed);
 
   } catch (err) {
     console.error("🔥 DECLINE ANALYZE ERROR:", err);
@@ -366,6 +362,7 @@ error: "Document context mapping failed"
 
 
 
+
 /* =====================================================
    ANALYZE INSIGHTS (QUESTIONS INFORMATIONAL)
 ===================================================== */
@@ -480,57 +477,17 @@ FORMAT JSON STRICT :
       throw new Error("OpenAI API failed");
     }
 
+    const data = await response.json();
 
+    const content = data?.choices?.[0]?.message?.content;
 
+    if (!content) {
+      throw new Error("Empty AI response");
+    }
 
+    const parsed = JSON.parse(content);
 
-
-
-const data = await response.json();
-
-const content = data?.choices?.[0]?.message?.content;
-
-if (!content) {
-  throw new Error("Empty AI response");
-}
-
-let parsed;
-
-try {
-  parsed = JSON.parse(content);
-} catch (e) {
-
-  console.error("Invalid AI JSON:", content);
-
-  parsed = {
-    context_analysis: "",
-    recommended_actions: []
-  };
-
-}
-
-/* =========================
-   Sécuriser structure
-========================= */
-
-if (!parsed.recommended_actions || !Array.isArray(parsed.recommended_actions)) {
-
-  parsed.recommended_actions = [];
-
-}
-
-if (!parsed.context_analysis) {
-
-  parsed.context_analysis = "";
-
-}
-
-res.json(parsed);
-
-
-     
-
-     
+    res.json(parsed);
 
   } catch (err) {
 
@@ -543,6 +500,8 @@ res.json(parsed);
   }
 
 });
+
+
 
 
 
