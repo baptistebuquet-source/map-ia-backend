@@ -170,44 +170,50 @@ Réponds UNIQUEMENT en JSON au format :
 /* =====================================================
    MAP DOCUMENT CONTEXT
    ===================================================== */
+
 app.post("/map-document-context", async (req, res) => {
 
 console.log("===== MAP DOCUMENT CONTEXT CALLED =====");
 
 const { text } = req.body;
 
+console.log("Incoming payload:", req.body);
 console.log("Incoming text length:", text ? text.length : "NO TEXT");
 
+/* ===============================
+   Vérification payload
+================================ */
+
 if (!text || text.length < 30) {
-console.log("Payload rejected: text too short");
-return res.status(400).json({ error: "Invalid payload" });
+
+console.log("Payload rejected: text too short or missing");
+
+return res.status(400).json({
+error: "Invalid payload"
+});
+
 }
 
+try {
 
-  const { text } = req.body;
+console.log("Sending request to OpenAI...");
 
-  if (!text || text.length < 30) {
-    return res.status(400).json({ error: "Invalid payload" });
-  }
-
-  try {
-
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          temperature: 0.2,
-          response_format: { type: "json_object" },
-          messages: [
-            {
-              role: "system",
-              content: `
+const response = await fetch(
+"https://api.openai.com/v1/chat/completions",
+{
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+Authorization: `Bearer ${OPENAI_KEY}`,
+},
+body: JSON.stringify({
+model: "gpt-4o-mini",
+temperature: 0.2,
+response_format: { type: "json_object" },
+messages: [
+{
+role: "system",
+content: `
 Tu analyses un document décrivant un établissement.
 
 Objectif :
@@ -236,49 +242,69 @@ Réponds UNIQUEMENT en JSON :
   "summary": "Résumé du contexte de l'établissement..."
 }
 `
-            },
-            {
-              role: "user",
-              content: text
-            }
-          ]
-        }),
-      }
-    );
+},
+{
+role: "user",
+content: text
+}
+]
+}),
+}
+);
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("OpenAI error:", errText);
-      throw new Error("OpenAI API failed");
-    }
+/* ===============================
+   Vérification réponse OpenAI
+================================ */
 
-    const data = await response.json();
+if (!response.ok) {
 
-    const content = data?.choices?.[0]?.message?.content;
+const errText = await response.text();
 
-    if (!content) {
-      throw new Error("Empty AI response");
-    }
+console.error("OpenAI API ERROR:", errText);
 
-    const parsed = JSON.parse(content);
+throw new Error("OpenAI API failed");
 
-    res.json(parsed);
+}
 
-  } catch (err) {
+console.log("OpenAI response received");
 
-    console.error("🔥 DOCUMENT CONTEXT ERROR:", err);
+const data = await response.json();
 
-    res.status(500).json({
-      error: "Document context mapping failed"
-    });
+console.log("Raw OpenAI data:", data);
 
-  }
+const content = data?.choices?.[0]?.message?.content;
 
+if (!content) {
+
+console.error("Empty content from OpenAI");
+
+throw new Error("Empty AI response");
+
+}
+
+console.log("AI content:", content);
+
+const parsed = JSON.parse(content);
+
+console.log("Parsed summary:", parsed.summary);
+
+/* ===============================
+   Retour API
+================================ */
+
+res.json(parsed);
+
+} catch (err) {
+
+console.error("🔥 DOCUMENT CONTEXT ERROR:", err);
+
+res.status(500).json({
+error: "Document context mapping failed"
 });
 
+}
 
-
-
+});
 
 
 
