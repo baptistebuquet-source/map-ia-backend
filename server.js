@@ -167,6 +167,8 @@ Réponds UNIQUEMENT en JSON au format :
 
 
 
+const pdf = require("pdf-parse");
+
 /* =====================================================
    MAP DOCUMENT CONTEXT
    ===================================================== */
@@ -175,10 +177,39 @@ app.post("/map-document-context", async (req, res) => {
 
 console.log("===== MAP DOCUMENT CONTEXT CALLED =====");
 
-const { text } = req.body;
+let { text, file_base64 } = req.body;
 
-console.log("Incoming payload:", req.body);
-console.log("Incoming text length:", text ? text.length : "NO TEXT");
+console.log("Incoming payload keys:", Object.keys(req.body));
+
+/* ===============================
+   Si PDF envoyé
+================================ */
+
+if (!text && file_base64) {
+
+console.log("PDF detected");
+
+try {
+
+const buffer = Buffer.from(file_base64, "base64");
+
+const data = await pdf(buffer);
+
+text = data.text;
+
+console.log("Extracted PDF text length:", text.length);
+
+} catch(err){
+
+console.error("PDF extraction error:", err);
+
+return res.status(500).json({
+error: "PDF extraction failed"
+});
+
+}
+
+}
 
 /* ===============================
    Vérification payload
@@ -193,6 +224,10 @@ error: "Invalid payload"
 });
 
 }
+
+/* limiter taille */
+
+text = text.slice(0,4000);
 
 try {
 
@@ -217,7 +252,7 @@ content: `
 Tu analyses un document décrivant un établissement.
 
 Objectif :
-extraire les informations utiles pour comprendre le contexte de cet établissement.
+extraire les informations utiles pour comprendre le contexte.
 
 Cherche notamment :
 
@@ -225,21 +260,19 @@ Cherche notamment :
 - positionnement
 - clientèle cible
 - ambiance
-- services ou produits principaux
+- services
 - particularités
 
 RÈGLES :
 
-- produire un résumé court
+- résumé court
 - maximum 5 lignes
-- ne pas inventer d'informations
-- ne pas décrire le document lui-même
-- uniquement le contexte de l'établissement
+- ne rien inventer
 
-Réponds UNIQUEMENT en JSON :
+Réponds en JSON :
 
 {
-  "summary": "Résumé du contexte de l'établissement..."
+"summary":"..."
 }
 `
 },
@@ -248,7 +281,7 @@ role: "user",
 content: text
 }
 ]
-}),
+})
 }
 );
 
@@ -266,31 +299,21 @@ throw new Error("OpenAI API failed");
 
 }
 
-console.log("OpenAI response received");
-
 const data = await response.json();
-
-console.log("Raw OpenAI data:", data);
 
 const content = data?.choices?.[0]?.message?.content;
 
 if (!content) {
 
-console.error("Empty content from OpenAI");
+console.error("Empty AI response");
 
 throw new Error("Empty AI response");
 
 }
 
-console.log("AI content:", content);
-
 const parsed = JSON.parse(content);
 
 console.log("Parsed summary:", parsed.summary);
-
-/* ===============================
-   Retour API
-================================ */
 
 res.json(parsed);
 
@@ -305,7 +328,6 @@ error: "Document context mapping failed"
 }
 
 });
-
 
 
 
