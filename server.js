@@ -619,6 +619,15 @@ pourrait poser pour approfondir l'analyse.
 Ces questions doivent être directement liées
 aux résultats fournis.
 
+
+IMPORTANT :
+
+Le champ "suggestions" doit toujours contenir exactement 3 questions.
+
+Même si la réponse contient déjà un plan d'action ou des recommandations.
+
+Ne jamais laisser le tableau suggestions vide.
+
 Tu dois répondre STRICTEMENT au format JSON suivant :
 
 {
