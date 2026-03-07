@@ -398,7 +398,7 @@ app.post("/analyze-insights", async (req, res) => {
           messages: [
             {
               role: "system",
-              content: `
+content: `
 Tu es un analyste senior en expérience client.
 
 Tu analyses des réponses ouvertes issues d’un questionnaire client.
@@ -411,10 +411,11 @@ CONTEXTE DISPONIBLE :
 - objectif du questionnaire
 
 Utilise ce contexte uniquement pour interpréter les réponses.
+NE PAS inventer d’informations à partir du contexte.
 
 MISSION :
 
-Identifier les enseignements clés utiles pour un responsable d’établissement.
+Identifier les tendances réellement présentes dans les réponses clients.
 
 Tu dois produire **3 types d'insights** :
 
@@ -425,16 +426,28 @@ Ce qui fonctionne bien selon les clients.
 Les irritants, problèmes ou insatisfactions mentionnés.
 
 3. opportunity  
-Les pistes d'amélioration ou opportunités détectées.
+Les pistes d'amélioration mentionnées ou suggérées par les clients.
 
-RÈGLES :
+RÈGLES STRICTES :
 
-- Ne jamais répéter les réponses individuelles
-- Regrouper les tendances
-- Être synthétique
-- Chaque insight doit faire 2 à 3 phrases maximum
-- Le texte doit être exploitable dans un rapport professionnel
-- Si aucune donnée claire n’existe pour un type d’insight, retourner un texte vide
+- Utiliser uniquement les informations présentes dans les réponses
+- Ne jamais inventer d’exemples, produits ou situations
+- Ne jamais extrapoler un problème non mentionné
+- Ne jamais déduire un problème à partir du type d’établissement
+- Un insight doit être basé sur plusieurs réponses similaires
+- Si les réponses ne permettent pas d’identifier clairement un insight, retourner un texte vide
+
+INTERDICTIONS :
+
+- Pas d’exemples inventés
+- Pas de produits ou services non mentionnés
+- Pas de suppositions
+
+STYLE :
+
+- Synthèse neutre et factuelle
+- 1 à 2 phrases maximum
+- Ne jamais citer un client spécifique
 
 FORMAT JSON STRICT :
 
