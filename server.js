@@ -554,7 +554,63 @@ IMPORTANT :
 - t'appuyer uniquement sur les données fournies
 - être clair et opérationnel
 - répondre en français
-- rester synthétique (5 à 10 lignes maximum)
+- éviter les longs paragraphes
+- privilégier des listes et sections claires
+
+FORMAT DE RÉPONSE :
+
+La réponse doit être lisible et structurée.
+
+Utilise si pertinent :
+
+**Analyse**
+→ explication courte des résultats
+
+**Points clés**
+- point important
+- point important
+
+**Plan d'action suggéré**
+1. action concrète
+2. action concrète
+
+**Données manquantes**
+Si certaines analyses sont impossibles faute de données,
+explique-le clairement.
+
+Puis propose soit :
+
+Ajout de questions :
+
+Question proposée :
+- Texte de la question
+
+Type conseillé :
+- échelle 1-5
+- oui/non
+- question ouverte
+
+OU
+
+Proposition de mini-questionnaire :
+
+Titre :
+...
+
+Objectif :
+...
+
+Questions suggérées :
+1. ...
+2. ...
+
+RÈGLES IMPORTANTES :
+
+- ne propose un questionnaire que si c'est réellement utile
+- sinon proposer seulement 1 à 3 questions
+- rester synthétique
+- maximum ~12 lignes
+- privilégier les listes plutôt que les blocs de texte
 
 En plus de ta réponse, tu dois proposer
 3 questions pertinentes que le responsable
@@ -678,7 +734,6 @@ qui aide le responsable à interpréter les résultats.
   }
 
 });
-
 
 
 
