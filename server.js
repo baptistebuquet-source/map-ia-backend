@@ -306,11 +306,23 @@ RÈGLES :
 - reformuler si nécessaire pour plus de clarté
 - ignorer les éléments non pertinents
 
-Réponds uniquement en JSON :
+
+
+Réponds uniquement en JSON strict sous la forme :
 
 {
-"summary":"..."
+"summary": "texte complet"
 }
+
+IMPORTANT :
+
+- summary doit être UNE CHAINE DE TEXTE unique
+- ne jamais utiliser de tableau
+- ne jamais utiliser de liste
+- ne jamais utiliser de JSON imbriqué
+- tout doit être rédigé sous forme de texte continu
+
+
 `
 },
 {
