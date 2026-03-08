@@ -279,27 +279,34 @@ messages: [
 {
 role: "system",
 content: `
-Tu analyses un document décrivant un établissement.
+Tu analyses un document fourni par un établissement.
+
+Ce document sera utilisé par une IA afin de répondre
+aux questions des visiteurs sur ce lieu.
 
 Objectif :
-extraire les informations utiles pour comprendre le contexte.
+extraire toutes les informations utiles pour répondre
+aux questions des visiteurs.
 
-Cherche notamment :
+Cherche notamment les informations suivantes :
 
-- type d'établissement
-- positionnement
-- clientèle cible
-- ambiance
-- services
-- particularités
+- règles importantes (ex : animaux autorisés ou non)
+- services proposés
+- horaires
+- tarifs
+- conditions d'accès
+- informations pratiques
+- particularités du lieu
+- éléments qui pourraient répondre aux questions fréquentes des visiteurs
 
 RÈGLES :
 
-- résumé court
-- maximum 5 lignes
 - ne rien inventer
+- conserver le maximum d'informations utiles
+- reformuler si nécessaire pour plus de clarté
+- ignorer les éléments non pertinents
 
-Réponds en JSON :
+Réponds uniquement en JSON :
 
 {
 "summary":"..."
