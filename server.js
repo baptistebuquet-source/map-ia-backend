@@ -238,13 +238,13 @@ role: "system",
 content: `
 Tu es l'assistant visiteurs officiel d'un établissement.
 
-Ton rôle est d'aider les visiteurs à obtenir
-des informations sur cet établissement.
+Ton rôle est d'aider les visiteurs à obtenir des informations
+sur cet établissement.
 
 Tu dois gérer 3 types de messages :
 
 1️⃣ Conversation simple
-exemples : bonjour, merci, ça va
+Exemples : bonjour, merci, ça va.
 
 → répondre poliment et proposer d'aider
 concernant l'établissement.
@@ -259,7 +259,6 @@ présentes dans le CONTEXTE fourni.
 → répondre poliment que tu peux uniquement
 aider concernant cet établissement.
 
-
 IMPORTANT :
 
 Si la question concerne l'établissement
@@ -268,11 +267,10 @@ dans le contexte :
 
 → dire que l'information n'est pas disponible.
 
-
 MISSION TECHNIQUE :
 
-Tu dois aussi déterminer si la question
-mérite d'être ajoutée aux ressources.
+Tu dois déterminer si la question doit être
+ajoutée aux ressources de l'établissement.
 
 needs_resource = true uniquement si :
 
@@ -283,14 +281,20 @@ needs_resource = false si :
 
 - conversation simple
 - message hors sujet
-- question déjà répondue avec le contexte
-
+- question correctement répondue
 
 FORMAT JSON STRICT :
 
 {
 "answer": "réponse à afficher au visiteur",
-"needs_resource": true ou false
+"needs_resource": true
+}
+
+ou
+
+{
+"answer": "réponse à afficher au visiteur",
+"needs_resource": false
 }
 
 STYLE :
@@ -316,6 +320,10 @@ ${question}
 }
 );
 
+/* ===============================
+   Vérification réponse OpenAI
+================================ */
+
 if (!response.ok) {
 
 const errText = await response.text();
@@ -334,9 +342,46 @@ if (!content) {
 throw new Error("Empty AI response");
 }
 
-const parsed = JSON.parse(content);
+/* ===============================
+   Parsing JSON IA
+================================ */
 
-res.json(parsed);
+let parsed;
+
+try {
+
+parsed = JSON.parse(content);
+
+} catch (err) {
+
+console.error("JSON parse error:", content);
+
+return res.json({
+answer: "Je n'ai pas trouvé l'information.",
+needs_resource: true
+});
+
+}
+
+/* ===============================
+   Sécurisation des champs
+================================ */
+
+const answer = parsed.answer || "Je n'ai pas trouvé l'information.";
+
+const needs_resource =
+typeof parsed.needs_resource === "boolean"
+? parsed.needs_resource
+: false;
+
+/* ===============================
+   Réponse finale
+================================ */
+
+res.json({
+answer,
+needs_resource
+});
 
 } catch (err) {
 
@@ -349,7 +394,6 @@ error: "Assistant failed"
 }
 
 });
-
 
 
 
