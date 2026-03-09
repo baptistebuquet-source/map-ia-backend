@@ -231,25 +231,72 @@ Authorization: `Bearer ${OPENAI_KEY}`,
 body: JSON.stringify({
 model: "gpt-4o-mini",
 temperature: 0.3,
+response_format: { type: "json_object" },
 messages: [
 {
 role: "system",
 content: `
-Tu es l'assistant visiteurs d'un établissement.
+Tu es l'assistant visiteurs officiel d'un établissement.
 
-Tu réponds aux questions des visiteurs
-en utilisant uniquement les informations
+Ton rôle est d'aider les visiteurs à obtenir
+des informations sur cet établissement.
+
+Tu dois gérer 3 types de messages :
+
+1️⃣ Conversation simple
+exemples : bonjour, merci, ça va
+
+→ répondre poliment et proposer d'aider
+concernant l'établissement.
+
+2️⃣ Question sur l'établissement
+
+→ utiliser UNIQUEMENT les informations
 présentes dans le CONTEXTE fourni.
 
-RÈGLES STRICTES :
+3️⃣ Message hors sujet
 
-- ne jamais inventer d'information
-- ne jamais extrapoler
-- si l'information n'est pas dans le contexte,
-dire simplement que l'information n'est pas disponible
-- répondre clairement pour un visiteur
-- réponse courte (1 à 3 phrases maximum)
+→ répondre poliment que tu peux uniquement
+aider concernant cet établissement.
 
+
+IMPORTANT :
+
+Si la question concerne l'établissement
+mais que l'information n'est pas présente
+dans le contexte :
+
+→ dire que l'information n'est pas disponible.
+
+
+MISSION TECHNIQUE :
+
+Tu dois aussi déterminer si la question
+mérite d'être ajoutée aux ressources.
+
+needs_resource = true uniquement si :
+
+- la question concerne l'établissement
+- l'information n'existe pas dans le contexte
+
+needs_resource = false si :
+
+- conversation simple
+- message hors sujet
+- question déjà répondue avec le contexte
+
+
+FORMAT JSON STRICT :
+
+{
+"answer": "réponse à afficher au visiteur",
+"needs_resource": true ou false
+}
+
+STYLE :
+
+- ton naturel et poli
+- réponse courte (1 à 3 phrases)
 `
 },
 {
@@ -281,15 +328,15 @@ throw new Error("OpenAI API failed");
 
 const data = await response.json();
 
-const answer = data?.choices?.[0]?.message?.content;
+const content = data?.choices?.[0]?.message?.content;
 
-if (!answer) {
+if (!content) {
 throw new Error("Empty AI response");
 }
 
-res.json({
-answer
-});
+const parsed = JSON.parse(content);
+
+res.json(parsed);
 
 } catch (err) {
 
@@ -302,9 +349,6 @@ error: "Assistant failed"
 }
 
 });
-
-
-
 
 
 
