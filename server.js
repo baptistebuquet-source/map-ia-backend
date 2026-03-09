@@ -199,6 +199,117 @@ Réponds UNIQUEMENT en JSON au format :
 
 
 
+
+
+
+/* =====================================================
+   ASSISTANT VISITEUR
+===================================================== */
+
+app.post("/assistant-question", async (req, res) => {
+
+console.log("===== ASSISTANT QUESTION CALLED =====");
+
+let { question, context } = req.body;
+
+if (!question) {
+return res.status(400).json({
+error: "Invalid payload"
+});
+}
+
+try {
+
+const response = await fetch(
+"https://api.openai.com/v1/chat/completions",
+{
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+Authorization: `Bearer ${OPENAI_KEY}`,
+},
+body: JSON.stringify({
+model: "gpt-4o-mini",
+temperature: 0.3,
+messages: [
+{
+role: "system",
+content: `
+Tu es l'assistant visiteurs d'un établissement.
+
+Tu réponds aux questions des visiteurs
+en utilisant uniquement les informations
+présentes dans le CONTEXTE fourni.
+
+RÈGLES STRICTES :
+
+- ne jamais inventer d'information
+- ne jamais extrapoler
+- si l'information n'est pas dans le contexte,
+dire simplement que l'information n'est pas disponible
+- répondre clairement pour un visiteur
+- réponse courte (1 à 3 phrases maximum)
+
+`
+},
+{
+role: "user",
+content: `
+CONTEXTE :
+
+${context || "Aucune information disponible"}
+
+QUESTION VISITEUR :
+
+${question}
+`
+}
+]
+})
+}
+);
+
+if (!response.ok) {
+
+const errText = await response.text();
+
+console.error("OpenAI error:", errText);
+
+throw new Error("OpenAI API failed");
+
+}
+
+const data = await response.json();
+
+const answer = data?.choices?.[0]?.message?.content;
+
+if (!answer) {
+throw new Error("Empty AI response");
+}
+
+res.json({
+answer
+});
+
+} catch (err) {
+
+console.error("🔥 ASSISTANT ERROR:", err);
+
+res.status(500).json({
+error: "Assistant failed"
+});
+
+}
+
+});
+
+
+
+
+
+
+
+
 /* =====================================================
    MAP DOCUMENT CONTEXT
    ===================================================== */
