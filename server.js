@@ -237,7 +237,7 @@ Authorization: `Bearer ${OPENAI_KEY}`,
 },
 body: JSON.stringify({
 model: "gpt-4o-mini",
-temperature: 0.3,
+temperature: 0.4,
 response_format: { type: "json_object" },
 messages: [
 {
@@ -277,10 +277,13 @@ Si l'information n'existe pas dans le contexte
 Si type = hors_sujet
 → répondre poliment que tu peux uniquement aider concernant cet établissement.
 
-
 Si aucune information pertinente n'existe dans le contexte,
 répondre clairement que l'information n'est pas disponible.
 Ne jamais inventer d'information.
+
+Lorsque l'information existe dans le contexte,
+reformule-la de manière naturelle pour répondre à la question.
+Ne copie jamais mot pour mot le contexte.
 
 
 MISSION TECHNIQUE :
@@ -307,8 +310,12 @@ FORMAT JSON STRICT :
 
 STYLE :
 
-- ton naturel et poli
+- ton naturel et conversationnel
+- adapter la réponse à la question du visiteur
+- reformuler l'information du contexte
+- ne jamais répéter mot pour mot le contexte
 - réponse courte (1 à 3 phrases)
+- si possible commencer naturellement (ex : "Oui,", "Non,", "Vous pouvez", etc.)
 `
 },
 {
@@ -412,7 +419,6 @@ error: "Assistant failed"
 }
 
 });
-
 
 
 
