@@ -202,6 +202,13 @@ Réponds UNIQUEMENT en JSON au format :
 
 
 
+
+
+
+
+
+
+
 /* =====================================================
    ASSISTANT VISITEUR
 ===================================================== */
@@ -269,6 +276,11 @@ Si l'information n'existe pas dans le contexte
 
 Si type = hors_sujet
 → répondre poliment que tu peux uniquement aider concernant cet établissement.
+
+
+Si aucune information pertinente n'existe dans le contexte,
+répondre clairement que l'information n'est pas disponible.
+Ne jamais inventer d'information.
 
 
 MISSION TECHNIQUE :
@@ -400,6 +412,23 @@ error: "Assistant failed"
 }
 
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
