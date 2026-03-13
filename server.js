@@ -94,7 +94,7 @@ app.post("/analyze-decline", async (req, res) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + OPENAI_KEY,
+          Authorization: `Bearer ${OPENAI_KEY}`,
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -292,6 +292,7 @@ FORMAT JSON STRICT
 
 
 
+
 /* =====================================================
    ASSISTANT VISITEUR
 ===================================================== */
@@ -316,7 +317,7 @@ const response = await fetch(
 method: "POST",
 headers: {
 "Content-Type": "application/json",
-Authorization: "Bearer " + OPENAI_KEY,
+Authorization: `Bearer ${OPENAI_KEY}`,
 },
 body: JSON.stringify({
 model: "gpt-4o-mini",
@@ -520,7 +521,6 @@ error: "Assistant failed"
 
 
 
-
 /* =====================================================
    MAP DOCUMENT CONTEXT
    ===================================================== */
@@ -591,7 +591,7 @@ const response = await fetch(
 method: "POST",
 headers: {
 "Content-Type": "application/json",
-Authorization: "Bearer " + OPENAI_KEY,
+Authorization: `Bearer ${OPENAI_KEY}`,
 },
 body: JSON.stringify({
 model: "gpt-4o-mini",
@@ -744,7 +744,7 @@ app.post("/analyze-insights", async (req, res) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + OPENAI_KEY,
+          Authorization: `Bearer ${OPENAI_KEY}`,
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -1181,7 +1181,7 @@ qui aide le responsable à interpréter les résultats.
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + OPENAI_KEY,
+          Authorization: `Bearer ${OPENAI_KEY}`,
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -1273,7 +1273,7 @@ app.post("/generate-questions", async (req, res) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + OPENAI_KEY,
+          Authorization: `Bearer ${OPENAI_KEY}`,
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -1573,7 +1573,7 @@ app.post("/classify-question", async (req, res) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + OPENAI_KEY,
+          Authorization: `Bearer ${OPENAI_KEY}`,
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
