@@ -292,6 +292,223 @@ FORMAT JSON STRICT
 
 
 
+/* =====================================================
+   ASSISTANT VISITEUR
+===================================================== */
+
+app.post("/assistant-question", async (req, res) => {
+
+console.log("===== ASSISTANT QUESTION CALLED =====");
+
+let { question, context } = req.body;
+
+if (!question) {
+return res.status(400).json({
+error: "Invalid payload"
+});
+}
+
+try {
+
+const response = await fetch(
+"https://api.openai.com/v1/chat/completions",
+{
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+Authorization: `Bearer ${OPENAI_KEY}`,
+},
+body: JSON.stringify({
+model: "gpt-4o-mini",
+temperature: 0.4,
+response_format: { type: "json_object" },
+messages: [
+{
+role: "system",
+content: `
+Tu es l'assistant visiteurs officiel d'un établissement.
+
+Ton rôle est d'aider les visiteurs à obtenir des informations
+sur cet établissement.
+
+Tu dois analyser le message du visiteur et le classer.
+
+TYPES POSSIBLES :
+
+conversation
+→ interaction simple
+exemples : bonjour, merci, ça va
+
+structure_question
+→ question concernant l'établissement
+
+hors_sujet
+→ question sans rapport avec l'établissement
+
+
+RÈGLES :
+
+Si type = conversation
+→ répondre poliment et proposer d'aider concernant l'établissement.
+
+Si type = structure_question
+→ utiliser UNIQUEMENT les informations présentes dans le CONTEXTE.
+
+Si l'information n'existe pas dans le contexte
+→ dire que l'information n'est pas disponible.
+
+Si type = hors_sujet
+→ répondre poliment que tu peux uniquement aider concernant cet établissement.
+
+Si aucune information pertinente n'existe dans le contexte,
+répondre clairement que l'information n'est pas disponible.
+Ne jamais inventer d'information.
+
+Lorsque l'information existe dans le contexte,
+reformule-la de manière naturelle pour répondre à la question.
+Ne copie jamais mot pour mot le contexte.
+
+
+MISSION TECHNIQUE :
+
+needs_resource = true uniquement si :
+
+- type = structure_question
+- l'information demandée n'existe pas dans le contexte
+
+needs_resource = false si :
+
+- conversation
+- hors sujet
+- question déjà répondue
+
+
+FORMAT JSON STRICT :
+
+{
+"type": "conversation | structure_question | hors_sujet",
+"answer": "réponse à afficher",
+"needs_resource": true ou false
+}
+
+STYLE :
+
+- ton naturel et conversationnel
+- adapter la réponse à la question du visiteur
+- reformuler l'information du contexte
+- ne jamais répéter mot pour mot le contexte
+- réponse courte (1 à 3 phrases)
+- si possible commencer naturellement (ex : "Oui,", "Non,", "Vous pouvez", etc.)
+`
+},
+{
+role: "user",
+content: `
+CONTEXTE :
+
+${context || "Aucune information disponible"}
+
+QUESTION VISITEUR :
+
+${question}
+`
+}
+]
+})
+}
+);
+
+/* ===============================
+   Vérification réponse OpenAI
+================================ */
+
+if (!response.ok) {
+
+const errText = await response.text();
+
+console.error("OpenAI error:", errText);
+
+throw new Error("OpenAI API failed");
+
+}
+
+const data = await response.json();
+
+const content = data?.choices?.[0]?.message?.content;
+
+if (!content) {
+throw new Error("Empty AI response");
+}
+
+/* ===============================
+   Parsing JSON IA
+================================ */
+
+let parsed;
+
+try {
+
+parsed = JSON.parse(content);
+
+} catch (err) {
+
+console.error("JSON parse error:", content);
+
+return res.json({
+type: "structure_question",
+answer: "Je n'ai pas trouvé l'information.",
+needs_resource: true
+});
+
+}
+
+/* ===============================
+   Sécurisation des champs
+================================ */
+
+const type =
+["conversation","structure_question","hors_sujet"].includes(parsed.type)
+? parsed.type
+: "structure_question";
+
+const answer =
+typeof parsed.answer === "string"
+? parsed.answer
+: "Je n'ai pas trouvé l'information.";
+
+const needs_resource =
+typeof parsed.needs_resource === "boolean"
+? parsed.needs_resource
+: false;
+
+/* ===============================
+   Réponse finale
+================================ */
+
+res.json({
+type,
+answer,
+needs_resource
+});
+
+} catch (err) {
+
+console.error("🔥 ASSISTANT ERROR:", err);
+
+res.status(500).json({
+error: "Assistant failed"
+});
+
+}
+
+});
+
+
+
+
+
+
+
 
 
 
@@ -1490,4 +1707,3 @@ app.post("/classify-question", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 IA backend running on port ${PORT}`);
 });
-
