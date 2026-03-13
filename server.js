@@ -103,31 +103,69 @@ app.post("/analyze-decline", async (req, res) => {
           messages: [
             {
               role: "system",
-              content: `
+content: `
 Tu es un consultant senior en stratégie opérationnelle.
 
-Un établissement observe une baisse sur un indicateur précis issu d'un questionnaire client.
+Un établissement observe une évolution négative
+sur un indicateur précis issu d'un questionnaire client.
 
-MISSION :
+────────────────────────────
+MISSION
+────────────────────────────
 
-1. Comprendre la problématique exprimée par la question.
-2. Interpréter le score actuel et son évolution.
+1. Comprendre la dimension mesurée par la question.
+2. Interpréter la signification possible du score actuel et de son évolution.
 3. Proposer jusqu'à 3 actions concrètes et réalistes que l'établissement pourrait mettre en place.
 
-RÈGLES IMPORTANTES :
+Les recommandations doivent aider l'établissement
+à améliorer la perception des clients sur cet indicateur.
 
-- Les actions doivent être directement liées au problème mesuré.
+────────────────────────────
+UTILISATION DU CONTEXTE (RÈGLE CRITIQUE)
+────────────────────────────
+
+Le contexte établissement est fourni uniquement
+pour comprendre l'environnement général de la structure.
+
+Il ne doit pas être utilisé pour identifier une cause précise.
+
+L'analyse doit être basée principalement sur :
+
+- le texte de la question
+- la dimension mesurée
+- l'évolution du score
+
+Le contexte ne doit jamais être utilisé pour affirmer
+qu’un problème spécifique existe.
+
+Si un élément apparaît dans le contexte
+mais n'est pas directement lié à la question mesurée :
+
+→ il ne doit pas apparaître dans l'analyse.
+
+────────────────────────────
+RÈGLES IMPORTANTES
+────────────────────────────
+
+- Les actions doivent être directement liées à la dimension mesurée.
 - Les actions doivent être concrètes et opérationnelles.
-- Éviter les recommandations vagues.
+- Éviter les recommandations vagues ou génériques.
+- Ne pas inventer de problème spécifique non indiqué par la question.
+- Ne pas déduire une cause à partir du contexte seul.
 - Si aucune action pertinente ne peut être proposée → retourner une liste vide.
 
-STYLE :
+────────────────────────────
+STYLE
+────────────────────────────
 
-- Analyse courte
-- Actions très concrètes
-- Pas de phrases inutiles
+- Analyse claire et synthétique
+- Raisonnement basé sur la question analysée
+- Actions concrètes et réalistes
+- Pas de spéculation inutile
 
-CONTEXTE DISPONIBLE :
+────────────────────────────
+CONTEXTE DISPONIBLE
+────────────────────────────
 
 Type d'établissement :
 ${establishment_type ?? "non spécifié"}
@@ -147,7 +185,9 @@ ${current_score}
 Évolution observée :
 ${delta}
 
-FORMAT JSON STRICT :
+────────────────────────────
+FORMAT JSON STRICT
+────────────────────────────
 
 {
   "context_analysis": "...",
@@ -729,7 +769,7 @@ Les éléments suivants peuvent être fournis :
 - objectif du questionnaire
 
 Le contexte établissement provient de documents internes
-(menu, règlement, description, fonctionnement, etc.).
+(menu, règlement, description, fonctionnement, organisation, etc.).
 
 UTILISATION DU CONTEXTE (RÈGLE CRITIQUE) :
 
@@ -746,12 +786,8 @@ mais pas dans les réponses clients :
 
 → elle ne doit jamais apparaître dans l'analyse.
 
-Exemple interdit :
-Si le contexte mentionne "paiement minimum par carte"
-mais que les clients ne parlent pas du paiement,
-tu ne dois jamais mentionner ce sujet.
-
 IMPORTANT :
+
 - ne jamais inventer d'informations à partir du contexte
 - ne jamais supposer un problème non mentionné
 - ne jamais utiliser une information du contexte
@@ -790,18 +826,22 @@ INTERDICTIONS
 ────────────────────────────
 
 - Pas d’exemples inventés
-- Pas de produits ou services non mentionnés
+- Pas de produits, services ou situations non mentionnés dans les réponses
 - Pas de suppositions
-- Pas d’interprétation basée sur le contexte seul
+- Pas d’interprétation basée uniquement sur le contexte
 
 ────────────────────────────
 STYLE
 ────────────────────────────
 
 - Synthèse neutre et factuelle
-- 1 à 2 phrases maximum
+- Ton professionnel et analytique
+- Longueur adaptée au volume et à la richesse des réponses
+- Formulation claire et structurée
 - Ne jamais citer un client spécifique
-- Formulation concise
+
+L'objectif est de produire une synthèse utile
+permettant de comprendre rapidement les tendances clients.
 
 ────────────────────────────
 FORMAT JSON STRICT
