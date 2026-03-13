@@ -1163,9 +1163,35 @@ Les éléments suivants peuvent être fournis :
 - Description de l’objectif du questionnaire
 - existing_questions : liste des questions déjà présentes dans le questionnaire
 
-Si un objectif est fourni, il doit guider la sélection des thématiques et la formulation des questions.
+L’objectif du questionnaire doit déterminer les thématiques abordées.
+Toutes les questions doivent contribuer directement à comprendre cet objectif.
 
 Le type et le contexte servent uniquement à adapter la pertinence et le vocabulaire.
+
+
+────────────────────────────
+RÈGLE FONDAMENTALE — PRIORITÉ À L’OBJECTIF
+────────────────────────────
+
+L’objectif du questionnaire est l’élément CENTRAL.
+
+Toutes les questions générées doivent contribuer directement
+à mieux comprendre ou mesurer cet objectif.
+
+Le contexte de l’établissement et son type servent uniquement à :
+
+- adapter la formulation
+- adapter les exemples
+- adapter la pertinence opérationnelle
+
+Ils ne doivent jamais détourner le questionnaire de son objectif.
+
+Si le contexte suggère d’autres sujets mais qu’ils ne servent pas
+directement l’objectif du questionnaire :
+
+→ Ne pas générer ces questions.
+
+L’objectif prime toujours sur le contexte.
 
 ────────────────────────────
 OBJECTIF
