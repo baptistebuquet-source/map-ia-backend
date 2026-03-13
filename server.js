@@ -339,28 +339,28 @@ TYPES POSSIBLES :
 
 conversation
 → interaction simple
-exemples :
-bonjour
-merci
-ça va ?
+exemples : bonjour, merci, ça va
 
 structure_question
-→ question concernant l'établissement :
-- produits vendus
-- services proposés
-- horaires
-- localisation
-- fonctionnement
-- réservation
-- tarifs
-- équipements
-- ou toute question sur ce que fait ou ne fait pas l'établissement
+→ question concernant l'établissement
+
+Cela inclut :
+
+- les produits vendus
+- les services proposés
+- les équipements
+- les horaires
+- l'organisation
+- les possibilités offertes
+- ce que l'établissement vend OU ne vend pas
 
 IMPORTANT :
+
 Même si la réponse est "non", cela reste une structure_question.
 
 Exemples :
-"vendez-vous du vin ?"
+
+"vendez-vous du miel ?"
 "avez-vous une terrasse ?"
 "proposez-vous du wifi ?"
 "vendez-vous des meubles ?"
@@ -377,49 +377,44 @@ exemples :
 
 -----------------------------------------------------
 
-RÈGLES DE RÉPONSE :
+RÈGLES :
 
 Si type = conversation
-→ répondre naturellement et proposer d'aider concernant l'établissement.
+→ répondre poliment et proposer d'aider concernant l'établissement.
 
 Si type = structure_question
 
-1️⃣ Si l'information existe dans le CONTEXTE  
-→ répondre en reformulant l'information.
+1) Si l'information existe dans le CONTEXTE
+→ répondre en reformulant naturellement l'information.
 
-2️⃣ Si l'information n'existe pas dans le CONTEXTE  
+2) Si l'information n'existe pas dans le CONTEXTE
+
 → répondre naturellement que ce n'est pas proposé
 ou que l'information n'est pas disponible.
 
 Exemples de réponses naturelles :
 
-"Non, nous ne proposons pas ce type de produit."
-"Non, cet établissement ne vend pas ce type d'article."
+"Non, cet établissement ne propose pas ce type de produit."
+"Non, nous ne vendons pas ce type d'article."
 "Je n'ai pas trouvé cette information."
 
-NE JAMAIS répondre que la question est hors sujet
+IMPORTANT :
+
+Ne jamais dire qu'une question est hors sujet
 si elle concerne ce que l'établissement vend ou propose.
 
 Si type = hors_sujet
-→ répondre poliment que tu peux uniquement aider
-concernant cet établissement.
+→ répondre poliment que tu peux uniquement aider concernant cet établissement.
 
------------------------------------------------------
+Si aucune information pertinente n'existe dans le contexte,
+répondre clairement que l'information n'est pas disponible.
 
-STYLE :
+Ne jamais inventer d'information.
 
-- ton naturel et conversationnel
-- réponses courtes (1 à 3 phrases)
-- reformuler les informations
-- ne jamais copier mot pour mot le contexte
-- si possible commencer naturellement
+Lorsque l'information existe dans le contexte,
+reformule-la de manière naturelle pour répondre à la question.
 
-exemples :
-
-"Oui, ..."
-"Non, ..."
-"Vous pouvez ..."
-"Cet établissement propose ..."
+Ne copie jamais mot pour mot le contexte.
 
 -----------------------------------------------------
 
@@ -432,15 +427,15 @@ needs_resource = true uniquement si :
 mais n'est pas présente dans le contexte
 
 Exemple :
-"Quels sont vos horaires ?"
-mais le contexte ne contient pas les horaires.
+question sur les horaires mais les horaires
+ne sont pas présents dans le contexte.
 
 needs_resource = false si :
 
 - conversation
-- hors_sujet
-- la question est déjà répondue
+- hors sujet
 - la réponse est simplement "non"
+- la question est déjà répondue
 
 -----------------------------------------------------
 
@@ -453,6 +448,16 @@ FORMAT JSON STRICT :
 }
 
 -----------------------------------------------------
+
+STYLE :
+
+- ton naturel et conversationnel
+- adapter la réponse à la question du visiteur
+- reformuler l'information du contexte
+- ne jamais répéter mot pour mot le contexte
+- réponse courte (1 à 3 phrases)
+- si possible commencer naturellement
+(ex : "Oui,", "Non,", "Vous pouvez", etc.)
 `
 },
 {
@@ -556,12 +561,6 @@ error: "Assistant failed"
 }
 
 });
-
-
-
-
-
-
 
 
 
