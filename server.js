@@ -75,14 +75,14 @@ app.post("/analyze-decline", async (req, res) => {
 
   const {
     establishment_type,
+    establishment_context,
     axis_label,
     question_text,
     current_score,
-    delta,
-    actions_pool
+    delta
   } = req.body;
 
-  if (!question_text || !actions_pool || actions_pool.length === 0) {
+  if (!question_text) {
     return res.status(400).json({ error: "Invalid payload" });
   }
 
@@ -98,7 +98,7 @@ app.post("/analyze-decline", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0.2,
+          temperature: 0.25,
           response_format: { type: "json_object" },
           messages: [
             {
@@ -106,34 +106,48 @@ app.post("/analyze-decline", async (req, res) => {
               content: `
 Tu es un consultant senior en stratégie opérationnelle.
 
-Un établissement observe une baisse sur une question précise.
+Un établissement observe une baisse sur un indicateur précis issu d'un questionnaire client.
 
-Les actions fournies ont réellement été mises en œuvre par des structures similaires et ont généré une amélioration mesurée (delta_observed) sur un volume réel de réponses (response_count).
+MISSION :
 
-Ta mission :
+1. Comprendre la problématique exprimée par la question.
+2. Interpréter le score actuel et son évolution.
+3. Proposer jusqu'à 3 actions concrètes et réalistes que l'établissement pourrait mettre en place.
 
-1. Analyser précisément la problématique exprimée dans la question.
-2. Évaluer la pertinence DIRECTE des actions fournies.
-3. Sélectionner jusqu’à 3 actions maximum.
-4. Si une seule est pertinente → retourner 1.
-5. Si aucune n’est suffisamment pertinente → retourner une liste vide.
-6. Ne jamais inventer d’action.
-7. Ne jamais modifier les données statistiques fournies.
-8. Ne jamais inventer de delta ou de volume.
+RÈGLES IMPORTANTES :
 
-CRITÈRES STRICTS :
+- Les actions doivent être directement liées au problème mesuré.
+- Les actions doivent être concrètes et opérationnelles.
+- Éviter les recommandations vagues.
+- Si aucune action pertinente ne peut être proposée → retourner une liste vide.
 
-- L’action doit agir sur la dimension principale de la question.
-- Le lien doit être opérationnel et explicite.
-- Si le lien est partiel ou secondaire → ne pas sélectionner.
+STYLE :
 
-Pour chaque action retenue :
+- Analyse courte
+- Actions très concrètes
+- Pas de phrases inutiles
 
-- Reprendre exactement delta_observed et response_count.
-- Ne pas les recalculer.
-- Ne pas les modifier.
+CONTEXTE DISPONIBLE :
 
-Réponds UNIQUEMENT en JSON au format :
+Type d'établissement :
+${establishment_type ?? "non spécifié"}
+
+Contexte établissement :
+${establishment_context ?? "non fourni"}
+
+Dimension analysée :
+${axis_label ?? "non spécifié"}
+
+Question mesurée :
+${question_text}
+
+Score actuel :
+${current_score}
+
+Évolution observée :
+${delta}
+
+FORMAT JSON STRICT :
 
 {
   "context_analysis": "...",
@@ -141,9 +155,7 @@ Réponds UNIQUEMENT en JSON au format :
     {
       "title": "...",
       "justification": "...",
-      "expected_impact": "...",
-      "delta_observed": 0,
-      "response_count": 0
+      "expected_impact": "..."
     }
   ]
 }
@@ -153,11 +165,11 @@ Réponds UNIQUEMENT en JSON au format :
               role: "user",
               content: JSON.stringify({
                 establishment_type,
+                establishment_context,
                 axis_label,
                 question_text,
                 current_score,
-                delta,
-                actions_pool
+                delta
               })
             }
           ]
@@ -171,52 +183,55 @@ Réponds UNIQUEMENT en JSON au format :
       throw new Error("OpenAI API failed");
     }
 
-   const data = await response.json();
-   
-   const content = data?.choices?.[0]?.message?.content;
-   
-   if (!content) {
-     throw new Error("Empty AI response");
-   }
-   
-   let parsed;
-   
-   try {
-   
-     parsed = JSON.parse(content);
-   
-   } catch (e) {
-   
-     console.error("Invalid AI JSON:", content);
-   
-     parsed = {
-       context_analysis: "",
-       recommended_actions: []
-     };
-   
-   }
-   
-   /* =========================
-      Sécuriser structure
-   ========================= */
-   
-   if (!parsed.recommended_actions || !Array.isArray(parsed.recommended_actions)) {
-     parsed.recommended_actions = [];
-   }
-   
-   if (!parsed.context_analysis) {
-     parsed.context_analysis = "";
-   }
-   
-   res.json(parsed);
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Empty AI response");
+    }
+
+    let parsed;
+
+    try {
+
+      parsed = JSON.parse(content);
+
+    } catch (e) {
+
+      console.error("Invalid AI JSON:", content);
+
+      parsed = {
+        context_analysis: "",
+        recommended_actions: []
+      };
+
+    }
+
+    /* =========================
+       Sécuriser structure
+    ========================= */
+
+    if (!parsed.recommended_actions || !Array.isArray(parsed.recommended_actions)) {
+      parsed.recommended_actions = [];
+    }
+
+    if (!parsed.context_analysis) {
+      parsed.context_analysis = "";
+    }
+
+    res.json(parsed);
 
   } catch (err) {
+
     console.error("🔥 DECLINE ANALYZE ERROR:", err);
-    res.status(500).json({ error: "AI decline analysis failed" });
+
+    res.status(500).json({
+      error: "AI decline analysis failed"
+    });
+
   }
 
 });
-
 
 
 
@@ -662,8 +677,6 @@ error: "Document context mapping failed"
 
 
 
-
-
 /* =====================================================
    ANALYZE INSIGHTS (QUESTIONS INFORMATIONAL)
 ===================================================== */
@@ -699,7 +712,7 @@ app.post("/analyze-insights", async (req, res) => {
           messages: [
             {
               role: "system",
-content: `
+              content: `
 Tu es un analyste senior en expérience client.
 
 Tu analyses des réponses ouvertes issues d’un questionnaire client.
@@ -707,12 +720,19 @@ Tu analyses des réponses ouvertes issues d’un questionnaire client.
 CONTEXTE DISPONIBLE :
 
 - type d’établissement
-- description de la structure
+- connaissances internes de l’établissement (documents fournis)
 - titre du questionnaire
 - objectif du questionnaire
 
-Utilise ce contexte uniquement pour interpréter les réponses.
-NE PAS inventer d’informations à partir du contexte.
+Le contexte établissement provient de documents internes
+(menu, règlement, description, fonctionnement, etc.).
+
+Utilise ce contexte uniquement pour mieux comprendre
+les réponses clients. 
+
+IMPORTANT :
+- ne jamais inventer d'informations à partir du contexte
+- ne jamais supposer un problème non mentionné
 
 MISSION :
 
@@ -732,11 +752,8 @@ Les pistes d'amélioration mentionnées ou suggérées par les clients.
 RÈGLES STRICTES :
 
 - Utiliser uniquement les informations présentes dans les réponses
-- Ne jamais inventer d’exemples, produits ou situations
-- Ne jamais extrapoler un problème non mentionné
-- Ne jamais déduire un problème à partir du type d’établissement
 - Un insight doit être basé sur plusieurs réponses similaires
-- Si les réponses ne permettent pas d’identifier clairement un insight, retourner un texte vide
+- Si les réponses ne permettent pas d’identifier clairement un insight → retourner un texte vide
 
 INTERDICTIONS :
 
@@ -792,14 +809,43 @@ FORMAT JSON STRICT :
     }
 
     const data = await response.json();
-
     const content = data?.choices?.[0]?.message?.content;
 
     if (!content) {
       throw new Error("Empty AI response");
     }
 
-    const parsed = JSON.parse(content);
+    let parsed;
+
+    try {
+
+      parsed = JSON.parse(content);
+
+    } catch (e) {
+
+      console.error("Invalid AI JSON:", content);
+
+      parsed = {
+        insights: [
+          { type: "satisfaction", text: "" },
+          { type: "friction", text: "" },
+          { type: "opportunity", text: "" }
+        ]
+      };
+
+    }
+
+    /* =========================
+       Sécuriser structure
+    ========================= */
+
+    if (!parsed.insights || !Array.isArray(parsed.insights)) {
+      parsed.insights = [
+        { type: "satisfaction", text: "" },
+        { type: "friction", text: "" },
+        { type: "opportunity", text: "" }
+      ];
+    }
 
     res.json(parsed);
 
@@ -814,9 +860,6 @@ FORMAT JSON STRICT :
   }
 
 });
-
-
-
 
 
 
