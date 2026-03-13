@@ -186,18 +186,6 @@ ${current_score}
 ${delta}
 
 
-INTERPRÉTATION DES DELTAS :
-
-Les indicateurs peuvent contenir un champ "delta".
-
-Ce delta représente l'évolution du score par rapport à la période précédente.
-
-- delta négatif → baisse de performance
-- delta positif → amélioration
-- delta = 0 → stabilité
-
-Si un delta négatif est présent, tu dois considérer qu'il s'agit d'une baisse réelle de l'indicateur.
-
 ────────────────────────────
 FORMAT JSON STRICT
 ────────────────────────────
@@ -959,7 +947,6 @@ FORMAT JSON STRICT
 
 
 
-
 /* =====================================================
    ANALYSIS CHAT
 ===================================================== */
@@ -1008,6 +995,48 @@ IMPORTANT :
 - éviter les longs paragraphes
 - privilégier des listes et sections claires
 
+-----------------------------------------------------
+
+COMPRÉHENSION DES DONNÉES :
+
+Les performances sont fournies sous forme d'objets JSON contenant :
+
+- question_text : texte de la question posée aux clients
+- normalized_score : score actuel normalisé entre 0 et 100
+- response_count : nombre de réponses collectées
+- delta : évolution du score par rapport au cycle précédent
+- direction : évolution ("up", "down", "stable")
+- percent_change : variation relative en pourcentage
+
+Exemple :
+
+{
+  "question_text": "Le temps d'attente était satisfaisant",
+  "normalized_score": 68,
+  "response_count": 42,
+  "delta": -7,
+  "direction": "down",
+  "percent_change": -9.3
+}
+
+Interprétation :
+
+- delta négatif → baisse
+- delta positif → amélioration
+- delta proche de 0 → stabilité
+
+Utilise ces informations pour :
+
+- identifier les points en amélioration
+- identifier les dégradations
+- expliquer les évolutions observées
+- prioriser les actions d'amélioration
+
+Si une métrique n'a pas de delta, cela signifie qu'aucune comparaison
+n'est disponible avec le cycle précédent.
+
+-----------------------------------------------------
+
 FORMAT DE RÉPONSE :
 
 La réponse doit être lisible et structurée.
@@ -1028,6 +1057,8 @@ Utilise si pertinent :
 **Données manquantes**
 Si certaines analyses sont impossibles faute de données,
 explique-le clairement.
+
+-----------------------------------------------------
 
 Puis propose soit :
 
@@ -1055,6 +1086,8 @@ Questions suggérées :
 1. ...
 2. ...
 
+-----------------------------------------------------
+
 RÈGLES IMPORTANTES :
 
 - ne propose un questionnaire que si c'est réellement utile
@@ -1063,13 +1096,14 @@ RÈGLES IMPORTANTES :
 - maximum ~12 lignes
 - privilégier les listes plutôt que les blocs de texte
 
+-----------------------------------------------------
+
 En plus de ta réponse, tu dois proposer
 3 questions pertinentes que le responsable
 pourrait poser pour approfondir l'analyse.
 
 Ces questions doivent être directement liées
 aux résultats fournis.
-
 
 IMPORTANT :
 
@@ -1078,6 +1112,8 @@ Le champ "suggestions" doit toujours contenir exactement 3 questions.
 Même si la réponse contient déjà un plan d'action ou des recommandations.
 
 Ne jamais laisser le tableau suggestions vide.
+
+-----------------------------------------------------
 
 Tu dois répondre STRICTEMENT au format JSON suivant :
 
@@ -1090,6 +1126,8 @@ Tu dois répondre STRICTEMENT au format JSON suivant :
   ]
 }
 
+-----------------------------------------------------
+
 CONTEXTE :
 
 Type d'établissement :
@@ -1101,12 +1139,19 @@ ${establishment_context ?? "non fourni"}
 Objectif du questionnaire :
 ${survey_objective ?? "non fourni"}
 
+-----------------------------------------------------
+
 SYNTHÈSE CLIENTS :
+
 ${analysis_context?.insight ?? "aucune synthèse disponible"}
+
+-----------------------------------------------------
 
 PERFORMANCES MESURÉES :
 
 ${JSON.stringify(analysis_context?.metrics ?? [], null, 2)}
+
+-----------------------------------------------------
 
 Tu dois répondre comme un consultant stratégique
 qui aide le responsable à interpréter les résultats.
@@ -1136,7 +1181,7 @@ qui aide le responsable à interpréter les résultats.
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_KEY}`,
+          Authorization: \`Bearer \${OPENAI_KEY}\`,
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -1194,8 +1239,6 @@ qui aide le responsable à interpréter les résultats.
   }
 
 });
-
-
 
 
 
