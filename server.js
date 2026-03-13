@@ -333,8 +333,6 @@ sur cet établissement.
 
 Tu dois analyser le message du visiteur et le classer.
 
------------------------------------------------------
-
 TYPES POSSIBLES :
 
 conversation
@@ -344,38 +342,9 @@ exemples : bonjour, merci, ça va
 structure_question
 → question concernant l'établissement
 
-Cela inclut :
-
-- les produits vendus
-- les services proposés
-- les équipements
-- les horaires
-- l'organisation
-- les possibilités offertes
-- ce que l'établissement vend OU ne vend pas
-
-IMPORTANT :
-
-Même si la réponse est "non", cela reste une structure_question.
-
-Exemples :
-
-"vendez-vous du miel ?"
-"avez-vous une terrasse ?"
-"proposez-vous du wifi ?"
-"vendez-vous des meubles ?"
-
-Ces questions concernent toujours l'établissement,
-même si la réponse est négative.
-
 hors_sujet
-→ question totalement sans rapport avec l'établissement
+→ question sans rapport avec l'établissement
 
-exemples :
-"quelle est la capitale du Pérou ?"
-"qui a gagné la coupe du monde 2018 ?"
-
------------------------------------------------------
 
 RÈGLES :
 
@@ -383,61 +352,36 @@ Si type = conversation
 → répondre poliment et proposer d'aider concernant l'établissement.
 
 Si type = structure_question
+→ utiliser UNIQUEMENT les informations présentes dans le CONTEXTE.
 
-1) Si l'information existe dans le CONTEXTE
-→ répondre en reformulant naturellement l'information.
-
-2) Si l'information n'existe pas dans le CONTEXTE
-
-→ répondre naturellement que ce n'est pas proposé
-ou que l'information n'est pas disponible.
-
-Exemples de réponses naturelles :
-
-"Non, cet établissement ne propose pas ce type de produit."
-"Non, nous ne vendons pas ce type d'article."
-"Je n'ai pas trouvé cette information."
-
-IMPORTANT :
-
-Ne jamais dire qu'une question est hors sujet
-si elle concerne ce que l'établissement vend ou propose.
+Si l'information n'existe pas dans le contexte
+→ dire que l'information n'est pas disponible.
 
 Si type = hors_sujet
 → répondre poliment que tu peux uniquement aider concernant cet établissement.
 
 Si aucune information pertinente n'existe dans le contexte,
 répondre clairement que l'information n'est pas disponible.
-
 Ne jamais inventer d'information.
 
 Lorsque l'information existe dans le contexte,
 reformule-la de manière naturelle pour répondre à la question.
-
 Ne copie jamais mot pour mot le contexte.
 
------------------------------------------------------
 
 MISSION TECHNIQUE :
 
 needs_resource = true uniquement si :
 
 - type = structure_question
-- l'information demandée pourrait exister
-mais n'est pas présente dans le contexte
-
-Exemple :
-question sur les horaires mais les horaires
-ne sont pas présents dans le contexte.
+- l'information demandée n'existe pas dans le contexte
 
 needs_resource = false si :
 
 - conversation
 - hors sujet
-- la réponse est simplement "non"
-- la question est déjà répondue
+- question déjà répondue
 
------------------------------------------------------
 
 FORMAT JSON STRICT :
 
@@ -447,8 +391,6 @@ FORMAT JSON STRICT :
 "needs_resource": true ou false
 }
 
------------------------------------------------------
-
 STYLE :
 
 - ton naturel et conversationnel
@@ -456,8 +398,7 @@ STYLE :
 - reformuler l'information du contexte
 - ne jamais répéter mot pour mot le contexte
 - réponse courte (1 à 3 phrases)
-- si possible commencer naturellement
-(ex : "Oui,", "Non,", "Vous pouvez", etc.)
+- si possible commencer naturellement (ex : "Oui,", "Non,", "Vous pouvez", etc.)
 `
 },
 {
@@ -561,6 +502,10 @@ error: "Assistant failed"
 }
 
 });
+
+
+
+
 
 
 
