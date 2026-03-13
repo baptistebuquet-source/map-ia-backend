@@ -42,6 +42,29 @@ app.get("/", (_, res) => {
   res.send("✅ IA Survey Analysis API running");
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =====================================================
    =====================================================
    ANALYZE SURVEY
@@ -193,6 +216,10 @@ Réponds UNIQUEMENT en JSON au format :
   }
 
 });
+
+
+
+
 
 
 
@@ -621,6 +648,22 @@ error: "Document context mapping failed"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =====================================================
    ANALYZE INSIGHTS (QUESTIONS INFORMATIONAL)
 ===================================================== */
@@ -771,6 +814,9 @@ FORMAT JSON STRICT :
   }
 
 });
+
+
+
 
 
 
@@ -1017,6 +1063,10 @@ qui aide le responsable à interpréter les résultats.
 
 
 
+
+
+
+
 /* =====================================================
    =====================================================
    GENERATE QUESTIONS
@@ -1025,13 +1075,14 @@ qui aide le responsable à interpréter les résultats.
 
 app.post("/generate-questions", async (req, res) => {
 
-  const {
-    establishment,
-    establishment_type,
-    establishment_context,
-    survey_title,
-    survey_objective // ✅ AJOUTÉ
-  } = req.body;
+   const {
+     establishment,
+     establishment_type,
+     establishment_context,
+     survey_title,
+     survey_objective,
+     existing_questions
+   } = req.body;
 
   if (!survey_title) {
     return res.status(400).json({ error: "Invalid payload" });
@@ -1067,7 +1118,7 @@ Les éléments suivants peuvent être fournis :
 - Description de l’établissement
 - Titre du questionnaire
 - Description de l’objectif du questionnaire
-- Liste de questions déjà existantes
+- existing_questions : liste des questions déjà présentes dans le questionnaire
 
 Si un objectif est fourni, il doit guider la sélection des thématiques et la formulation des questions.
 
@@ -1244,13 +1295,14 @@ FORMAT JSON STRICT — AUCUN TEXTE HORS JSON
             },
             {
               role: "user",
-              content: JSON.stringify({
-                establishment,
-                establishment_type,
-                establishment_context,
-                survey_title,
-                survey_objective // ✅ ENVOYÉ AU MODÈLE
-              })
+               content: JSON.stringify({
+                 establishment,
+                 establishment_type,
+                 establishment_context,
+                 survey_title,
+                 survey_objective,
+                 existing_questions
+               })
             }
           ]
         }),
