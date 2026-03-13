@@ -185,6 +185,19 @@ ${current_score}
 Évolution observée :
 ${delta}
 
+
+INTERPRÉTATION DES DELTAS :
+
+Les indicateurs peuvent contenir un champ "delta".
+
+Ce delta représente l'évolution du score par rapport à la période précédente.
+
+- delta négatif → baisse de performance
+- delta positif → amélioration
+- delta = 0 → stabilité
+
+Si un delta négatif est présent, tu dois considérer qu'il s'agit d'une baisse réelle de l'indicateur.
+
 ────────────────────────────
 FORMAT JSON STRICT
 ────────────────────────────
