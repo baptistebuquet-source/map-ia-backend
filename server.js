@@ -1,5 +1,4 @@
 import express from "express";
-import fetch from "node-fetch";
 import pdf from "pdf-parse";
 
 const app = express();
