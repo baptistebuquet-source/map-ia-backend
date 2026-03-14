@@ -649,19 +649,28 @@ extension = (extension || "").toLowerCase();
 console.log("Incoming payload keys:", Object.keys(req.body));
 console.log("Extension:", extension);
 
-let isImage = false;
-
 /* ===============================
-   Si PDF envoyé
+   VERIFICATION PDF
 ================================ */
 
-if (!text && file_base64 && extension === "pdf") {
+if (extension !== "pdf") {
+return res.status(400).json({
+error: "Only PDF documents are supported"
+});
+}
 
-console.log("PDF detected");
+let buffer;
+let isScanned = false;
+
+/* ===============================
+   EXTRACTION TEXTE PDF
+================================ */
 
 try {
 
-const buffer = Buffer.from(file_base64, "base64");
+buffer = Buffer.from(file_base64, "base64");
+
+console.log("PDF buffer size:", buffer.length);
 
 const data = await pdf(buffer);
 
@@ -669,11 +678,13 @@ text = data.text || "";
 
 console.log("Extracted PDF text length:", text.length);
 
-if (text.length < 30) {
+/* PDF scanné si quasi aucun texte */
 
-console.log("PDF likely scanned → switching to vision");
+if (text.length < 50) {
 
-isImage = true;
+console.log("PDF likely scanned → using Vision");
+
+isScanned = true;
 
 }
 
@@ -681,33 +692,19 @@ isImage = true;
 
 console.error("PDF extraction error:", err);
 
-isImage = true;
-
-}
-
-}
-
-/* ===============================
-   Si image envoyée
-================================ */
-
-if (!text && file_base64 && ["jpg","jpeg","png","webp"].includes(extension)) {
-
-console.log("Image detected");
-
-isImage = true;
+isScanned = true;
 
 }
 
 /* ===============================
-   ANALYSE IMAGE / SCAN
+   CAS 1 : PDF TEXTE
 ================================ */
 
-if (isImage && file_base64) {
+if (!isScanned && text) {
 
 try {
 
-console.log("Using Vision model");
+console.log("Using TEXT summarization");
 
 const response = await fetch(
 "https://api.openai.com/v1/chat/completions",
@@ -718,74 +715,39 @@ headers: {
 Authorization: `Bearer ${process.env.OPENAI_KEY}`,
 },
 body: JSON.stringify({
-
 model: "gpt-4o-mini",
-
 temperature: 0.2,
-
 messages: [
 {
 role: "system",
 content: `
-Tu analyses un document visuel fourni par un établissement.
+Tu analyses un document fourni par un établissement.
 
 Le document peut être :
-
 - menu
-- affiche
+- flyer
 - brochure
 - règlement
 - horaires
-- flyer
-- panneau informatif
+- informations pratiques
 
 Objectif :
-extraire toutes les informations utiles pour répondre
-aux questions des visiteurs.
+extraire les informations utiles pour répondre aux questions des visiteurs.
 
-Cherche notamment :
-
-- horaires
-- services
-- règles importantes
-- produits proposés
-- informations pratiques
-- tarifs
-- particularités du lieu
-
-RÈGLES :
-
-- ne rien inventer
-- conserver un maximum d'informations utiles
-- reformuler si nécessaire
-- ignorer les éléments décoratifs
-
-Réponds uniquement en JSON strict :
+Réponds uniquement en JSON :
 
 {
 "summary": "texte complet"
 }
-
-summary doit être une seule chaine de texte continue.
 `
 },
 {
 role: "user",
-content: [
-{
-type: "text",
-text: "Analyse ce document et résume les informations utiles pour un assistant visiteurs."
-},
-{
-type: "image_url",
-image_url: {
-url: `data:image/${extension || "jpeg"};base64,${file_base64}`
-}
-}
-]
-}
-]
+content: `Voici le contenu du document :
 
+${text.substring(0, 12000)}`
+}
+]
 })
 }
 );
@@ -793,6 +755,107 @@ url: `data:image/${extension || "jpeg"};base64,${file_base64}`
 if (!response.ok) {
 
 const errText = await response.text();
+
+console.error("OpenAI API ERROR:", errText);
+
+throw new Error("OpenAI API failed");
+
+}
+
+const data = await response.json();
+
+const content = data?.choices?.[0]?.message?.content;
+
+const parsed = JSON.parse(content);
+
+console.log("Summary:", parsed.summary);
+
+return res.json(parsed);
+
+} catch(err){
+
+console.error("Text summarization error:", err);
+
+return res.status(500).json({
+error: "Text processing failed"
+});
+
+}
+
+}
+
+/* ===============================
+   CAS 2 : PDF SCAN → VISION
+================================ */
+
+try {
+
+console.log("Using Vision for scanned PDF");
+
+const response = await fetch(
+"https://api.openai.com/v1/chat/completions",
+{
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+Authorization: `Bearer ${process.env.OPENAI_KEY}`,
+},
+body: JSON.stringify({
+model: "gpt-4o-mini",
+temperature: 0.2,
+messages: [
+{
+role: "system",
+content: `
+Tu analyses un document PDF scanné fourni par un établissement.
+
+Objectif :
+extraire les informations utiles pour répondre aux questions des visiteurs.
+
+Le document peut être :
+- menu
+- flyer
+- panneau
+- brochure
+- horaires
+- règlement
+
+Règles :
+- ne rien inventer
+- ignorer les éléments décoratifs
+
+Réponds uniquement en JSON :
+
+{
+"summary": "texte complet"
+}
+`
+},
+{
+role: "user",
+content: [
+{
+type: "text",
+text: "Analyse ce document PDF et résume les informations utiles."
+},
+{
+type: "file",
+file: {
+filename: "document.pdf",
+file_data: `data:application/pdf;base64,${file_base64}`
+}
+}
+]
+}
+]
+})
+}
+);
+
+if (!response.ok) {
+
+const errText = await response.text();
+
 console.error("OpenAI API ERROR:", errText);
 
 throw new Error("OpenAI API failed");
@@ -819,145 +882,7 @@ error: "Vision processing failed"
 
 }
 
-}
-
-/* ===============================
-   ANALYSE TEXTE
-================================ */
-
-/* CORRECTION ICI */
-
-if (!text && !file_base64) {
-
-console.log("Payload rejected: nothing to analyse");
-
-return res.status(400).json({
-error: "Invalid payload"
 });
-
-}
-
-/* limiter taille */
-
-if (text) {
-text = text.slice(0,4000);
-}
-
-try {
-
-console.log("Sending request to OpenAI (text)...");
-
-const response = await fetch(
-"https://api.openai.com/v1/chat/completions",
-{
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-Authorization: `Bearer ${process.env.OPENAI_KEY}`,
-},
-body: JSON.stringify({
-
-model: "gpt-4o-mini",
-
-temperature: 0.2,
-
-response_format: { type: "json_object" },
-
-messages: [
-{
-role: "system",
-content: `
-Tu analyses un document fourni par un établissement.
-
-Ce document sera utilisé par une IA afin de répondre
-aux questions des visiteurs sur ce lieu.
-
-Objectif :
-extraire toutes les informations utiles pour répondre
-aux questions des visiteurs.
-
-Cherche notamment :
-
-- règles importantes
-- services proposés
-- horaires
-- tarifs
-- conditions d'accès
-- informations pratiques
-- particularités du lieu
-
-RÈGLES :
-
-- ne rien inventer
-- conserver le maximum d'informations utiles
-- reformuler si nécessaire
-- ignorer les éléments non pertinents
-
-Réponds uniquement en JSON strict :
-
-{
-"summary": "texte complet"
-}
-
-summary doit être une seule chaine de texte continue.
-`
-},
-{
-role: "user",
-content: text
-}
-]
-
-})
-}
-);
-
-/* ===============================
-   VERIFICATION REPONSE
-================================ */
-
-if (!response.ok) {
-
-const errText = await response.text();
-
-console.error("OpenAI API ERROR:", errText);
-
-throw new Error("OpenAI API failed");
-
-}
-
-const data = await response.json();
-
-const content = data?.choices?.[0]?.message?.content;
-
-if (!content) {
-
-console.error("Empty AI response");
-
-throw new Error("Empty AI response");
-
-}
-
-const parsed = JSON.parse(content);
-
-console.log("Parsed summary:", parsed.summary);
-
-res.json(parsed);
-
-} catch (err) {
-
-console.error("🔥 DOCUMENT CONTEXT ERROR:", err);
-
-res.status(500).json({
-error: "Document context mapping failed"
-});
-
-}
-
-});
-
-
-
 
 
 
