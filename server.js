@@ -633,7 +633,6 @@ error: "Assistant failed"
 
 
 
-
 /* =====================================================
    MAP DOCUMENT CONTEXT
 ===================================================== */
@@ -655,7 +654,7 @@ extension = (extension || "").toLowerCase();
 console.log("Extension:", extension);
 
 /* ===============================
-   VERIFICATION PDF
+   Vérification PDF
 ================================ */
 
 if (extension !== "pdf") {
@@ -667,10 +666,6 @@ error: "Only PDF supported"
 });
 
 }
-
-/* ===============================
-   VERIFICATION BASE64
-================================ */
 
 if (!file_base64) {
 
@@ -685,7 +680,7 @@ error: "No file_base64 received"
 console.log("Base64 length:", file_base64.length);
 
 /* ===============================
-   DECODE PDF
+   Décodage PDF
 ================================ */
 
 let buffer;
@@ -707,7 +702,7 @@ error: "Base64 decode failed"
 }
 
 /* ===============================
-   EXTRACTION TEXTE
+   Extraction texte
 ================================ */
 
 let extractedText = "";
@@ -732,22 +727,22 @@ console.error("PDF PARSE ERROR:", err);
 }
 
 /* ===============================
-   SI PDF SCANNE
+   Détection PDF scanné
 ================================ */
 
 let isScanned = false;
 
 if (extractedText.length < 50) {
 
-console.log("PDF probably scanned (very little text)");
+console.log("PDF probably scanned");
 
 isScanned = true;
 
 }
 
-/* ===============================
+/* =====================================================
    CAS 1 : PDF TEXTE
-================================ */
+===================================================== */
 
 if (!isScanned) {
 
@@ -757,24 +752,24 @@ try {
 
 const promptText = extractedText.substring(0,12000);
 
-console.log("Prompt length:", promptText.length);
-
 const response = await fetch(
 "https://api.openai.com/v1/chat/completions",
 {
 method: "POST",
 headers: {
 "Content-Type": "application/json",
-Authorization: `Bearer ${process.env.OPENAI_KEY}`,
+Authorization: `Bearer ${OPENAI_KEY}`,
 },
 body: JSON.stringify({
 model: "gpt-4o-mini",
 temperature: 0.2,
+response_format: { type: "json_object" },
 messages: [
+
 {
 role: "system",
 content: `
-Tu analyses un document fourni par un établissement.
+Tu analyses un document fourni par une structure.
 
 Le document peut être :
 - menu
@@ -782,35 +777,60 @@ Le document peut être :
 - brochure
 - règlement
 - horaires
+- informations pratiques
 
-Réponds uniquement en JSON :
+Objectif :
+résumer les informations utiles pour les visiteurs.
+
+Règles :
+- ne rien inventer
+- ignorer les éléments décoratifs
+
+FORMAT JSON STRICT :
 
 {
-"summary": "texte complet"
+"summary": "résumé clair et utile"
 }
 `
 },
+
 {
 role: "user",
 content: promptText
 }
+
 ]
 })
 }
 );
 
-console.log("OpenAI status:", response.status);
+/* ===============================
+   Vérification réponse OpenAI
+================================ */
 
-const raw = await response.text();
+if (!response.ok) {
 
-console.log("OpenAI RAW RESPONSE:");
-console.log(raw);
+const errText = await response.text();
 
-const data = JSON.parse(raw);
+console.error("OpenAI error:", errText);
+
+throw new Error("OpenAI API failed");
+
+}
+
+const data = await response.json();
 
 const content = data?.choices?.[0]?.message?.content;
 
-console.log("AI CONTENT:", content);
+if (!content) {
+
+throw new Error("Empty AI response");
+
+}
+
+/* ===============================
+   Parsing JSON
+================================ */
 
 let parsed;
 
@@ -820,15 +840,24 @@ parsed = JSON.parse(content);
 
 } catch(err) {
 
-console.log("JSON parse failed, fallback");
+console.error("JSON parse error:", content);
 
-parsed = { summary: content };
+return res.json({
+summary: content
+});
 
 }
 
-console.log("FINAL SUMMARY:", parsed.summary);
+const summary =
+typeof parsed.summary === "string"
+? parsed.summary
+: "Résumé non disponible.";
 
-return res.json(parsed);
+console.log("FINAL SUMMARY:", summary);
+
+return res.json({
+summary
+});
 
 } catch(err) {
 
@@ -842,9 +871,9 @@ error: "Text summarization failed"
 
 }
 
-/* ===============================
-   CAS 2 : PDF SCAN
-================================ */
+/* =====================================================
+   CAS 2 : PDF SCANNÉ
+===================================================== */
 
 console.log("Using Vision fallback");
 
@@ -856,33 +885,40 @@ const response = await fetch(
 method: "POST",
 headers: {
 "Content-Type": "application/json",
-Authorization: `Bearer ${process.env.OPENAI_KEY}`,
+Authorization: `Bearer ${OPENAI_KEY}`,
 },
 body: JSON.stringify({
 model: "gpt-4o-mini",
 temperature: 0.2,
+response_format: { type: "json_object" },
 messages: [
+
 {
 role: "system",
 content: `
 Tu analyses un document PDF scanné.
 
 Objectif :
-extraire les informations utiles pour répondre aux visiteurs.
+extraire les informations utiles pour les visiteurs.
 
-Réponds uniquement en JSON :
+Règles :
+- ne rien inventer
+- ignorer les éléments décoratifs
+
+FORMAT JSON STRICT :
 
 {
-"summary": "texte complet"
+"summary": "résumé clair et utile"
 }
 `
 },
+
 {
 role: "user",
 content: [
 {
 type: "text",
-text: "Analyse ce document."
+text: "Analyse ce document PDF."
 },
 {
 type: "file",
@@ -893,23 +929,39 @@ file_data: `data:application/pdf;base64,${file_base64}`
 }
 ]
 }
+
 ]
 })
 }
 );
 
-console.log("Vision status:", response.status);
+/* ===============================
+   Vérification OpenAI
+================================ */
 
-const raw = await response.text();
+if (!response.ok) {
 
-console.log("Vision RAW:");
-console.log(raw);
+const errText = await response.text();
 
-const data = JSON.parse(raw);
+console.error("OpenAI error:", errText);
+
+throw new Error("OpenAI API failed");
+
+}
+
+const data = await response.json();
 
 const content = data?.choices?.[0]?.message?.content;
 
-console.log("Vision CONTENT:", content);
+if (!content) {
+
+throw new Error("Empty AI response");
+
+}
+
+/* ===============================
+   Parsing JSON
+================================ */
 
 let parsed;
 
@@ -919,13 +971,24 @@ parsed = JSON.parse(content);
 
 } catch(err) {
 
-parsed = { summary: content };
+console.error("JSON parse error:", content);
+
+return res.json({
+summary: content
+});
 
 }
 
-console.log("FINAL SUMMARY:", parsed.summary);
+const summary =
+typeof parsed.summary === "string"
+? parsed.summary
+: "Résumé non disponible.";
 
-return res.json(parsed);
+console.log("VISION SUMMARY:", summary);
+
+return res.json({
+summary
+});
 
 } catch(err){
 
@@ -948,8 +1011,6 @@ error: "Server crash"
 }
 
 });
-
-
 
 
 
