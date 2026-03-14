@@ -769,27 +769,67 @@ messages: [
 {
 role: "system",
 content: `
-Tu analyses un document fourni par une structure.
+Tu analyses un document fourni par une structure accueillant des visiteurs.
+
+La structure peut être par exemple :
+- un restaurant
+- un commerce
+- un musée
+- un lieu culturel
+- un service
+- une organisation
+- un établissement ouvert au public
 
 Le document peut être :
-- menu
-- flyer
-- brochure
-- règlement
-- horaires
-- informations pratiques
+- un menu
+- un flyer
+- une brochure
+- un règlement
+- des horaires
+- des informations pratiques
+- un document de présentation
 
-Objectif :
-résumer les informations utiles pour les visiteurs.
+OBJECTIF :
 
-Règles :
-- ne rien inventer
-- ignorer les éléments décoratifs
+Produire un résumé complet contenant TOUTES les informations utiles pour un visiteur.
+
+Le résumé doit inclure lorsque ces informations sont présentes :
+
+- ce que propose la structure (produits, services, activités)
+- les horaires d'ouverture
+- l'adresse ou la localisation
+- les coordonnées (téléphone, email, site web)
+- les informations importantes pour les visiteurs
+- les règles ou conditions particulières
+- les catégories importantes du document (ex : sections d’un menu)
+
+IMPORTANT :
+
+Si une information peut être utile à un visiteur,
+elle doit être incluse dans le résumé.
+
+Ne supprime pas des informations importantes
+dans le but de raccourcir le texte.
+
+RÈGLES :
+
+- ne jamais inventer d'information
+- ne mentionner que ce qui apparaît dans le document
+- ignorer les éléments purement décoratifs
+- reformuler les informations pour qu'elles soient faciles à comprendre
+- privilégier les informations utiles pour répondre aux questions des visiteurs
+
+STYLE :
+
+- texte clair et naturel
+- phrases simples
+- résumé structuré et compréhensible
+- ne pas copier mot pour mot le document
 
 FORMAT JSON STRICT :
 
 {
-"summary": "résumé clair et utile"
+"summary": "résumé complet des informations utiles du document"
 }
 `
 },
@@ -896,19 +936,45 @@ messages: [
 {
 role: "system",
 content: `
-Tu analyses un document PDF scanné.
+Tu analyses un document PDF scanné fourni par une structure accueillant des visiteurs.
 
-Objectif :
-extraire les informations utiles pour les visiteurs.
+OBJECTIF :
 
-Règles :
-- ne rien inventer
+Produire un résumé complet contenant toutes les informations utiles pour un visiteur.
+
+Le résumé doit inclure lorsque ces informations sont visibles :
+
+- services ou produits proposés
+- horaires
+- adresse ou localisation
+- coordonnées (téléphone, email, site web)
+- règles ou conditions particulières
+- informations importantes pour les visiteurs
+- sections principales du document
+
+IMPORTANT :
+
+Toute information utile pour un visiteur doit être incluse.
+
+Ne supprime pas des informations importantes
+dans le but de raccourcir le texte.
+
+RÈGLES :
+
+- ne jamais inventer d'information
+- ne mentionner que ce qui apparaît dans le document
 - ignorer les éléments décoratifs
+
+STYLE :
+
+- texte clair et naturel
+- résumé structuré
+- reformuler les informations
 
 FORMAT JSON STRICT :
 
 {
-"summary": "résumé clair et utile"
+"summary": "résumé complet des informations utiles du document"
 }
 `
 },
@@ -918,7 +984,7 @@ role: "user",
 content: [
 {
 type: "text",
-text: "Analyse ce document PDF."
+text: "Analyse ce document PDF et résume les informations utiles pour les visiteurs."
 },
 {
 type: "file",
@@ -1011,7 +1077,6 @@ error: "Server crash"
 }
 
 });
-
 
 
 
