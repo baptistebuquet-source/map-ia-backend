@@ -640,13 +640,18 @@ error: "Assistant failed"
 
 app.post("/map-document-context", async (req, res) => {
 
-console.log("===== MAP DOCUMENT CONTEXT CALLED =====");
+console.log("\n===============================");
+console.log("MAP DOCUMENT CONTEXT START");
+console.log("===============================");
+
+try {
 
 let { text, file_base64, extension } = req.body;
 
+console.log("BODY RECEIVED:", Object.keys(req.body));
+
 extension = (extension || "").toLowerCase();
 
-console.log("Incoming payload keys:", Object.keys(req.body));
 console.log("Extension:", extension);
 
 /* ===============================
@@ -654,43 +659,87 @@ console.log("Extension:", extension);
 ================================ */
 
 if (extension !== "pdf") {
+
+console.log("ERROR: extension not pdf");
+
 return res.status(400).json({
-error: "Only PDF documents are supported"
+error: "Only PDF supported"
 });
+
 }
 
-let buffer;
-let isScanned = false;
+/* ===============================
+   VERIFICATION BASE64
+================================ */
+
+if (!file_base64) {
+
+console.log("ERROR: file_base64 missing");
+
+return res.status(400).json({
+error: "No file_base64 received"
+});
+
+}
+
+console.log("Base64 length:", file_base64.length);
 
 /* ===============================
-   EXTRACTION TEXTE PDF
+   DECODE PDF
 ================================ */
+
+let buffer;
 
 try {
 
 buffer = Buffer.from(file_base64, "base64");
 
-console.log("PDF buffer size:", buffer.length);
+console.log("Buffer size:", buffer.length);
 
-const data = await pdf(buffer);
+} catch(err) {
 
-text = data.text || "";
+console.error("BASE64 DECODE ERROR:", err);
 
-console.log("Extracted PDF text length:", text.length);
-
-/* PDF scanné si quasi aucun texte */
-
-if (text.length < 50) {
-
-console.log("PDF likely scanned → using Vision");
-
-isScanned = true;
+return res.status(500).json({
+error: "Base64 decode failed"
+});
 
 }
 
-} catch(err){
+/* ===============================
+   EXTRACTION TEXTE
+================================ */
 
-console.error("PDF extraction error:", err);
+let extractedText = "";
+
+try {
+
+console.log("Running pdf-parse...");
+
+const data = await pdf(buffer);
+
+extractedText = data.text || "";
+
+console.log("Extracted text length:", extractedText.length);
+
+console.log("First 500 chars:");
+console.log(extractedText.substring(0,500));
+
+} catch(err) {
+
+console.error("PDF PARSE ERROR:", err);
+
+}
+
+/* ===============================
+   SI PDF SCANNE
+================================ */
+
+let isScanned = false;
+
+if (extractedText.length < 50) {
+
+console.log("PDF probably scanned (very little text)");
 
 isScanned = true;
 
@@ -700,11 +749,15 @@ isScanned = true;
    CAS 1 : PDF TEXTE
 ================================ */
 
-if (!isScanned && text) {
+if (!isScanned) {
+
+console.log("Using TEXT summarization");
 
 try {
 
-console.log("Using TEXT summarization");
+const promptText = extractedText.substring(0,12000);
+
+console.log("Prompt length:", promptText.length);
 
 const response = await fetch(
 "https://api.openai.com/v1/chat/completions",
@@ -729,10 +782,6 @@ Le document peut être :
 - brochure
 - règlement
 - horaires
-- informations pratiques
-
-Objectif :
-extraire les informations utiles pour répondre aux questions des visiteurs.
 
 Réponds uniquement en JSON :
 
@@ -743,41 +792,50 @@ Réponds uniquement en JSON :
 },
 {
 role: "user",
-content: `Voici le contenu du document :
-
-${text.substring(0, 12000)}`
+content: promptText
 }
 ]
 })
 }
 );
 
-if (!response.ok) {
+console.log("OpenAI status:", response.status);
 
-const errText = await response.text();
+const raw = await response.text();
 
-console.error("OpenAI API ERROR:", errText);
+console.log("OpenAI RAW RESPONSE:");
+console.log(raw);
 
-throw new Error("OpenAI API failed");
-
-}
-
-const data = await response.json();
+const data = JSON.parse(raw);
 
 const content = data?.choices?.[0]?.message?.content;
 
-const parsed = JSON.parse(content);
+console.log("AI CONTENT:", content);
 
-console.log("Summary:", parsed.summary);
+let parsed;
+
+try {
+
+parsed = JSON.parse(content);
+
+} catch(err) {
+
+console.log("JSON parse failed, fallback");
+
+parsed = { summary: content };
+
+}
+
+console.log("FINAL SUMMARY:", parsed.summary);
 
 return res.json(parsed);
 
-} catch(err){
+} catch(err) {
 
-console.error("Text summarization error:", err);
+console.error("TEXT SUMMARY ERROR:", err);
 
 return res.status(500).json({
-error: "Text processing failed"
+error: "Text summarization failed"
 });
 
 }
@@ -785,12 +843,12 @@ error: "Text processing failed"
 }
 
 /* ===============================
-   CAS 2 : PDF SCAN → VISION
+   CAS 2 : PDF SCAN
 ================================ */
 
-try {
+console.log("Using Vision fallback");
 
-console.log("Using Vision for scanned PDF");
+try {
 
 const response = await fetch(
 "https://api.openai.com/v1/chat/completions",
@@ -807,22 +865,10 @@ messages: [
 {
 role: "system",
 content: `
-Tu analyses un document PDF scanné fourni par un établissement.
+Tu analyses un document PDF scanné.
 
 Objectif :
-extraire les informations utiles pour répondre aux questions des visiteurs.
-
-Le document peut être :
-- menu
-- flyer
-- panneau
-- brochure
-- horaires
-- règlement
-
-Règles :
-- ne rien inventer
-- ignorer les éléments décoratifs
+extraire les informations utiles pour répondre aux visiteurs.
 
 Réponds uniquement en JSON :
 
@@ -836,7 +882,7 @@ role: "user",
 content: [
 {
 type: "text",
-text: "Analyse ce document PDF et résume les informations utiles."
+text: "Analyse ce document."
 },
 {
 type: "file",
@@ -852,38 +898,56 @@ file_data: `data:application/pdf;base64,${file_base64}`
 }
 );
 
-if (!response.ok) {
+console.log("Vision status:", response.status);
 
-const errText = await response.text();
+const raw = await response.text();
 
-console.error("OpenAI API ERROR:", errText);
+console.log("Vision RAW:");
+console.log(raw);
 
-throw new Error("OpenAI API failed");
-
-}
-
-const data = await response.json();
+const data = JSON.parse(raw);
 
 const content = data?.choices?.[0]?.message?.content;
 
-const parsed = JSON.parse(content);
+console.log("Vision CONTENT:", content);
 
-console.log("Vision summary:", parsed.summary);
+let parsed;
+
+try {
+
+parsed = JSON.parse(content);
+
+} catch(err) {
+
+parsed = { summary: content };
+
+}
+
+console.log("FINAL SUMMARY:", parsed.summary);
 
 return res.json(parsed);
 
 } catch(err){
 
-console.error("Vision processing error:", err);
+console.error("VISION ERROR:", err);
 
 return res.status(500).json({
-error: "Vision processing failed"
+error: "Vision failed"
+});
+
+}
+
+} catch(globalErr) {
+
+console.error("GLOBAL ERROR:", globalErr);
+
+return res.status(500).json({
+error: "Server crash"
 });
 
 }
 
 });
-
 
 
 
