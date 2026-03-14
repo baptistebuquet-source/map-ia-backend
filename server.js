@@ -639,18 +639,16 @@ error: "Assistant failed"
    MAP DOCUMENT CONTEXT
 ===================================================== */
 
-
 app.post("/map-document-context", async (req, res) => {
 
 console.log("===== MAP DOCUMENT CONTEXT CALLED =====");
 
 let { text, file_base64, extension } = req.body;
 
-extension = extension || "";
+extension = (extension || "").toLowerCase();
 
 console.log("Incoming payload keys:", Object.keys(req.body));
-
-
+console.log("Extension:", extension);
 
 let isImage = false;
 
@@ -668,18 +666,24 @@ const buffer = Buffer.from(file_base64, "base64");
 
 const data = await pdf(buffer);
 
-text = data.text;
+text = data.text || "";
 
 console.log("Extracted PDF text length:", text.length);
 
-if (!text || text.length < 30) {
+/* si PDF scanné */
+
+if (text.length < 30) {
+
 console.log("PDF likely scanned → switching to vision");
+
 isImage = true;
+
 }
 
 } catch(err){
 
 console.error("PDF extraction error:", err);
+
 isImage = true;
 
 }
@@ -690,9 +694,10 @@ isImage = true;
    Si image envoyée
 ================================ */
 
-if (!text && file_base64 && extension && ["jpg","jpeg","png","webp"].includes(extension)) {
+if (!text && file_base64 && ["jpg","jpeg","png","webp"].includes(extension)) {
 
-console.log("Image detected");
+console.log("Image detected → using vision");
+
 isImage = true;
 
 }
@@ -716,11 +721,8 @@ headers: {
 Authorization: `Bearer ${process.env.OPENAI_KEY}`,
 },
 body: JSON.stringify({
-
 model: "gpt-4o-mini",
-
 temperature: 0.2,
-
 messages: [
 {
 role: "system",
@@ -728,43 +730,27 @@ content: `
 Tu analyses un document visuel fourni par un établissement.
 
 Le document peut être :
-
 - menu
-- affiche
+- panneau
+- flyer
 - brochure
 - règlement
 - horaires
-- flyer
-- panneau informatif
+- informations pratiques
 
 Objectif :
-extraire toutes les informations utiles pour répondre
-aux questions des visiteurs.
+extraire les informations utiles pour répondre aux questions des visiteurs.
 
-Cherche notamment :
-
-- horaires
-- services
-- règles importantes
-- produits proposés
-- informations pratiques
-- tarifs
-- particularités du lieu
-
-RÈGLES :
-
+Règles :
 - ne rien inventer
-- conserver un maximum d'informations utiles
-- reformuler si nécessaire
+- conserver les informations utiles
 - ignorer les éléments décoratifs
 
-Réponds uniquement en JSON strict :
+Réponds uniquement en JSON :
 
 {
 "summary": "texte complet"
 }
-
-summary doit être une seule chaine de texte continue.
 `
 },
 {
@@ -772,18 +758,17 @@ role: "user",
 content: [
 {
 type: "text",
-text: "Analyse ce document et résume les informations utiles pour un assistant visiteurs."
+text: "Analyse ce document et résume les informations utiles."
 },
 {
 type: "image_url",
 image_url: {
-url: `data:image/${extension};base64,${file_base64}`
+url: `data:image/${extension || "jpeg"};base64,${file_base64}`
 }
 }
 ]
 }
 ]
-
 })
 }
 );
@@ -791,6 +776,7 @@ url: `data:image/${extension};base64,${file_base64}`
 if (!response.ok) {
 
 const errText = await response.text();
+
 console.error("OpenAI API ERROR:", errText);
 
 throw new Error("OpenAI API failed");
@@ -818,136 +804,6 @@ error: "Vision processing failed"
 }
 
 }
-
-/* ===============================
-   ANALYSE TEXTE
-================================ */
-
-if (!text || text.length < 30) {
-
-console.log("Payload rejected: text too short");
-
-return res.status(400).json({
-error: "Invalid payload"
-});
-
-}
-
-text = text.slice(0,4000);
-
-try {
-
-console.log("Sending request to OpenAI (text)...");
-
-const response = await fetch(
-"https://api.openai.com/v1/chat/completions",
-{
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-Authorization: `Bearer ${process.env.OPENAI_KEY}`,
-},
-body: JSON.stringify({
-
-model: "gpt-4o-mini",
-
-temperature: 0.2,
-
-response_format: { type: "json_object" },
-
-messages: [
-{
-role: "system",
-content: `
-Tu analyses un document fourni par un établissement.
-
-Ce document sera utilisé par une IA afin de répondre
-aux questions des visiteurs sur ce lieu.
-
-Objectif :
-extraire toutes les informations utiles pour répondre
-aux questions des visiteurs.
-
-Cherche notamment :
-
-- règles importantes
-- services proposés
-- horaires
-- tarifs
-- conditions d'accès
-- informations pratiques
-- particularités du lieu
-
-RÈGLES :
-
-- ne rien inventer
-- conserver le maximum d'informations utiles
-- reformuler si nécessaire
-- ignorer les éléments non pertinents
-
-Réponds uniquement en JSON strict :
-
-{
-"summary": "texte complet"
-}
-
-summary doit être une seule chaine de texte continue.
-`
-},
-{
-role: "user",
-content: text
-}
-]
-
-})
-}
-);
-
-/* ===============================
-   VERIFICATION REPONSE
-================================ */
-
-if (!response.ok) {
-
-const errText = await response.text();
-
-console.error("OpenAI API ERROR:", errText);
-
-throw new Error("OpenAI API failed");
-
-}
-
-const data = await response.json();
-
-const content = data?.choices?.[0]?.message?.content;
-
-if (!content) {
-
-console.error("Empty AI response");
-
-throw new Error("Empty AI response");
-
-}
-
-const parsed = JSON.parse(content);
-
-console.log("Parsed summary:", parsed.summary);
-
-res.json(parsed);
-
-} catch (err) {
-
-console.error("🔥 DOCUMENT CONTEXT ERROR:", err);
-
-res.status(500).json({
-error: "Document context mapping failed"
-});
-
-}
-
-});
-
 
 
 
