@@ -639,13 +639,18 @@ error: "Assistant failed"
    MAP DOCUMENT CONTEXT
 ===================================================== */
 
+
 app.post("/map-document-context", async (req, res) => {
 
 console.log("===== MAP DOCUMENT CONTEXT CALLED =====");
 
 let { text, file_base64, extension } = req.body;
 
+extension = extension || "";
+
 console.log("Incoming payload keys:", Object.keys(req.body));
+
+
 
 let isImage = false;
 
