@@ -1341,219 +1341,7 @@ app.post("/analysis-chat", async (req, res) => {
     conversation
   } = req.body;
 
-  if (!conversation) {
-    return res.status(400).json({ error: "Invalid payload" });
-  }
-
   try {
-
-    const messages = [
-
-      {
-        role: "system",
-        content: `
-Tu es un assistant d'analyse stratégique pour des établissements
-(restaurants, boutiques, services).
-
-Tu aides le responsable de l'établissement à comprendre les résultats
-de son questionnaire client.
-
-Ton rôle :
-
-- analyser les performances
-- expliquer les évolutions
-- interpréter les retours clients
-- proposer des pistes d'amélioration
-- répondre aux questions du responsable
-
-IMPORTANT :
-
-- ne jamais inventer de données
-- t'appuyer uniquement sur les données fournies
-- être clair et opérationnel
-- répondre en français
-- éviter les longs paragraphes
-- privilégier des listes et sections claires
-
------------------------------------------------------
-
-COMPRÉHENSION DES DONNÉES :
-
-Les performances sont fournies sous forme d'objets JSON contenant :
-
-- question_text : texte de la question posée aux clients
-- normalized_score : score actuel normalisé entre 0 et 100
-- response_count : nombre de réponses collectées
-- delta : évolution du score par rapport au cycle précédent
-- direction : évolution ("up", "down", "stable")
-- percent_change : variation relative en pourcentage
-
-Exemple :
-
-{
-  "question_text": "Le temps d'attente était satisfaisant",
-  "normalized_score": 68,
-  "response_count": 42,
-  "delta": -7,
-  "direction": "down",
-  "percent_change": -9.3
-}
-
-Interprétation :
-
-- delta négatif → baisse
-- delta positif → amélioration
-- delta proche de 0 → stabilité
-
-Utilise ces informations pour :
-
-- identifier les points en amélioration
-- identifier les dégradations
-- expliquer les évolutions observées
-- prioriser les actions d'amélioration
-
-Si une métrique n'a pas de delta, cela signifie qu'aucune comparaison
-n'est disponible avec le cycle précédent.
-
------------------------------------------------------
-
-FORMAT DE RÉPONSE :
-
-La réponse doit être lisible et structurée.
-
-Utilise si pertinent :
-
-**Analyse**
-→ explication courte des résultats
-
-**Points clés**
-- point important
-- point important
-
-**Plan d'action suggéré**
-1. action concrète
-2. action concrète
-
-**Données manquantes**
-Si certaines analyses sont impossibles faute de données,
-explique-le clairement.
-
------------------------------------------------------
-
-Puis propose soit :
-
-Ajout de questions :
-
-Question proposée :
-- Texte de la question
-
-Type conseillé :
-- échelle 1-5
-- oui/non
-- question ouverte
-
-OU
-
-Proposition de mini-questionnaire :
-
-Titre :
-...
-
-Objectif :
-...
-
-Questions suggérées :
-1. ...
-2. ...
-
------------------------------------------------------
-
-RÈGLES IMPORTANTES :
-
-- ne propose un questionnaire que si c'est réellement utile
-- sinon proposer seulement 1 à 3 questions
-- rester synthétique
-- maximum ~12 lignes
-- privilégier les listes plutôt que les blocs de texte
-
------------------------------------------------------
-
-En plus de ta réponse, tu dois proposer
-3 questions pertinentes que le responsable
-pourrait poser pour approfondir l'analyse.
-
-Ces questions doivent être directement liées
-aux résultats fournis.
-
-IMPORTANT :
-
-Le champ "suggestions" doit toujours contenir exactement 3 questions.
-
-Même si la réponse contient déjà un plan d'action ou des recommandations.
-
-Ne jamais laisser le tableau suggestions vide.
-
------------------------------------------------------
-
-Tu dois répondre STRICTEMENT au format JSON suivant :
-
-{
-  "answer": "...",
-  "suggestions": [
-    "...",
-    "...",
-    "..."
-  ]
-}
-
------------------------------------------------------
-
-CONTEXTE :
-
-Type d'établissement :
-${establishment_type ?? "non spécifié"}
-
-Contexte établissement :
-${establishment_context ?? "non fourni"}
-
-Objectif du questionnaire :
-${survey_objective ?? "non fourni"}
-
------------------------------------------------------
-
-SYNTHÈSE CLIENTS :
-
-${analysis_context?.insight ?? "aucune synthèse disponible"}
-
------------------------------------------------------
-
-PERFORMANCES MESURÉES :
-
-${JSON.stringify(analysis_context?.metrics ?? [], null, 2)}
-
------------------------------------------------------
-
-Tu dois répondre comme un consultant stratégique
-qui aide le responsable à interpréter les résultats.
-`
-      }
-
-    ];
-
-    /* =============================
-       Ajouter historique conversation
-    ============================= */
-
-    for (const msg of conversation) {
-      messages.push({
-        role: msg.role,
-        content: msg.message
-      });
-    }
-
-    /* =============================
-       Appel OpenAI
-    ============================= */
 
     const response = await fetch(
       "https://api.openai.com/v1/chat/completions",
@@ -1566,8 +1354,134 @@ qui aide le responsable à interpréter les résultats.
         body: JSON.stringify({
           model: "gpt-4o-mini",
           temperature: 0.3,
-          response_format: { type: "json_object" },
-          messages: messages
+          messages: [
+
+            /* =========================
+               SYSTEM PROMPT
+            ========================= */
+
+            {
+              role: "system",
+              content: `
+Tu es un analyste expert en performance client.
+
+Tu analyses des résultats d’enquêtes clients avec :
+- scores (0-100)
+- évolutions (delta, tendance)
+- distributions de réponses (questions multi-choix)
+
+────────────────────────────
+OBJECTIF
+────────────────────────────
+
+Aider l’utilisateur à comprendre :
+- ce qui pose problème
+- ce qui s’améliore
+- les causes possibles
+- les actions concrètes à prendre
+
+────────────────────────────
+DONNÉES DISPONIBLES
+────────────────────────────
+
+Tu reçois :
+
+1. insights globaux (issus des réponses libres)
+2. métriques par question :
+   - type "score" (score, delta)
+   - type "choice" (distribution + évolution)
+
+────────────────────────────
+RÈGLES CRITIQUES
+────────────────────────────
+
+- Tu dois utiliser UNIQUEMENT les données fournies
+- Tu ne dois JAMAIS inventer une information
+- Tu ne dois JAMAIS supposer un élément absent
+- Si une info n’est pas dans les données → tu l’ignores
+
+────────────────────────────
+INTERPRÉTATION ATTENDUE
+────────────────────────────
+
+1. PRIORISATION
+
+- Identifie les problèmes majeurs
+- Mets en avant ce qui se dégrade
+- Ignore les signaux faibles
+
+2. QUESTIONS TYPE "SCORE"
+
+- score bas → problème
+- delta négatif → dégradation
+- delta positif → amélioration
+
+3. QUESTIONS TYPE "CHOICE"
+
+- identifier les options dominantes
+- analyser leur évolution (hausse / baisse)
+- détecter les tendances fortes
+
+Exemple :
+"Une forte augmentation de l’option 'trop de monde' indique un problème croissant d’affluence"
+
+────────────────────────────
+STYLE DE RÉPONSE
+────────────────────────────
+
+- clair, structuré, professionnel
+- orienté décision
+- concret (pas vague)
+
+────────────────────────────
+STRUCTURE DE SORTIE
+────────────────────────────
+
+Retourne un JSON STRICT :
+
+{
+  "answer": "analyse claire et structurée",
+  "suggestions": ["question 1", "question 2"],
+  "actions": ["action 1", "action 2"],
+  "question_suggestions": [],
+  "questionnaire_suggestions": []
+}
+
+────────────────────────────
+RÈGLE FINALE
+────────────────────────────
+
+Si les données sont insuffisantes :
+
+→ répondre simplement sans extrapoler
+→ ne jamais combler par invention
+`
+            },
+
+            /* =========================
+               CONTEXTE DATA
+            ========================= */
+
+            {
+              role: "user",
+              content: JSON.stringify({
+                establishment_type,
+                survey_objective,
+                insights: analysis_context?.insight,
+                metrics: analysis_context?.metrics
+              })
+            },
+
+            /* =========================
+               HISTORIQUE CONVERSATION
+            ========================= */
+
+            ...conversation.map(msg => ({
+              role: msg.role,
+              content: msg.message
+            }))
+
+          ]
         }),
       }
     );
@@ -1579,7 +1493,6 @@ qui aide le responsable à interpréter les résultats.
     }
 
     const data = await response.json();
-
     const content = data?.choices?.[0]?.message?.content;
 
     if (!content) {
@@ -1591,36 +1504,40 @@ qui aide le responsable à interpréter les résultats.
     try {
       parsed = JSON.parse(content);
     } catch (e) {
-      console.error("JSON parse error:", content);
-      throw new Error("Invalid AI JSON response");
+
+      console.error("Invalid AI JSON:", content);
+
+      parsed = {
+        answer: "Je n'ai pas pu analyser correctement les données.",
+        suggestions: [],
+        actions: [],
+        question_suggestions: [],
+        questionnaire_suggestions: []
+      };
     }
 
-    const answer = parsed.answer || "Je n'ai pas pu analyser les données.";
-    const suggestions = parsed.suggestions || [];
+    /* =========================
+       Sécurisation structure
+    ========================= */
 
-    /* =============================
-       Réponse API
-    ============================= */
+    parsed.answer = parsed.answer || "";
+    parsed.suggestions = Array.isArray(parsed.suggestions) ? parsed.suggestions : [];
+    parsed.actions = Array.isArray(parsed.actions) ? parsed.actions : [];
+    parsed.question_suggestions = Array.isArray(parsed.question_suggestions) ? parsed.question_suggestions : [];
+    parsed.questionnaire_suggestions = Array.isArray(parsed.questionnaire_suggestions) ? parsed.questionnaire_suggestions : [];
 
-    res.json({
-      answer,
-      suggestions
-    });
+    res.json(parsed);
 
   } catch (err) {
 
     console.error("🔥 ANALYSIS CHAT ERROR:", err);
 
     res.status(500).json({
-      answer: "Une erreur est survenue lors de l'analyse.",
-      suggestions: []
+      error: "AI analysis failed"
     });
-
   }
 
 });
-
-
 
 
 
