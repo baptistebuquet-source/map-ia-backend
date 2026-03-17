@@ -1184,25 +1184,30 @@ NIVEAU DE DÉTAIL ATTENDU
 
 Chaque insight doit :
 
+- couvrir l’ensemble des tendances observées
 - regrouper les idées similaires
-- être précis et concret
-- mentionner les éléments observés
-- éviter toute généralité vague
+- être suffisamment détaillé pour être exploitable
+- mentionner les éléments récurrents identifiés dans les réponses
 
-❌ MAUVAIS :
-"les clients sont globalement satisfaits"
+Tu peux utiliser plusieurs phrases si nécessaire.
 
-✅ BON :
-"Plusieurs visiteurs mentionnent la qualité des œuvres exposées et l’intérêt des collections"
+⚠️ IMPORTANT :
+
+- privilégier l’exhaustivité à la brièveté
+- ne pas résumer au point de perdre de l’information
+- inclure toutes les tendances significatives observées
 
 ────────────────────────────
 STRUCTURE ATTENDUE
 ────────────────────────────
 
-Chaque insight doit être structuré en 1 à 2 phrases :
+Un insight peut contenir :
 
-1. constat basé sur les réponses  
-2. précision ou conséquence observée  
+- un constat principal
+- un ou plusieurs éléments détaillant ce constat
+- éventuellement une conséquence observable
+
+La longueur doit s’adapter au volume et à la richesse des réponses.
 
 ────────────────────────────
 CAS SANS DONNÉE
