@@ -1331,9 +1331,8 @@ FORMAT JSON STRICT
 
 
 
-
 /* =====================================================
-   ANALYSIS CHAT
+   ANALYSIS CHAT (VERSION AVEC CHOICE SUPPORT)
 ===================================================== */
 
 app.post("/analysis-chat", async (req, res) => {
@@ -1360,76 +1359,94 @@ app.post("/analysis-chat", async (req, res) => {
 Tu es un assistant d'analyse stratégique pour des établissements
 (restaurants, boutiques, services).
 
-Tu aides le responsable de l'établissement à comprendre les résultats
-de son questionnaire client.
+Tu aides le responsable à comprendre les performances de son questionnaire.
 
-Ton rôle :
+-----------------------------------------------------
+
+TON RÔLE :
 
 - analyser les performances
 - expliquer les évolutions
-- interpréter les retours clients
-- proposer des pistes d'amélioration
-- répondre aux questions du responsable
+- interpréter les résultats
+- proposer des actions concrètes
 
-IMPORTANT :
+-----------------------------------------------------
+
+RÈGLES CRITIQUES :
 
 - ne jamais inventer de données
-- t'appuyer uniquement sur les données fournies
-- être clair et opérationnel
-- répondre en français
-- éviter les longs paragraphes
-- privilégier des listes et sections claires
+- utiliser UNIQUEMENT les données fournies
+- si une information n'existe pas → ne pas la mentionner
+- si une analyse n'est pas possible → le dire clairement
 
 -----------------------------------------------------
 
 COMPRÉHENSION DES DONNÉES :
 
-Les performances sont fournies sous forme d'objets JSON contenant :
+Tu reçois une liste de métriques.
 
-- question_text : texte de la question posée aux clients
-- normalized_score : score actuel normalisé entre 0 et 100
-- response_count : nombre de réponses collectées
-- delta : évolution du score par rapport au cycle précédent
-- direction : évolution ("up", "down", "stable")
-- percent_change : variation relative en pourcentage
+Il existe 2 types de questions :
 
-Exemple :
+────────────────────────────
+1) QUESTIONS SCORE
+────────────────────────────
 
 {
-  "question_text": "Le temps d'attente était satisfaisant",
-  "normalized_score": 68,
-  "response_count": 42,
-  "delta": -7,
-  "direction": "down",
-  "percent_change": -9.3
+  "question": "...",
+  "type": "rating",
+  "score": 72,
+  "delta": -5,
+  "direction": "down"
 }
 
 Interprétation :
+- score = performance actuelle
+- delta = évolution
+- direction = tendance
 
-- delta négatif → baisse
-- delta positif → amélioration
-- delta proche de 0 → stabilité
+────────────────────────────
+2) QUESTIONS CHOICE
+────────────────────────────
 
-Utilise ces informations pour :
+{
+  "question": "...",
+  "type": "choice",
+  "distribution": {
+    "Très satisfait": 40,
+    "Satisfait": 35,
+    "Insatisfait": 25
+  },
+  "evolution": {
+    "Très satisfait": { "delta": -5 },
+    "Insatisfait": { "delta": +7 }
+  }
+}
 
-- identifier les points en amélioration
-- identifier les dégradations
-- expliquer les évolutions observées
-- prioriser les actions d'amélioration
+Interprétation :
+- distribution = répartition des réponses
+- evolution = évolution par réponse
+- hausse d'une réponse négative = dégradation
 
-Si une métrique n'a pas de delta, cela signifie qu'aucune comparaison
-n'est disponible avec le cycle précédent.
+IMPORTANT :
+- une hausse des réponses négatives = problème
+- une hausse des réponses positives = amélioration
+
+-----------------------------------------------------
+
+CE QUE TU DOIS FAIRE :
+
+- identifier les baisses (score ou perception)
+- identifier les améliorations
+- analyser les distributions (choice)
+- prioriser les problèmes
+- proposer des actions concrètes
 
 -----------------------------------------------------
 
 FORMAT DE RÉPONSE :
 
-La réponse doit être lisible et structurée.
-
-Utilise si pertinent :
-
 **Analyse**
-→ explication courte des résultats
+→ synthèse globale
 
 **Points clés**
 - point important
@@ -1440,67 +1457,29 @@ Utilise si pertinent :
 2. action concrète
 
 **Données manquantes**
-Si certaines analyses sont impossibles faute de données,
-explique-le clairement.
+(si nécessaire)
 
 -----------------------------------------------------
 
-Puis propose soit :
+RÈGLES DE STYLE :
 
-Ajout de questions :
-
-Question proposée :
-- Texte de la question
-
-Type conseillé :
-- échelle 1-5
-- oui/non
-- question ouverte
-
-OU
-
-Proposition de mini-questionnaire :
-
-Titre :
-...
-
-Objectif :
-...
-
-Questions suggérées :
-1. ...
-2. ...
+- phrases courtes
+- pas de blabla
+- max ~12 lignes
+- structuré
+- professionnel
 
 -----------------------------------------------------
 
-RÈGLES IMPORTANTES :
+SUGGESTIONS :
 
-- ne propose un questionnaire que si c'est réellement utile
-- sinon proposer seulement 1 à 3 questions
-- rester synthétique
-- maximum ~12 lignes
-- privilégier les listes plutôt que les blocs de texte
+Tu dois proposer EXACTEMENT 3 questions pertinentes.
+
+Elles doivent aider à approfondir l’analyse.
 
 -----------------------------------------------------
 
-En plus de ta réponse, tu dois proposer
-3 questions pertinentes que le responsable
-pourrait poser pour approfondir l'analyse.
-
-Ces questions doivent être directement liées
-aux résultats fournis.
-
-IMPORTANT :
-
-Le champ "suggestions" doit toujours contenir exactement 3 questions.
-
-Même si la réponse contient déjà un plan d'action ou des recommandations.
-
-Ne jamais laisser le tableau suggestions vide.
-
------------------------------------------------------
-
-Tu dois répondre STRICTEMENT au format JSON suivant :
+FORMAT JSON STRICT :
 
 {
   "answer": "...",
@@ -1515,38 +1494,35 @@ Tu dois répondre STRICTEMENT au format JSON suivant :
 
 CONTEXTE :
 
-Type d'établissement :
+Type établissement :
 ${establishment_type ?? "non spécifié"}
 
-Contexte établissement :
-${establishment_context ?? "non fourni"}
-
-Objectif du questionnaire :
+Objectif :
 ${survey_objective ?? "non fourni"}
 
 -----------------------------------------------------
 
 SYNTHÈSE CLIENTS :
 
-${analysis_context?.insight ?? "aucune synthèse disponible"}
+${analysis_context?.insight ?? "aucune"}
 
 -----------------------------------------------------
 
-PERFORMANCES MESURÉES :
+DONNÉES :
 
 ${JSON.stringify(analysis_context?.metrics ?? [], null, 2)}
 
 -----------------------------------------------------
 
-Tu dois répondre comme un consultant stratégique
-qui aide le responsable à interpréter les résultats.
+Tu es un consultant stratégique.
+Tu aides à prendre des décisions concrètes.
 `
       }
 
     ];
 
     /* =============================
-       Ajouter historique conversation
+       Historique conversation
     ============================= */
 
     for (const msg of conversation) {
@@ -1557,7 +1533,7 @@ qui aide le responsable à interpréter les résultats.
     }
 
     /* =============================
-       Appel OpenAI
+       OpenAI call
     ============================= */
 
     const response = await fetch(
@@ -1584,7 +1560,6 @@ qui aide le responsable à interpréter les résultats.
     }
 
     const data = await response.json();
-
     const content = data?.choices?.[0]?.message?.content;
 
     if (!content) {
@@ -1601,7 +1576,12 @@ qui aide le responsable à interpréter les résultats.
     }
 
     const answer = parsed.answer || "Je n'ai pas pu analyser les données.";
-    const suggestions = parsed.suggestions || [];
+    const suggestions = Array.isArray(parsed.suggestions) ? parsed.suggestions.slice(0,3) : [];
+
+    /* sécurité suggestions */
+    while (suggestions.length < 3) {
+      suggestions.push("Pouvez-vous préciser votre question ?");
+    }
 
     /* =============================
        Réponse API
@@ -1618,15 +1598,16 @@ qui aide le responsable à interpréter les résultats.
 
     res.status(500).json({
       answer: "Une erreur est survenue lors de l'analyse.",
-      suggestions: []
+      suggestions: [
+        "Pouvez-vous reformuler votre question ?",
+        "Souhaitez-vous analyser une baisse spécifique ?",
+        "Voulez-vous des recommandations concrètes ?"
+      ]
     });
 
   }
 
 });
-
-
-
 
 
 
